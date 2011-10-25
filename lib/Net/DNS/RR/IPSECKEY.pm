@@ -2,7 +2,7 @@ package Net::DNS::RR::IPSECKEY;
 
 
 #
-# $Id: IPSECKEY.pm 820 2009-11-30 12:13:45Z olaf $
+# $Id: IPSECKEY.pm 931 2011-10-25 12:10:56Z willem $
 #
 use strict;
 BEGIN { 
@@ -13,7 +13,7 @@ use Socket;
 
 use MIME::Base64;
 
-$VERSION = (qw$LastChangedRevision: 820 $)[1];
+$VERSION = (qw$LastChangedRevision: 931 $)[1];
 
 @ISA = qw(Net::DNS::RR);
 

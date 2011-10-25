@@ -1,6 +1,6 @@
 package Net::DNS::RR::LOC;
 #
-# $Id: LOC.pm 388 2005-06-22 10:06:05Z olaf $
+# $Id: LOC.pm 931 2011-10-25 12:10:56Z willem $
 #
 use strict;
 BEGIN { 
@@ -14,7 +14,7 @@ use vars qw(
 );
 
 @ISA     = qw(Net::DNS::RR);
-$VERSION = (qw$LastChangedRevision: 388 $)[1];
+$VERSION = (qw$LastChangedRevision: 931 $)[1];
 
 # Powers of 10 from 0 to 9 (used to speed up calculations).
 @poweroften = (1, 10, 100, 1_000, 10_000, 100_000, 1_000_000,

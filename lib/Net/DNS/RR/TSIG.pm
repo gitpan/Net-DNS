@@ -1,6 +1,6 @@
 package Net::DNS::RR::TSIG;
 #
-# $Id: TSIG.pm 388 2005-06-22 10:06:05Z olaf $
+# $Id: TSIG.pm 931 2011-10-25 12:10:56Z willem $
 #
 use strict;
 BEGIN { 
@@ -15,7 +15,7 @@ use constant DEFAULT_ALGORITHM => "HMAC-MD5.SIG-ALG.REG.INT";
 use constant DEFAULT_FUDGE     => 300;
 
 @ISA     = qw(Net::DNS::RR);
-$VERSION = (qw$LastChangedRevision: 388 $)[1];
+$VERSION = (qw$LastChangedRevision: 931 $)[1];
 
 # a signing function for the HMAC-MD5 algorithm. This can be overridden using
 # the sign_func element
@@ -138,8 +138,8 @@ sub sig_data {
 	bless($newpacket->{"header"} = {},"Net::DNS::Header");
 	$newpacket->{"additional"} = [];
 	%{$newpacket->{"header"}} = %{$packet->{"header"}};
-	@{$newpacket->{"additional"}} = @{$packet->{"additional"}};
-	shift(@{$newpacket->{"additional"}});
+    @{$newpacket->{"additional"}} =
+        grep { $_ != $self } @{$packet->{"additional"}};
 	$newpacket->{"header"}{"arcount"}--;
 	$newpacket->{"compnames"} = {};
 

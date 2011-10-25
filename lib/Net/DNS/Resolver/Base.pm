@@ -1,6 +1,6 @@
 package Net::DNS::Resolver::Base;
 #
-# $Id: Base.pm 830 2009-12-23 16:31:13Z olaf $
+# $Id: Base.pm 931 2011-10-25 12:10:56Z willem $
 #
 
 use strict;
@@ -24,7 +24,7 @@ use IO::Select;
 use Net::DNS;
 use Net::DNS::Packet;
 
-$VERSION = (qw$LastChangedRevision: 830 $)[1];
+$VERSION = (qw$LastChangedRevision: 931 $)[1];
 
 
 #
@@ -168,7 +168,8 @@ sub _process_args {
 	my ($self, %args) = @_;
 	
 	if ($args{'config_file'}) {
-		$self->read_config_file($args{'config_file'});
+		my $file = $args{'config_file'};
+		$self->read_config_file($file) or croak "Could not open $file: $!";
 	}
 	
 	foreach my $attr (keys %args) {
@@ -237,7 +238,7 @@ sub read_config_file {
 	
 	local *FILE;
 
-	open(FILE, "< $file") or croak "Could not open $file: $!";
+	open(FILE, "<", $file) or return;
 	local $/ = "\n";
 	local $_;
 	
@@ -272,6 +273,8 @@ sub read_config_file {
 		
 		$config->{'nameservers'} = [ @ns ]         if @ns;
 		$config->{'searchlist'}  = [ @searchlist ] if @searchlist;
+
+		return 1;
 	    }
  
 
@@ -325,7 +328,10 @@ sub nameservers {
 
 	} else  {
 
-		my $defres = Net::DNS::Resolver->new ();
+		my $defres = Net::DNS::Resolver->new(
+			    udp_timeout => $self->udp_timeout,
+			    tcp_timeout => $self->tcp_timeout
+			);
 		$defres->{"debug"}=$self->{"debug"};
 
 		
@@ -346,8 +352,15 @@ sub nameservers {
 		
 		my $packet = $defres->search($ns);
 		$self->errorstring($defres->errorstring);
-		if (defined($packet)) {
-		    push @a, cname_addr([@names], $packet);
+		if (defined($packet) && (my @adresses = cname_addr([@names], $packet))) {
+		    push @a, @adresses;
+		}
+		else {
+		    $packet = $defres->search($ns, 'AAAA');
+		    $self->errorstring($defres->errorstring);
+		    if (defined($packet)) {
+			push @a, cname_addr([@names], $packet);
+		    }
 		}
 	    }
 	}
@@ -390,6 +403,9 @@ sub cname_addr {
 			
 			push(@addr, $1)
 		}
+		elsif ($rr->type eq 'AAAA') {
+			push(@addr, $rr->address)
+        }
 	}
 	
 	
@@ -574,7 +590,12 @@ sub send_tcp {
 		      
 		      $buf = read_tcp($sock, $len, $self->{'debug'});
 		      
-		      $self->answerfrom($sock->peerhost);
+		      # Cannot use $sock->peerhost, because on some systems it 
+		      # returns garbage after reading from TCP. I have observed
+		      # this myself on cygwin.
+		      # -- Willem
+		      #
+		      $self->answerfrom( $ns );
 		      
 		      print ';; received ', length($buf), " bytes\n"
 			  if $self->{'debug'};
@@ -664,7 +685,7 @@ sub send_udp {
 	    
             my $srcaddr6 = $srcaddr eq '0.0.0.0' ? '::' : $srcaddr;
 	    
-	    print ";; Trying to set up a AF_INET6() family type UDP socket with srcaddr: $srcaddr ... "
+	    print ";; Trying to set up a AF_INET6() family type UDP socket with srcaddr: $srcaddr6 ... "
 		if $self->{'debug'};
 
 	    
@@ -923,8 +944,8 @@ sub bgsend {
 		return;
 	}
 
-		$self->_reset_errorstring;
-
+	$self->_reset_errorstring;
+	
 	my $packet = $self->make_query_packet(@_);
 	my $packet_data = $packet->data;
 

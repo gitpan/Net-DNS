@@ -1,4 +1,4 @@
-# $Id: 05-apl.t 759 2008-12-23 21:23:48Z olaf $  -*-perl-*-
+# $Id: 05-apl.t 931 2011-10-25 12:10:56Z willem $  -*-perl-*-
 
 use Test::More tests => 18;
 use strict;
@@ -13,12 +13,12 @@ use Net::DNS::RR::APL;
 
 
 
-foreach my $apitem qw( 1:192.168.32.0/21 !1:192.168.32.0/21 2:FF00:0:0:0:0:0:0:0/8){
+foreach my $apitem ( qw( 1:192.168.32.0/21 !1:192.168.32.0/21 2:FF00:0:0:0:0:0:0:0/8) ) {
     my $object=Net::DNS::RR::APL::ApItem->new($apitem);    
     is ( $object->string, $apitem, "String read/write correct for $apitem");
 }
 
-foreach my $apitem qw( 1:192.168.32.0.3/21 !1:192.168.32.0+21 4:FF00:0:0:0:0:0:0:0/8){
+foreach my $apitem ( qw( 1:192.168.32.0.3/21 !1:192.168.32.0+21 4:FF00:0:0:0:0:0:0:0/8) ) {
     my $object=Net::DNS::RR::APL::ApItem->new($apitem);    
     diag ($object->string)    unless( ok ( !defined ($object), "Incorrect format not parsed")); 
 }

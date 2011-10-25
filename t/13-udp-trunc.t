@@ -1,4 +1,4 @@
-# $Id: 13-udp-trunc.t 841 2009-12-30 12:45:22Z olaf $ -*-perl-*-
+# $Id: 13-udp-trunc.t 931 2011-10-25 12:10:56Z willem $ -*-perl-*-
 # Bulk of this code is contributed by Aaron Crane in 2008
 # via rt.cpan.org ticket 33547
 # Portions (c) 2009 Olaf Kolkman
@@ -55,12 +55,6 @@ BEGIN{
 
 
 {
-
-    no warnings("once");
-    $Net::DNS::Nameserver::has_inet6=0;    # Force IO::Socket::Inet to
-					   # cope with weird
-					   # environments
-
     my @full_response;
     my $ns = Net::DNS::Nameserver->new(
         LocalPort    => $TestPort,

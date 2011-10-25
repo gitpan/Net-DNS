@@ -1,4 +1,4 @@
-# $Id: 05-rr-various.t 823 2009-12-01 06:47:05Z olaf $   -*-perl-*-
+# $Id: 05-rr-various.t 931 2011-10-25 12:10:56Z willem $   -*-perl-*-
 # Contains a number of additional test for RR related functionality
 
 
@@ -51,7 +51,7 @@ my $newrr2 = Net::DNS::RR->new(name=> '5.5.5.5',
                               flags =>  'u',
                               service =>  'E2U+X-ADDRESS',
                               regexp => '!^(.*)$!data:,CN=East test;ST=CT;C=United States;uid=ast1;intrunk=dms500!',
-                              replacment => '.',
+                              replacement => '.',
                               rdlength => 0,
                               rdata => '',
         );

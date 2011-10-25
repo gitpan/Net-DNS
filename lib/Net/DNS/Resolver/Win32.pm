@@ -1,6 +1,6 @@
 package Net::DNS::Resolver::Win32;
 #
-# $Id: Win32.pm 795 2009-01-26 17:28:44Z olaf $
+# $Id: Win32.pm 931 2011-10-25 12:10:56Z willem $
 #
 
 use strict;
@@ -9,14 +9,14 @@ use vars qw(@ISA $VERSION);
 use Net::DNS::Resolver::Base ();
 
 @ISA     = qw(Net::DNS::Resolver::Base);
-$VERSION = (qw$LastChangedRevision: 795 $)[1];
+$VERSION = (qw$LastChangedRevision: 931 $)[1];
 
 use Win32::IPHelper;
-use Win32::Registry;
+use Win32::TieRegistry qw(KEY_READ REG_DWORD);
 use Data::Dumper;
 sub init {
   
-        my $debug=0;
+	my $debug=0;
 	my ($class) = @_;
 	
 	my $defaults = $class->defaults;
@@ -52,41 +52,40 @@ sub init {
 	}
 
 	my $domain=$FIXED_INFO->{'DomainName'}||'';
-	my $searchlist = "$domain" ;
+	my $searchlist; 
 	
 
 	#
 	# The Win32::IPHelper  does not return searchlist. Lets do a best effort attempt to get 
 	# a searchlist from the registry.
 
-	my ($resobj, %keys);
+	my $usedevolution = 0;
 
-	my $root = 'SYSTEM\CurrentControlSet\Services\Tcpip\Parameters';
-	my $opened_registry =1;
-	unless ($main::HKEY_LOCAL_MACHINE->Open($root, $resobj)) {
+	my $root = 'HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters';
+	my $reg_tcpip = $Registry->Open($root, {Access => KEY_READ});
+	if (!defined $reg_tcpip) {
 		# Didn't work, maybe we are on 95/98/Me?
-		$root = 'SYSTEM\CurrentControlSet\Services\VxD\MSTCP';
-		$main::HKEY_LOCAL_MACHINE->Open($root, $resobj)
-			or  $opened_registry =0;
+		$root = 'HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\VxD\MSTCP';
+		$reg_tcpip = $Registry->Open($root, {Access => KEY_READ});
 	}
 
-	
-	if ($opened_registry &&  $resobj->GetValues(\%keys)){
-		$searchlist  .= $keys{'SearchList'}->[2];
-	}
-	
-	
-	
 	if ($domain) {
 		$defaults->{'domain'} = $domain;
+		$searchlist = $domain;
 	}
-
-	my $usedevolution = $keys{'UseDomainNameDevolution'}->[2];
+	
+	if (defined $reg_tcpip){
+		$searchlist .= "," if $searchlist; # $domain already in there
+		$searchlist .= $reg_tcpip->GetValue('SearchList');
+		my ($value, $type) = $reg_tcpip->GetValue('UseDomainNameDevolution');
+		$usedevolution = defined $value && $type == REG_DWORD ? hex $value : 0;
+	}
+	
 	if ($searchlist) {
 		# fix devolution if configured, and simultaneously make sure no dups (but keep the order)
 		my @a;
 		my %h;
-		foreach my $entry (split(m/[\s,]+/, $searchlist)) {
+		foreach my $entry (split(m/[\s,]+/, lc $searchlist)) {
 			push(@a, $entry) unless $h{$entry};
 			$h{$entry} = 1;
 			if ($usedevolution) {

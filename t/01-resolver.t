@@ -1,8 +1,9 @@
-# $Id: 01-resolver.t 805 2009-11-20 13:15:12Z olaf $  -*-perl-*-
+# $Id: 01-resolver.t 931 2011-10-25 12:10:56Z willem $  -*-perl-*-
 
 use Test::More tests => 49;
 use strict;
 use File::Spec;
+use t::NonFatal;
 
 BEGIN { use_ok('Net::DNS'); }
 
@@ -63,34 +64,33 @@ while (my ($param, $value) = each %good_input) {
 
 
 	
-# Some people try to run these on private address space."
-
-use Net::IP;
-
-use IO::Socket::INET;
-
-my $sock = IO::Socket::INET->new(PeerAddr => '193.0.14.129', # k.root-servers.net.
-				 PeerPort => '53',
-				 Proto    => 'udp');
-
-
-my $ip=Net::IP->new(inet_ntoa($sock->sockaddr));
-	    
-
 SKIP: {
+	# Test first, if we want online tests at all.
 	skip 'Online tests disabled.', 3
 		unless -e 't/online.enabled';
 
 	skip 'Online tests disabled.', 3
 		if -e 't/online.disabled';
 
-	skip 'Tests may not run succesful from private IP('.$ip->ip() .')', 3
-	    if ($ip->iptype() ne "PUBLIC");
+	# Some people try to run these on private address space - test for this case and skip.
+	use IO::Socket::INET;
 
-	my $res = Net::DNS::Resolver->new;
+	my $sock = IO::Socket::INET->new(PeerAddr => '193.0.14.129', # k.root-servers.net.
+					 PeerPort => '53',
+					 Proto    => 'udp');
+
+	
+	my $ip = $sock ? inet_ntoa($sock->sockaddr) : undef;
+
+	skip "Tests may not succeed from private IP: $ip", 3
+		if $ip && $ip =~ /^(10|172\.(1[6-9]|2.|30|31)|192.168)\./;
+
+	NonFatalBegin();
+
+	my $res = Net::DNS::Resolver->new(udp_timeout => 3, tcp_timeout => 3);
 	
 	$res->nameservers('a.t.net-dns.org');
-	my $ip = ($res->nameservers)[0];
+	$ip = ($res->nameservers)[0];
 	is($ip, '10.0.1.128', 'Nameservers() looks up IP.') or
 	    diag ($res->errorstring . $res->print) ;
 	
@@ -105,7 +105,7 @@ SKIP: {
 	# places
 	my $die = 0;
 	undef ($res); # default values again
-	$res = Net::DNS::Resolver->new();
+	$res = Net::DNS::Resolver->new(udp_timeout => 3, tcp_timeout => 3);
 
 	eval{
 	    
@@ -122,6 +122,7 @@ SKIP: {
 	};
 	is($die, 0, 'No deaths because of \$_');
 
+	NonFatalEnd();
 
 }	
 

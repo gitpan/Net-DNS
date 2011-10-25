@@ -1,5 +1,5 @@
 
-# $Id: Makefile.PL 822 2009-11-30 17:37:30Z olaf $ -*-perl-*-
+# $Id: Makefile.PL 931 2011-10-25 12:10:56Z willem $ -*-perl-*-
 
 use strict;
 $^W = 1;
@@ -33,42 +33,59 @@ AMEN
 #
 # Get the command line args
 #
-my ($use_xs, $online_tests, $IPv6_tests);
 
-GetOptions(
+my $help = 0;
+my $IPv6_tests;
+my $online_tests = 2;	# 2 = non-fatal, 1 = on, 0 = off
+my $use_xs;
+
+unless (GetOptions(
 	'xs!'           => \$use_xs,
 	'pm'            => sub { 
 		warn qq/\n\tWARNING: Use of "--pm" is deprecated.  Use "--noxs" instead.\n\n/;
 		$use_xs = 0;
 	},
 	'online-tests!' => \$online_tests,
+	'non-fatal-online-tests' => sub {
+		$online_tests = 2;
+	},
 	'IPv6-tests!'   => \$IPv6_tests,
-);
+	'help|?'        => \$help,
+)) {
+	print "Error: Unrecognized option.\n"; print "Try perl Makefile.PL --help for more information\n";
+	exit 1;	
+};
 
+if ($help) {
+	print <<EOT;
 
+Usage: perl Makefile.PL [OPTION...]
 
-#
-# Test to see if IPv6 is available, unless IPv6 testing has been declined.
-#    
-if (!defined $IPv6_tests || $IPv6_tests == 1) {
-    unless(    eval {require IO::Socket::INET6; IO::Socket::INET6->VERSION("2.01");}	   ){
-		print <<V6WARNING;
+Prepare Makefile for building and installing Net::DNS
 
+  --xs | --noxs			Enable or disable linkage to the libresolv 
+				library Default the libresolv library is 
+				linked when a compiler is found.
 
-The libraries needed to support IPv6 transport have not been found. 
-You will need recent versions of the IO::Socket::INET6 and Socket6 
-libraries (from CPAN). 
+  --online-tests		Perform tests by communicating with the
+				outside world.  Beware that their success is
+				also dependent on outside influences.
 
-V6WARNING
-		$IPv6_tests = 0;
-	}
-}
+  --noonline-tests		Skip online tests completely.
 
+  --non-fatal-online-tests	Perform online test, but do not let failures 
+				negatively affect the outcome of running
+				make test.  This is the default.
+
+EOT
+
+	exit 0;
+};
 
 
 #
 # Get our makefile started...
-#  NB Net::IP is still needed for tests.
+#
 my %Makefile = (
 	NAME          => 'Net::DNS',
 	VERSION_FROM  => 'lib/Net/DNS.pm',
@@ -78,28 +95,24 @@ my %Makefile = (
 		'MIME::Base64'     => 2.11,
 		'Digest::MD5'      => 2.12,
 		'Digest::SHA'      => 5.23,
-		'Net::IP'          => 1.2,
 		'Digest::HMAC_MD5' => 1.00,
 	},
 	XS            => {},
 	C             => [],
-	clean         => { FILES => 't/IPv6.enabled t/online.enabled compile.* DNS.o DNS.c DNS.bs' },
-
-
+	clean         => { FILES => 't/IPv6.enabled t/online.enabled t/online.nonfatal compile.* DNS.o DNS.c DNS.bs lib/Net/DNS/Resolver/Win32' },
 );
 
 
 
-if ($^O eq 'MSWin32' || $^O eq 'cygwin') {
+if ($^O eq 'MSWin32') {
     unless(    eval {require WIN32::API; }	   ){
 	warn <<AMEN; 
 I can not find WIN32::API version 0.55 or higher.
-
 I will add WIN32::API to the list of prerequisites.
 AMEN
 
 
-if ( $^O eq "MSWin32" ){ 
+if ( $^O eq "MSWin32" ){
     warn <<AMEN2;
 Note that, WIN32::API is included in recent versions
 of ActivePerl (5.10 since build 1003) and recent
@@ -108,19 +121,36 @@ version of 5.10.0.3) and the module has not be
 tested with other versions. In case of failure please
 consider upgrading.
 AMEN2
-}else{
-    warn <<AMEN3;
-When using cygwin missing dependencies can be installed using CPAN.
-AMEN3
-
 }
 
 
     }
     $Makefile{'PREREQ_PM'}->{'enum'} = 1.0;  # Dependency for Win32::IPHelper
-    $Makefile{'PREREQ_PM'}->{'Win32::IPHelper'} = 0.05;
+    $Makefile{'PREREQ_PM'}->{'Win32::IPHelper'} = 0.07;
     $Makefile{'PREREQ_PM'}->{'Win32::API'} = 0.55;
-    $Makefile{'PREREQ_PM'}->{'Win32::Registry'} = 0;
+    $Makefile{'PREREQ_PM'}->{'Win32::TieRegistry'} = 0;
+
+    # On 64 bit versions of windows Win32::IPHelper <= 0.06 is known not to 
+    # work.
+    # 
+    if ( $INC{'Win32/IPHelper.pm'} || eval {
+		    	local $SIG{__WARN__} = sub {};
+		    	require Win32::IPHelper;
+		} && ($ENV{'PROCESSOR_ARCHITECTURE'} =~ /64/
+		  ||  $ENV{'PROCESSOR_ARCHITEW6432'} =~ /64/)
+		  && $Win32::IPHelper::VERSION < 0.07 ) {
+	    warn <<IPHelper64bitWarning;
+
+WARNING!
+========
+You have a Win32::IPHelper version $Win32::IPHelper::VERSION.  On 64bit machines Net::DNS::Resolver
+will not work with a Win32::IPHelper before version 0.07.  Please upgrade your
+Win32::IPHelper module.
+
+
+IPHelper64bitWarning
+
+    }
 }
 
 
@@ -158,13 +188,6 @@ END
 	}
 }
 
-
-
-
-
-
-
-
 if ($use_xs) {
 	# turn the XS bits on.
         print "Activating XS Magic...\n" if DEBUG; 
@@ -178,43 +201,74 @@ if ($use_xs) {
 # Check if we have internet connection
 # (I lifted this code from LWP... )
 #
-unless (defined $online_tests) {
+
+if ($online_tests) {
 	my $s = IO::Socket::INET->new(
 		PeerAddr => "www.google.com:80",
 		Timeout  => 10,
 	);
 	
-	if ($s) {
-		close($s);
-	
+	unless ($s) {
 		print <<EOT;
 	
-You appear to be directly connected to the Internet.  I have some tests
-that try to query live nameservers.
+You appear not to be directly connected to the Internet.
+Disabling online tests altogether...
 	
 EOT
-	
-		$online_tests = prompt("Do you want to enable these tests?", "y") =~ /^y/i ? 1 : 0;
+
+		$online_tests = 0;
+	} else {
+		close($s);
+	}
+
+}
+if ($online_tests) {
+	if ($online_tests == 2) {
+		print "\nActivating Non Fatal Online Tests...\n\n";
+	} else {
+		print "\nActivating Online Tests...\n\n";
+	}
+	print <<EOT;
+Warning!
+========
+Online tests depend on conditions out of the control of Net::DNS. The tests 
+check for the expected results when both Net::DNS and the outside world are
+functioning properly. In case of failure it is often undecidable if the error
+lies with Net::DNS or elsewhere.
+
+EOT
+	open(ENABLED, ">t/online.enabled") || die "Can't touch ./t/online.enabled $!";
+	close(ENABLED)                     || die "Can't touch ./t/online.enabled $!";
+	if ($online_tests == 2) {
+		open(NONFATAL, ">t/online.nonfatal") || die "Can't touch ./t/online.nonfatal $!";
+		close(NONFATAL)                     || die "Can't touch ./t/online.nonfatal $!";
 	}
 }
 
-if ($online_tests) {
-	print "Activating Online Tests...\n" if DEBUG; 
-	open(ENABLED, ">t/online.enabled") || die "Can't touch ./t/online.enabled $!";
-	close(ENABLED)                     || die "Can't touch ./t/online.enabled $!";
+
+#
+# Test to see if IPv6 is available, unless IPv6 testing has been declined.
+#    
+if (!defined $IPv6_tests || $IPv6_tests == 1) {
+	unless(    eval {require IO::Socket::INET6; IO::Socket::INET6->VERSION("2.01");}	   ) {
+		print <<V6WARNING;
+
+The libraries needed to support IPv6 transport have not been found. 
+You will need recent versions of the IO::Socket::INET6 and Socket6 
+libraries (from CPAN). 
+
+V6WARNING
+		if ($IPv6_tests) {
+			$IPv6_tests = prompt('Are you sure you wish to enable IPv6 tests?', 'y') =~ /^y/i ? 1 : 0;
+		}
+	}
+	if ($IPv6_tests) {
+		print "\nActivating IPv6 Tests...\n"; 
+		open(ENABLED, '>t/IPv6.enabled') || die "Can't touch ./t/IPv6.enabled $!";
+		close(ENABLED)                   || die "Can't touch ./t/IPv6.enabled $!";
+	}
 }
 
-
-
-unless (defined $IPv6_tests) {
-	$IPv6_tests = prompt('Would you like to enable IPv6 tests?', 'y') =~ /^y/i ? 1 : 0;
-}
-
-if ($IPv6_tests) {
-	print "Activating IPv6 Tests...\n" if DEBUG; 
-	open(ENABLED, '>t/IPv6.enabled') || die "Can't touch ./t/IPv6.enabled $!";
-	close(ENABLED)                   || die "Can't touch ./t/IPv6.enabled $!";
-}
 
 WriteMakefile(%Makefile);
 
@@ -273,6 +327,7 @@ test_cover : pure_all
 netdns$(LIB_EXT): netdns$(OBJ_EXT)
 	$(AR) '.($^O eq 'MSWin32' && $Config{'cc'} eq 'cl'?'/OUT:':'cr ').
 	  'netdns$(LIB_EXT) netdns$(OBJ_EXT)
+	$(RANLIB) netdns$(LIB_EXT)
 
 ';
 #    print "$content";

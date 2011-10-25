@@ -1,4 +1,4 @@
-# $Id: 01-resolver-flags.t 759 2008-12-23 21:23:48Z olaf $  -*-perl-*-
+# $Id: 01-resolver-flags.t 931 2011-10-25 12:10:56Z willem $  -*-perl-*-
 
 use Test::More tests => 7;
 use strict;

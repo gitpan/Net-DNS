@@ -1,6 +1,6 @@
 package Net::DNS::RR::HIP;
 #
-# $Id: HIP.pm 835 2009-12-29 20:20:38Z olaf $
+# $Id: HIP.pm 931 2011-10-25 12:10:56Z willem $
 #
 # See RFC 5205 for the specification of this record.
 
@@ -192,6 +192,7 @@ sub pubkey {
 sub _normalize_dnames {
 	my $self=shift;
 	$self->_normalize_ownername();
+	$self->{'rendezvousservers'} ||= [];
 	my @dnames = @{$self->{'rendezvousservers'}};
 	$self->{'rendezvousservers'}=[];
 	foreach my $dname (@dnames){

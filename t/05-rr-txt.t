@@ -1,4 +1,4 @@
-# $Id: 05-rr-txt.t 835 2009-12-29 20:20:38Z olaf $ -*-perl-*-
+# $Id: 05-rr-txt.t 931 2011-10-25 12:10:56Z willem $ -*-perl-*-
 
 use Test::More tests => 38;
 use strict;
@@ -124,9 +124,9 @@ $work_hash{'txtdata'} = q|no quotes|;
 
 ok( $uut = Net::DNS::RR->new(%work_hash), 		# 30
     "RR->new_from_hash with txtdata -- Stimulus");
-ok( $uut->rdatastr() eq q|"no" "quotes"|, 		# 31
+is( $uut->rdatastr(), q|"no" "quotes"|, 		# 31
     "RR->new_from_hash with txtdata -- Response (rdatastr())");
-ok( $uut->rr_rdata() eq $rdata , "TXT->rr_rdata" );	# 32
+is( $uut->rr_rdata(), $rdata , "TXT->rr_rdata" );	# 32
 
 
 
@@ -135,7 +135,7 @@ ok( $uut->rr_rdata() eq $rdata , "TXT->rr_rdata" );	# 32
 my $rr = Net::DNS::RR->new("SRI-NIC.ARPA. HINFO 'DEC-2060 2006' TOPS20");
 is($rr->cpu,"DEC-2060 2006","Character string in quotes 1");
 is($rr->os,"TOPS20","Character string in quotes 2");
-my $rr2 = Net::DNS::RR->new("SRI-NIC.ARPA. HINFO DEC-2060 2006 TOPS20");
+my $rr2 = eval{ Net::DNS::RR->new("SRI-NIC.ARPA. HINFO DEC-2060 2006 TOPS20") };
 ok( !defined($rr2), "Failed parsing of to many HINFO strings");
 
 my $rr3 = Net::DNS::RR->new("SRI-NIC.ARPA. HINFO DEC-2060  TOPS20");

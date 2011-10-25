@@ -1,6 +1,6 @@
 package Net::DNS::RR::TXT;
 #
-# $Id: TXT.pm 812 2009-11-26 15:04:14Z olaf $
+# $Id: TXT.pm 931 2011-10-25 12:10:56Z willem $
 #
 use strict;
 BEGIN { 
@@ -11,7 +11,7 @@ use vars qw(@ISA $VERSION);
 use Text::ParseWords;
 
 @ISA     = qw(Net::DNS::RR);
-$VERSION = (qw$LastChangedRevision: 812 $)[1];
+$VERSION = (qw$LastChangedRevision: 931 $)[1];
 
 sub new {
 	my ($class, $self, $data, $offset) = @_;
@@ -54,7 +54,8 @@ sub rdatastr {
 		return join(' ', map { 
 			my $str = $_;  
 			$str =~ s/"/\\"/g;  
-			$str =~ s/;/\\;/g;  
+			$str =~ s/;/\\;/g;
+			#$str =~ s/([\x00-\x1F\x7F-\xFF])/sprintf"\\%.3d",ord($1)/eg;
 			qq("$str");
 		} @{$self->{'char_str_list'}});
 	} 

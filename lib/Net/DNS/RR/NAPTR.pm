@@ -1,6 +1,6 @@
 package Net::DNS::RR::NAPTR;
 #
-# $Id: NAPTR.pm 801 2009-10-02 16:02:37Z olaf $
+# $Id: NAPTR.pm 931 2011-10-25 12:10:56Z willem $
 #
 use strict;
 BEGIN { 
@@ -9,7 +9,7 @@ BEGIN {
 use vars qw(@ISA $VERSION);
 
 @ISA     = qw(Net::DNS::RR);
-$VERSION = (qw$LastChangedRevision: 801 $)[1];
+$VERSION = (qw$LastChangedRevision: 931 $)[1];
 
 
 

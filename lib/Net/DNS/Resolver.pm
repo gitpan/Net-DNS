@@ -1,25 +1,25 @@
 package Net::DNS::Resolver;
 #
-# $Id: Resolver.pm 830 2009-12-23 16:31:13Z olaf $
+# $Id: Resolver.pm 931 2011-10-25 12:10:56Z willem $
 #
 
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = (qw$LastChangedRevision: 830 $)[1];
+$VERSION = (qw$LastChangedRevision: 931 $)[1];
 
-BEGIN {
+#BEGIN {
 	if ($^O eq 'MSWin32') {
 		require Net::DNS::Resolver::Win32;
 		@ISA = qw(Net::DNS::Resolver::Win32);
 	} elsif ($^O eq 'cygwin') {
-		require Net::DNS::Resolver::Win32;
-		@ISA = qw(Net::DNS::Resolver::Win32);
-	} else {   
+		require Net::DNS::Resolver::Cygwin;
+		@ISA = qw(Net::DNS::Resolver::Cygwin);
+	} else {
 		require Net::DNS::Resolver::UNIX;
 		@ISA = qw(Net::DNS::Resolver::UNIX);
 	}
-}
+#}
 
 __PACKAGE__->init();
 
@@ -400,7 +400,7 @@ $res->bgisready >> or C<IO::Select> to find out if the socket is ready
 before reading it.
 
 bgsend does not support persistent sockets.
-
+bgsend does not support the usevc option (TCP).
 
 =head2 bgread
 
@@ -595,7 +595,7 @@ secured zones will contain DNSKEY, NSEC and RRSIG records.
 
 Setting calling the dnssec method with a non-zero value will set the
 UDP packet size to the default value of 2048. If that is to small or
-to big for your environement you should call the udppacketsize()
+to big for your environment you should call the udppacketsize()
 method immeditatly after.
 
    $res->dnssec(1);    # turns on DNSSEC and sets udp packetsize to 2048
@@ -637,7 +637,7 @@ to 1.
     $res->udppacketsize(2048);
 
 udppacketsize will set or get the packet size. If set to a value greater than 
-Net::DNS::PACKETSZ() an EDNS extension will be added indicating suppport for MTU path 
+Net::DNS::PACKETSZ() an EDNS extension will be added indicating support for MTU path 
 recovery.
 
 Default udppacketsize is Net::DNS::PACKETSZ() (512)

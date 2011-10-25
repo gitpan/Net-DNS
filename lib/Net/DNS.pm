@@ -1,7 +1,7 @@
 
 package Net::DNS;
 #
-# $Id: DNS.pm 829 2009-12-23 15:39:59Z olaf $
+# $Id: DNS.pm 931 2011-10-25 12:10:56Z willem $
 #
 use strict;
 
@@ -42,14 +42,14 @@ BEGIN {
     require Exporter;
     @ISA     = qw(Exporter );
     # these need to live here because of dependencies further on.
-    @EXPORT = qw(mx yxrrset nxrrset yxdomain nxdomain rr_add rr_del);
+    @EXPORT = qw(mx yxrrset nxrrset yxdomain nxdomain rr_add rr_del SEQUENTIAL UNIXTIME YYYYMMDDxx);
     @EXPORT_OK= qw(name2labels wire2presentation rrsort stripdot);
 
 
 
     
-    $VERSION = '0.66';
-    $SVNVERSION = (qw$LastChangedRevision: 829 $)[1];
+    $VERSION = '0.66_01';
+    $SVNVERSION = (qw$LastChangedRevision: 931 $)[1];
 
 
 
@@ -203,31 +203,22 @@ sub typesbyname {
 
     return $typesbyname{$name} if defined $typesbyname{$name};
 
-    confess "Net::DNS::typesbyname() argument ($name) is not TYPE###" unless 
-        $name =~ m/^\s*TYPE(\d+)\s*$/o;  
-    
-    my $val = $1;
-    
-    confess 'Net::DNS::typesbyname() argument larger than ' . 0xffff if $val > 0xffff;
-    
-    return $val;
+    confess "unknown type $name" unless $name =~ m/TYPE(\d+)/o;
+
+    my $val = 0 + $1;
+    confess 'argument out of range' if $val > 0xffff;
+
+    return $val ? $val : '00';    ## preserve historical behaviour for TYPE0 ##
 }
-
-
 
 sub typesbyval {
     my $val = shift;
-    confess "Net::DNS::typesbyval() argument is not defined" unless defined $val;
-    confess "Net::DNS::typesbyval() argument ($val) is not numeric" unless 
-	$val =~ s/^\s*0*(\d+)\s*$/$1/o;
 
-    
-    
-    return $typesbyval{$val} if $typesbyval{$val};
-    
-    confess 'Net::DNS::typesbyval() argument larger than '. 0xffff if 
-        $val > 0xffff;
-    
+    return $typesbyval{$val} if defined $typesbyval{$val};
+
+    $val += 0;
+    confess 'argument out of range' if $val > 0xffff;
+
     return "TYPE$val";
 }
 
@@ -256,30 +247,25 @@ sub typesbyval {
 
 sub classesbyname {
     my $name = uc shift;
-    return $classesbyname{$name} if $classesbyname{$name};
-    
-    confess "Net::DNS::classesbyval() argument is not CLASS### ($name)" unless 
-        $name =~ m/^\s*CLASS(\d+)\s*$/o;
-    
-    my $val = $1;
-    
-    confess 'Net::DNS::classesbyval() argument larger than '. 0xffff if $val > 0xffff;
-    
+
+    return $classesbyname{$name} if defined $classesbyname{$name};
+
+    confess "unknown class $name" unless $name =~ m/CLASS(\d+)/o;
+
+    my $val = 0 + $1;
+    confess 'argument out of range' if $val > 0xffff;
+
     return $val;
 }
 
-
-
 sub classesbyval {
     my $val = shift;
-    
-    confess "Net::DNS::classesbyname() argument is not numeric ($val)" unless 
-	$val =~ s/^\s*0*([0-9]+)\s*$/$1/o;
-    
-    return $classesbyval{$val} if $classesbyval{$val};
-    
-    confess 'Net::DNS::classesbyname() argument larger than ' . 0xffff if $val > 0xffff;
-    
+
+    return $classesbyval{$val} if defined $classesbyval{$val};
+
+    $val += 0;
+    confess 'argument out of range' if $val > 0xffff;
+
     return "CLASS$val";
 }
 
@@ -371,29 +357,22 @@ sub mx {
     return @ret;
 }
 
-sub yxrrset {
-    return Net::DNS::RR->new_from_string(shift, 'yxrrset');
-}
 
-sub nxrrset {
-    return Net::DNS::RR->new_from_string(shift, 'nxrrset');
-}
+#
+# Auxiliary functions to support dynamic update.
+#
 
-sub yxdomain {
-    return Net::DNS::RR->new_from_string(shift, 'yxdomain');
-}
+sub yxrrset { return new Net::DNS::RR( shift, 'yxrrset' ); }
 
-sub nxdomain {
-    return Net::DNS::RR->new_from_string(shift, 'nxdomain');
-}
+sub nxrrset { return new Net::DNS::RR( shift, 'nxrrset' ); }
 
-sub rr_add {
-    return Net::DNS::RR->new_from_string(shift, 'rr_add');
-}
+sub yxdomain { return new Net::DNS::RR( shift, 'yxdomain' ); }
 
-sub rr_del {
-    return Net::DNS::RR->new_from_string(shift, 'rr_del');
-}
+sub nxdomain { return new Net::DNS::RR( shift, 'nxdomain' ); }
+
+sub rr_add { return new Net::DNS::RR( shift, 'rr_add' ); }
+
+sub rr_del { return new Net::DNS::RR( shift, 'rr_del' ); }
 
 
 
@@ -492,50 +471,48 @@ sub stripdot {
 sub presentation2wire {
     my  $presentation=shift;
     my  $wire="";
-    my $length=length($presentation);
     
-    my $i=0;
-    
-    while ($i < $length ){
-	my $char=unpack("x".$i."C1",$presentation);
-	if (  $char == ord ('.')){
-	    return ($wire,substr($presentation,$i+1));
-	}
-	if (  $char == ord ('\\')){
-	    #backslash found
-	    pos($presentation)=$i+1;
-	    if ($presentation=~/\G(\d\d\d)/){
-		$wire.=pack("C",$1);
-		$i+=3;
-	    }elsif($presentation=~/\Gx([0..9a..fA..F][0..9a..fA..F])/){
-		$wire.=pack("H*",$1);
-		$i+=3;
-	    }elsif($presentation=~/\G\./){
-		$wire.="\.";
-		$i+=1;
-	    }elsif($presentation=~/\G@/){
-		$wire.="@";
-		$i+=1;
-	    }elsif($presentation=~/\G\(/){
-		$wire.="(";
-		$i+=1;
-	    }elsif($presentation=~/\G\)/){
-		$wire.=")";
-		$i+=1;
-           }elsif($presentation=~/\G\\/){
-               $wire.="\\"; 
-               $i+=1;
+    while ($presentation =~ /\G([^.\\]*)([.\\]?)/g){
+        $wire .= $1 if defined $1;
+
+        if ($2) {
+            if ($2 eq '.') {
+                return ($wire,substr($presentation,pos $presentation));
 	    }
-	}else{
-	    $wire .=  pack("C",$char);  
+
+            #backslash found
+            if ($presentation =~ /\G(\d\d\d)/gc) {
+                $wire.=pack("C",$1);
+            } elsif ($presentation =~ /\Gx([0..9a..fA..F][0..9a..fA..F])/gc){
+                $wire.=pack("H*",$1);
+            } elsif ($presentation =~ /\G([@().\\])/gc){
+                $wire .= $1;
+            }
         }
-	$i++;
     }
     
     return $wire;
 }
 
 
+
+
+#
+# Auxiliary functions to support policy-driven zone serial numbering.
+#
+#	$successor = $soa->serial(SEQUENTIAL);
+#	$successor = $soa->serial(UNIXTIME);
+#	$successor = $soa->serial(YYYYMMDDxx);
+#
+
+sub SEQUENTIAL() { undef }
+
+sub UNIXTIME() { return CORE::time; }
+
+sub YYYYMMDDxx() {
+	my ( $dd, $mm, $yy ) = ( localtime )[3 .. 5];
+	return 1900010000 + sprintf '%d%0.2d%0.2d00', $yy, $mm, $dd;
+}
 
 
 
@@ -791,6 +768,37 @@ section of a dynamic update packet.
 
 Returns a C<Net::DNS::RR> object or C<undef> if the object couldn't
 be created.
+
+
+
+=head1 Zone Serial Number Management
+
+The Net::DNS module provides auxiliary functions which support
+policy-driven zone serial numbering regimes.
+
+=head2 Strictly Sequential
+
+    $successor = $soa->serial( SEQUENTIAL );
+
+The existing serial number is incremented modulo 2**32.
+
+=head2 Time Encoded
+
+    $successor = $soa->serial( UNIXTIME );
+
+The Unix time scale will be used as the basis for zone serial
+numbering. The serial number will be incremented if the time
+elapsed since the previous update is less than one second.
+
+=head2 Date Encoded
+
+    $successor = $soa->serial( YYYYMMDDxx );
+
+The 32 bit value returned by the auxiliary YYYYMMDDxx() function
+will be used as the base for the date-coded zone serial number.
+Serial number increments must be limited to 100 per day for the
+date information to remain useful.
+
 
 
 =head2 Sorting of RR arrays

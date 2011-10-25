@@ -1,6 +1,6 @@
-package Net::DNS::Resolver::Cygwin;
+package Net::DNS::Resolver::Cygwin; # -*- tab-width:4 -*-
 #
-# $Id: Cygwin.pm 696 2007-12-28 13:46:20Z olaf $
+# $Id: Cygwin.pm 931 2011-10-25 12:10:56Z willem $
 #
 
 use strict;
@@ -9,7 +9,7 @@ use vars qw(@ISA $VERSION);
 use Net::DNS::Resolver::Base ();
 
 @ISA	 = qw(Net::DNS::Resolver::Base);
-$VERSION = (qw$LastChangedRevision: 696 $)[1];
+$VERSION = (qw$LastChangedRevision: 931 $)[1];
 
 sub getregkey {
 	my $key	  = $_[0] . $_[1];
@@ -19,7 +19,7 @@ sub getregkey {
 
 	if (open(LM, "<$key")) {
 		$value = <LM>;
-		$value =~ s/\0+$//;
+		$value =~ s/\0+$// if $value;
 		close(LM);
 	}
 	
@@ -33,7 +33,7 @@ sub init {
 	local *LM;
 	
 	my $root = '/proc/registry/HKEY_LOCAL_MACHINE/SYSTEM/CurrentControlSet/Services/Tcpip/Parameters/';
-   
+
 	unless (-d $root) {
 		# Doesn't exist, maybe we are on 95/98/Me?
 		$root = '/proc/registry/HKEY_LOCAL_MACHINE/SYSTEM/CurrentControlSet/Services/VxD/MSTCP/';
@@ -90,12 +90,13 @@ sub init {
 				my $ip;
 				$ip = getregkey($regiface, "DhcpIPAddress") || getregkey($regiface, "IPAddress");
 				$ns = getregkey($regiface, "NameServer") ||
-				    getregkey($regiface, "DhcpNameServer") || ''				    unless !$ip || ($ip =~ /0\.0\.0\.0/);
-				
+				    getregkey($regiface, "DhcpNameServer") || ''
+                      unless !$ip || ($ip =~ /0\.0\.0\.0/);
+
 				$nameservers .= " $ns" if $ns;
-			    }
-		    }
-	    }
+            }
+        }
+    }
 	
 	if (!$nameservers) {
 		$nameservers = $nt4nameservers;
@@ -166,7 +167,7 @@ for all your resolving needs.
 
 =head1 COPYRIGHT
 
-Copyright (c) 1997-2002 Michael Fuhr. 
+Copyright (c) 1997-2002 Michael Fuhr.
 
 Portions Copyright (c) 2002-2004 Chris Reinhardt.
 

@@ -1,6 +1,6 @@
 package Net::DNS::RR::SSHFP;
 #
-# $Id: SSHFP.pm 626 2007-02-02 07:31:32Z olaf $
+# $Id: SSHFP.pm 931 2011-10-25 12:10:56Z willem $
 #
 use strict;
 BEGIN { 
@@ -18,7 +18,7 @@ BEGIN {
 	
 }
 
-$VERSION = (qw$LastChangedRevision: 626 $)[1];
+$VERSION = (qw$LastChangedRevision: 931 $)[1];
 
 @ISA = qw(Net::DNS::RR);
 
@@ -150,7 +150,7 @@ In addition to the regular methods
 
 =head2 algorithm
 
-    print "algoritm" = ", $rr->algorithm, "\n";
+    print "algorithm" = ", $rr->algorithm, "\n";
 
 Returns the RR's algorithm field in decimal representation
 

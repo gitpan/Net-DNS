@@ -1,6 +1,6 @@
 package Net::DNS::Packet;
 #
-# $Id: Packet.pm 837 2009-12-30 10:23:25Z olaf $
+# $Id: Packet.pm 931 2011-10-25 12:10:56Z willem $
 #
 use strict;
 
@@ -22,7 +22,7 @@ require Exporter;
 @EXPORT_OK = qw(dn_expand);
 
 
-$VERSION = (qw$LastChangedRevision: 837 $)[1];
+$VERSION = (qw$LastChangedRevision: 931 $)[1];
 
 
 
@@ -62,8 +62,8 @@ C<new> creates a packet object from that data.  A second argument
 can be passed to turn on debugging output for packet parsing.
 
 If called in array context, returns a packet object and an
-error string.  The error string will only be defined if the
-packet object is undefined (i.e., couldn't be created).
+error string.  The content of the error string is unspecified
+if the packet object was successfully created.
 
 Returns B<undef> if unable to create a packet object (e.g., if
 the packet data is truncated).
@@ -629,8 +629,9 @@ sub dn_expand_PP {
 
     $response = $res->send($update);
 
-Signs a packet with a TSIG resource record (see RFC 2845).  Uses the
-following defaults:
+Attaches a TSIG resource record object containing a key, which will
+be used to signs a packet with a TSIG resource record (see RFC 2845).
+Uses the following defaults:
 
     algorithm   = HMAC-MD5.SIG-ALG.REG.INT
     time_signed = current time
@@ -651,9 +652,6 @@ seconds:
     $query->sign_tsig($tsig);
 
     $response = $res->send($query);
-
-You shouldn't modify a packet after signing it; otherwise authentication
-will probably fail.
 
 =cut
 

@@ -1,6 +1,6 @@
 package Net::DNS::RR::RT;
 #
-# $Id: RT.pm 718 2008-02-26 21:49:20Z olaf $
+# $Id: RT.pm 931 2011-10-25 12:10:56Z willem $
 #
 use strict;
 BEGIN { 
@@ -9,7 +9,7 @@ BEGIN {
 use vars qw(@ISA $VERSION);
 
 @ISA     = qw(Net::DNS::RR);
-$VERSION = (qw$LastChangedRevision: 718 $)[1];
+$VERSION = (qw$LastChangedRevision: 931 $)[1];
 
 # Highest preference sorted first.
 __PACKAGE__->set_rrsort_func("preference",

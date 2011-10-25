@@ -1,6 +1,6 @@
 package Net::DNS::Nameserver;
 #
-# $Id: Nameserver.pm 835 2009-12-29 20:20:38Z olaf $
+# $Id: Nameserver.pm 931 2011-10-25 12:10:56Z willem $
 #
 
 use Net::DNS;
@@ -23,7 +23,7 @@ use constant	STATE_ACCEPTED => 1;
 use constant	STATE_GOT_LENGTH => 2;
 use constant	STATE_SENDING => 3;
 
-$VERSION = (qw$LastChangedRevision: 835 $)[1];
+$VERSION = (qw$LastChangedRevision: 931 $)[1];
 
 
 
@@ -47,7 +47,13 @@ BEGIN {
 
 sub new {
 	my ($class, %self) = @_;
-	unless ( ref $self{ReplyHandler} ) {
+	my $self = bless \%self, $class;
+	if (!exists $self{ReplyHandler}) {
+		if (my $handler = UNIVERSAL::can($class, "ReplyHandler")) {
+			$self{ReplyHandler} = sub { $handler->($self, @_); };
+		}
+	}
+	unless ( "CODE" eq ref $self{ReplyHandler} ) {
 		cluck "No reply handler!";
 		return;
 	}
@@ -61,6 +67,7 @@ sub new {
 
 	my $port = $self{LocalPort} || DEFAULT_PORT;
 	$self{Truncate}=1 unless defined ($self{Truncate});
+	$self{IdleTimeout}=120 unless defined ($self{IdleTimeout});
 	
 	my @sock_tcp;	# All the TCP sockets we will listen to.
 	my @sock_udp;	# All the UDP sockets we will listen to.
@@ -82,6 +89,7 @@ sub new {
  						    Listen	  => 64,
  						    Proto	  => "tcp",
  						    Reuse	  => 1,
+						    Blocking     =>  0,
  						    );
 	    if ( $sock_tcp ) {
 		push @sock_tcp, $sock_tcp;
@@ -126,7 +134,6 @@ sub new {
 	# Return the object.
 	#--------------------------------------------------------------------------
 
-	my $self = bless \%self, $class;
 	return $self;
 }
 
@@ -190,10 +197,19 @@ sub make_reply {
 			  ($rcode, $ans, $auth, $add, $headermask) =
 			      &{$self->{"ReplyHandler"}}($qname, $qclass, $qtype, $peerhost, $query, $conn);
 			}else{
-			  $reply->header->rcode("SERVFAIL") unless 
-			     ( ref $self->{"NotifyHandler"} eq "CODE");
-		  ($rcode, $ans, $auth, $add, $headermask) =
-			      &{$self->{"NotifyHandler"}}($qname, $qclass, $qtype, $peerhost, $query, $conn);
+				if ( ref $self->{"NotifyHandler"} eq "CODE") {
+					($rcode, $ans, $auth, $add, $headermask) =
+						&{$self->{"NotifyHandler"}}($qname, $qclass, $qtype, $peerhost, $query, $conn);
+				}else{
+					$rcode = "NOTIMP";
+					$headermask = {
+						opcode => "NS_NOTIFY_OP"
+					};
+				}
+			}
+			if (! defined($rcode)) {
+				print "remaining silent\n" if $self->{'Verbose'};
+				return undef;
 			}
 			print "$rcode\n" if $self->{"Verbose"};
 			
@@ -245,10 +261,12 @@ sub readfromtcp {
   	my ($self, $sock) = @_;
 	return -1 unless defined $self->{"_tcp"}{$sock};
 	my $peer = $self->{"_tcp"}{$sock}{"peer"};
+	my $buf;
 	my $charsread = $sock->sysread(
-	    $self->{"_tcp"}{$sock}{"inbuffer"}, 
+		$buf,
 	    16384);
-	$self->{"_tcp"}{$sock}{"timeout"} = time()+120; # Reset idle timer
+	$self->{"_tcp"}{$sock}{"inbuffer"} .= $buf;
+	$self->{"_tcp"}{$sock}{"timeout"} = time()+$self->{IdleTimeout}; # Reset idle timer
 	print "Received $charsread octets from $peer\n" if $self->{"Verbose"};
 	if ($charsread == 0) { # 0 octets means socket has closed
 	  print "Connection to $peer closed or lost.\n" if $self->{"Verbose"};
@@ -282,7 +300,7 @@ sub tcp_connection {
 		$self->{"_tcp"}{$client}{"peer"} = "tcp:".$peerhost.":".$peerport;
 		$self->{"_tcp"}{$client}{"state"} = STATE_ACCEPTED;
 		$self->{"_tcp"}{$client}{"socket"} = $client;
-		$self->{"_tcp"}{$client}{"timeout"} = time()+120;
+		$self->{"_tcp"}{$client}{"timeout"} = time()+$self->{IdleTimeout};
  		$self->{"select"}->add($client);
 		# After we accepted we will look at the socket again 
 		# to see if there is any data there. ---Olaf
@@ -358,7 +376,11 @@ sub udp_connection {
 
  	print "UDP connection from $peerhost:$peerport to $sockhost\n" if $self->{"Verbose"};
 
-	my $query = Net::DNS::Packet->new(\$buf);
+	my ($query, $err) = Net::DNS::Packet->new(\$buf, $self->{"Verbose"});
+	if (!defined($query)) {
+		print "Error interpreting query: $err\n" if $self->{"Verbose"};
+		return;
+	}
 	my $conn = {
 		    sockhost => $sock->sockhost,
 		    sockport => $sock->sockport,
@@ -413,7 +435,7 @@ sub get_open_tcp {
 sub loop_once {
   my ($self, $timeout) = @_;
 
-  print ";loop_once called with timeout: ".defined($timeout)?$timeout:"undefined"."\n" if $self->{"Verbose"} >4;
+  print ";loop_once called with timeout: ".(defined($timeout)?$timeout:"undefined")."\n" if $self->{"Verbose"} && $self->{"Verbose"} >4;
   foreach my $sock (keys %{$self->{"_tcp"}}) {
       # There is TCP traffic to handle
       $timeout = 0.1 if $self->{"_tcp"}{$sock}{"outbuffer"};
@@ -472,10 +494,10 @@ sub loop_once {
 		  # send the response... well, unless it's a lot of tiny queries,
 		  # in which case we will be generating an entire TCP packet per
 		  # reply. --robert
-		  $self->tcp_connection($self->{"_tcp"}{"socket"});
+		  $self->tcp_connection($self->{"_tcp"}{$s}{"socket"});
 	      }
 	  }
-	  $self->{"_tcp"}{$s}{"timeout"} = time()+120;
+	  $self->{"_tcp"}{$s}{"timeout"} = time()+$self->{IdleTimeout};
       } else {
 	  # Get rid of idle clients.
 	  my $timeout = $self->{"_tcp"}{$s}{"timeout"};
@@ -556,6 +578,9 @@ Creates a nameserver object.  Attributes are:
 			queries.			Defaults to 0 (off).
   Truncate              Truncates UDP packets that
                         are to big for the reply        Defaults to 1 (on)
+  IdleTimeout           TCP clients are disconnected
+                        if they are idle longer than
+                        this duration.                  Defaults to 120 (secs)
 
 The LocalAddr attribute may alternatively be specified as a list of IP
 addresses to listen to. 
@@ -567,9 +592,10 @@ IPv6 and IPv4);
 
 The ReplyHandler subroutine is passed the query name, query class,
 query type and optionally an argument containing the peerhost, the
-incoming query, and the name of the incomming socket (sockethost). It
-must return the response code and references to the answer, authority,
-and additional sections of the response.  Common response codes are:
+incoming query, and the name of the incoming socket (sockethost). It
+must either return the response code and references to the answer, 
+authority, and additional sections of the response, or undef to leave
+the query unanswered.  Common response codes are:
 
   NOERROR	No error
   FORMERR	Format error
@@ -578,7 +604,7 @@ and additional sections of the response.  Common response codes are:
   NOTIMP	Not implemented
   REFUSED	Query refused
 
-For advanced usage it may also contain a headermaks containing an
+For advanced usage it may also contain a headermask containing an
 hashref with the settings for the C<aa>, C<ra>, and C<ad> 
 header bits. The argument is of the form 
 C<< { ad => 1, aa => 0, ra => 1 } >>. 
@@ -714,7 +740,7 @@ address". This should really only be a problem on a server which has
 more than one IP-address (besides localhost - any experience with IPv6
 complications here, would be nice). If this is a problem for you, a
 work-around would be to not listen to INADDR_ANY but to specify each
-address that you want this module to listen on. A seperate set of
+address that you want this module to listen on. A separate set of
 sockets will then be created for each IP-address.
 
 =head1 COPYRIGHT

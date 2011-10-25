@@ -1,6 +1,6 @@
 package Net::DNS::RR::AFSDB;
 #
-# $Id: AFSDB.pm 718 2008-02-26 21:49:20Z olaf $
+# $Id: AFSDB.pm 931 2011-10-25 12:10:56Z willem $
 #
 use strict;
 
@@ -11,7 +11,7 @@ BEGIN {
 use vars qw(@ISA $VERSION);
 
 @ISA     = qw(Net::DNS::RR);
-$VERSION = (qw$LastChangedRevision: 718 $)[1];
+$VERSION = (qw$LastChangedRevision: 931 $)[1];
 
 sub new {
 	my ($class, $self, $data, $offset) = @_;

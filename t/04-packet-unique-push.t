@@ -1,4 +1,4 @@
-# $Id: 04-packet-unique-push.t 704 2008-02-06 21:30:59Z olaf $
+# $Id: 04-packet-unique-push.t 931 2011-10-25 12:10:56Z willem $
 
 use Test::More tests => 77;
 use strict;
@@ -31,39 +31,39 @@ my $tests = sub {
 	my @tests = (
 		[ 
 			1,
-			Net::DNS::RR->new_from_string('foo.example.com 60 IN A 10.0.0.1'),
-			Net::DNS::RR->new_from_string('foo.example.com 60 IN A 10.0.0.1'),
+			Net::DNS::RR->new('foo.example.com 60 IN A 10.0.0.1'),
+			Net::DNS::RR->new('foo.example.com 60 IN A 10.0.0.1'),
 		],
 		[
 			2,
-			Net::DNS::RR->new_from_string('foo.example.com 60 IN A 10.0.0.1'),
-			Net::DNS::RR->new_from_string('bar.example.com 60 IN A 10.0.0.1'),
+			Net::DNS::RR->new('foo.example.com 60 IN A 10.0.0.1'),
+			Net::DNS::RR->new('bar.example.com 60 IN A 10.0.0.1'),
 		],
 		[ 
 			1,
-			Net::DNS::RR->new_from_string('foo.example.com 60 IN A 10.0.0.1'),
-			Net::DNS::RR->new_from_string('foo.example.com 60 IN A 10.0.0.1'),
-			Net::DNS::RR->new_from_string('foo.example.com 90 IN A 10.0.0.1'),
+			Net::DNS::RR->new('foo.example.com 60 IN A 10.0.0.1'),
+			Net::DNS::RR->new('foo.example.com 60 IN A 10.0.0.1'),
+			Net::DNS::RR->new('foo.example.com 90 IN A 10.0.0.1'),
 		],
 		[ 
 			3,
-			Net::DNS::RR->new_from_string('foo.example.com 60 IN A 10.0.0.1'),
-			Net::DNS::RR->new_from_string('foo.example.com 60 IN A 10.0.0.2'),
-			Net::DNS::RR->new_from_string('foo.example.com 60 IN A 10.0.0.3'),
+			Net::DNS::RR->new('foo.example.com 60 IN A 10.0.0.1'),
+			Net::DNS::RR->new('foo.example.com 60 IN A 10.0.0.2'),
+			Net::DNS::RR->new('foo.example.com 60 IN A 10.0.0.3'),
 		],
 		[ 
 			3,
-			Net::DNS::RR->new_from_string('foo.example.com 60 IN A 10.0.0.1'),
-			Net::DNS::RR->new_from_string('foo.example.com 60 IN A 10.0.0.2'),
-			Net::DNS::RR->new_from_string('foo.example.com 60 IN A 10.0.0.3'),
-			Net::DNS::RR->new_from_string('foo.example.com 60 IN A 10.0.0.1'),
+			Net::DNS::RR->new('foo.example.com 60 IN A 10.0.0.1'),
+			Net::DNS::RR->new('foo.example.com 60 IN A 10.0.0.2'),
+			Net::DNS::RR->new('foo.example.com 60 IN A 10.0.0.3'),
+			Net::DNS::RR->new('foo.example.com 60 IN A 10.0.0.1'),
 		],
 		[ 
 			3,
-			Net::DNS::RR->new_from_string('foo.example.com 60 IN A 10.0.0.1'),
-			Net::DNS::RR->new_from_string('foo.example.com 60 IN A 10.0.0.2'),
-			Net::DNS::RR->new_from_string('foo.example.com 60 IN A 10.0.0.1'),
-			Net::DNS::RR->new_from_string('foo.example.com 60 IN A 10.0.0.4'),
+			Net::DNS::RR->new('foo.example.com 60 IN A 10.0.0.1'),
+			Net::DNS::RR->new('foo.example.com 60 IN A 10.0.0.2'),
+			Net::DNS::RR->new('foo.example.com 60 IN A 10.0.0.1'),
+			Net::DNS::RR->new('foo.example.com 60 IN A 10.0.0.4'),
 		],
 	);
 	

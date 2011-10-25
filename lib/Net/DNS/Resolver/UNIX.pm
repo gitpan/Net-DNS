@@ -1,6 +1,6 @@
 package Net::DNS::Resolver::UNIX;
 #
-# $Id: UNIX.pm 482 2005-09-02 13:34:33Z olaf $
+# $Id: UNIX.pm 931 2011-10-25 12:10:56Z willem $
 #
 
 use strict;
@@ -9,7 +9,7 @@ use vars qw(@ISA $VERSION);
 use Net::DNS::Resolver::Base ();
 
 @ISA     = qw(Net::DNS::Resolver::Base);
-$VERSION = (qw$LastChangedRevision: 482 $)[1];
+$VERSION = (qw$LastChangedRevision: 931 $)[1];
 
 my $resolv_conf = '/etc/resolv.conf';
 my $dotfile     = '.resolv.conf';

@@ -1,13 +1,15 @@
-# $Id: 08-online.t 807 2009-11-20 15:04:30Z olaf $ -*-perl-*-
+# $Id: 08-online.t 931 2011-10-25 12:10:56Z willem $ -*-perl-*-
 
 use Test::More;
 use strict;
 use Socket;
 use Data::Dumper;
+use t::NonFatal;
 
 BEGIN {
 	if (-e 't/online.enabled' && ! -e 't/online.disabled' ) {
 		plan tests => 95;
+		NonFatalBegin();
 	} else {
 		plan skip_all => 'Online tests disabled.';
 		exit;
@@ -16,7 +18,15 @@ BEGIN {
 
 BEGIN { use_ok('Net::DNS'); }
 
-my $res = Net::DNS::Resolver->new;
+sub timeoutres {
+    return Net::DNS::Resolver->new(
+		tcp_timeout => 3,
+		udp_timeout => 3 
+	    );
+}
+
+
+my $res = &timeoutres;
 #$res->debug(1);
 my @rrs = (
 	{
@@ -49,35 +59,50 @@ foreach my $data (@rrs) {
     
     my $packet = $res->send($data->{'name'}, $data->{'type'}, 'IN');
     
-    ok($packet, "Got an answer for $data->{name} IN $data->{type}");
-    is($packet->header->qdcount, 1, 'Only one question');
-    is($packet->header->ancount, 1, 'Got single answer');
-    
-    my $question = ($packet->question)[0];
-    my $answer   = ($packet->answer)[0];
-    
-    ok($question,                           'Got question'            );
-    is($question->qname,  $data->{'name'},  'Question has right name' );
-    is($question->qtype,  $data->{'type'},  'Question has right type' );
-    is($question->qclass, 'IN',             'Question has right class');
-    
-    ok($answer,                                                       );
-    is($answer->class,    'IN',             'Class correct'           );
-    
-    
-    foreach my $meth (keys %{$data}) {
-	if ($meth eq "name"){
-	    #names should be case insensitive
-	    is(lc($answer->$meth()),lc($data->{$meth}), "$meth correct ($data->{name})");
-	}else{
-	    is($answer->$meth(), $data->{$meth}, "$meth correct ($data->{name})");
+    if (ok($packet, "Got an answer for $data->{name} IN $data->{type}")) {
+		is($packet->header->qdcount, 1, 'Only one question');
+		if (is($packet->header->ancount, 1, 'Got single answer')) {
+		
+			my $question = ($packet->question)[0];
+			my $answer   = ($packet->answer)[0];
+			
+			ok($question,                           'Got question'            );
+			is($question->qname,  $data->{'name'},  'Question has right name' );
+			is($question->qtype,  $data->{'type'},  'Question has right type' );
+			is($question->qclass, 'IN',             'Question has right class');
+			
+			ok($answer,                                                       );
+			is($answer->class,    'IN',             'Class correct'           );
+			
+			
+			foreach my $meth (keys %{$data}) {
+			if ($meth eq "name"){
+				#names should be case insensitive
+				is(lc($answer->$meth()),lc($data->{$meth}), "$meth correct ($data->{name})");
+			}else{
+				is($answer->$meth(), $data->{$meth}, "$meth correct ($data->{name})");
+			}
+		}
+		} else {
+		    foreach (1 .. 6) { 
+			ok(1, "skipping subtest $_"); 
+		    }
+		    foreach (keys %{$data}) {
+			ok(1, "skipping subtest for method $_");
+		    }
+		}
+	} else {
+	    foreach (1 .. 8) {
+		ok(0, "skipping subtest $_");
+	    }
+	    foreach (keys %{$data}) {
+		ok(1, "skipping subtest for method $_");
+	    }
 	}
-	
-    }
 }
 
 # Does the mx() function work.
-my @mx = mx('mx2.t.net-dns.org');
+my @mx = mx(&timeoutres, 'mx2.t.net-dns.org');
 
 my $wanted_names = [qw(a.t.net-dns.org a2.t.net-dns.org)];
 my $names        = [ map { $_->exchange } @mx ];
@@ -86,7 +111,7 @@ my $names        = [ map { $_->exchange } @mx ];
 is_deeply($names, $wanted_names, "mx() seems to be working");
 
 # some people seem to use mx() in scalar context
-is(scalar mx('mx2.t.net-dns.org'), 2,  "mx() works in scalar context");
+is(scalar mx(&timeoutres, 'mx2.t.net-dns.org'), 2,  "mx() works in scalar context");
 
 #
 # test that search() and query() DTRT with reverse lookups
@@ -122,17 +147,19 @@ is(scalar mx('mx2.t.net-dns.org'), 2,  "mx() works in scalar context");
 $res = Net::DNS::Resolver->new(
 	domain     => 't.net-dns.org',
     searchlist => ['t.net-dns.org', 'net-dns.org'],
+	udp_timeout => 3,
+	tcp_timeout => 3,
     );
 
 my $ans_at=$res->send("a.t.", "A");
-if ($ans_at->header->ancount == 1 ){
+if ($ans_at && $ans_at->header && $ans_at->header->ancount >= 1 ){
     diag "We are going to skip a bunch of checks.";
     diag "For unexplained reasons a query for 'a.t' resolves as ";
     diag "".($ans_at->answer)[0]->string ;
     diag "For users of 'dig' try 'dig a.t.' to test this hypothesis";
 }
       SKIP: {
-    skip "Query for a.t. resolves unexpectedly",35 if ($ans_at->header->ancount == 1 );
+    skip "Query for a.t. resolves unexpectedly",35 if ($ans_at && $ans_at->header && $ans_at->header->ancount >= 1 );
     
     
 #$res->debug(1);
@@ -169,11 +196,11 @@ if ($ans_at->header->ancount == 1 ){
 		 
 		 isa_ok($ans, 'Net::DNS::Packet');
 		 
-		 is($ans->header->ancount, 1,"Correct answer count (with $method)");
-		 my ($a) = $ans->answer;
+		 is($ans && $ans->header && $ans->header->ancount, 1,"Correct answer count (with $method)");
+		 my ($a) = $ans && $ans->answer;
 		 
 		 isa_ok($a, 'Net::DNS::RR::A');
-		 is(lc($a->name), 'a.t.net-dns.org',"Correct name (with $method)");
+		 is($a && lc($a->name), 'a.t.net-dns.org',"Correct name (with $method)");
 	     }
 
 	 }
@@ -258,13 +285,15 @@ if ($ans_at->header->ancount == 1 ){
 		
 		isa_ok($ans, 'Net::DNS::Packet');
 
-		is($ans->header->ancount, 1,"Correct answer count (with persistent socket and $method)");
+		is($ans && $ans->header && $ans->header->ancount, 1,"Correct answer count (with persistent socket and $method)");
 		
-		my ($a) = $ans->answer;
+		my ($a) = $ans && $ans->answer;
 		
 		isa_ok($a, 'Net::DNS::RR::A');
-		is(lc($a->name), 'a.t.net-dns.org',"Correct name (with persistent socket and $method)");
+		is($a && lc($a->name), 'a.t.net-dns.org',"Correct name (with persistent socket and $method)");
 	}
 	
 
 	}
+
+NonFatalEnd();

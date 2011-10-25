@@ -1,6 +1,6 @@
 package Net::DNS::RR::SPF;
 #
-# $Id: SPF.pm 684 2007-10-10 12:32:22Z olaf $
+# $Id: SPF.pm 931 2011-10-25 12:10:56Z willem $
 #
 use strict;
 BEGIN { 
@@ -11,7 +11,7 @@ use Net::DNS::RR::TXT;
 
 
 @ISA     = qw(Net::DNS::RR::TXT);
-$VERSION = (qw$LastChangedRevision: 684 $)[1];
+$VERSION = (qw$LastChangedRevision: 931 $)[1];
 
 1;
 
