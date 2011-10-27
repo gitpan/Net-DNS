@@ -1,4 +1,4 @@
-# $Id: 01-resolver.t 931 2011-10-25 12:10:56Z willem $  -*-perl-*-
+# $Id: 01-resolver.t 924 2011-10-23 22:25:32Z willem $  -*-perl-*-
 
 use Test::More tests => 49;
 use strict;

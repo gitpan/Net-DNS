@@ -1,17 +1,17 @@
 package Net::DNS::RR::SPF;
 #
-# $Id: SPF.pm 931 2011-10-25 12:10:56Z willem $
+# $Id: SPF.pm 932 2011-10-26 12:40:48Z willem $
 #
 use strict;
-BEGIN { 
+BEGIN {
     eval { require bytes; }
-} 
+}
 use vars qw(@ISA $VERSION);
 use Net::DNS::RR::TXT;
 
 
 @ISA     = qw(Net::DNS::RR::TXT);
-$VERSION = (qw$LastChangedRevision: 931 $)[1];
+$VERSION = (qw$LastChangedRevision: 932 $)[1];
 
 1;
 

@@ -1,13 +1,13 @@
 package Net::DNS::Header;
 #
-# $Id: Header.pm 931 2011-10-25 12:10:56Z willem $
+# $Id: Header.pm 932 2011-10-26 12:40:48Z willem $
 #
 
 use strict;
 
-BEGIN { 
+BEGIN {
     eval { require bytes; }
-} 
+}
 
 
 use vars qw($VERSION $AUTOLOAD);
@@ -17,7 +17,7 @@ use Net::DNS;
 
 use constant MAX_ID => 65535;
 
-$VERSION = (qw$LastChangedRevision: 931 $)[1];
+$VERSION = (qw$LastChangedRevision: 932 $)[1];
 
 =head1 NAME
 
@@ -351,7 +351,7 @@ sub data {
 
 =head1 COPYRIGHT
 
-Copyright (c) 1997-2002 Michael Fuhr. 
+Copyright (c) 1997-2002 Michael Fuhr.
 
 Portions Copyright (c) 2002-2004 Chris Reinhardt.
 

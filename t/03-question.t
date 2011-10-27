@@ -1,4 +1,4 @@
-# $Id: 03-question.t 931 2011-10-25 12:10:56Z willem $	-*-perl-*-
+# $Id: 03-question.t 899 2011-09-22 21:45:52Z willem $	-*-perl-*-
 
 use strict;
 use diagnostics;

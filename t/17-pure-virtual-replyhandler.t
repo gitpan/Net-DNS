@@ -1,4 +1,4 @@
-# $Id: 17-pure-virtual-replyhandler.t 931 2011-10-25 12:10:56Z willem $
+# $Id: 17-pure-virtual-replyhandler.t 917 2011-10-18 15:23:31Z willem $
 # This code is not supposed to be included into the distribution.
 
 use Test::More;

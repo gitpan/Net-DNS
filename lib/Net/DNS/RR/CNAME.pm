@@ -1,16 +1,16 @@
 package Net::DNS::RR::CNAME;
 #
-# $Id: CNAME.pm 931 2011-10-25 12:10:56Z willem $
+# $Id: CNAME.pm 932 2011-10-26 12:40:48Z willem $
 #
 use strict;
-BEGIN { 
+BEGIN {
     eval { require bytes; }
-} 
+}
 
 use vars qw(@ISA $VERSION);
 
 @ISA     = qw(Net::DNS::RR);
-$VERSION = (qw$LastChangedRevision: 931 $)[1];
+$VERSION = (qw$LastChangedRevision: 932 $)[1];
 
 sub new {
 	my ($class, $self, $data, $offset) = @_;
@@ -59,7 +59,7 @@ sub _normalize_dnames {
 }
 
 
-sub _canonicalRdata {	
+sub _canonicalRdata {
 	my ($self) = @_;
 	return $self->_name2wire(lc($self->{"cname"}));
 }
@@ -89,7 +89,7 @@ Returns the RR's canonical name.
 
 =head1 COPYRIGHT
 
-Copyright (c) 1997-2002 Michael Fuhr. 
+Copyright (c) 1997-2002 Michael Fuhr.
 
 Portions Copyright (c) 2002-2004 Chris Reinhardt.
 

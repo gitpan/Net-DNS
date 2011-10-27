@@ -1,15 +1,15 @@
 package Net::DNS::RR::PX;
 #
-# $Id: PX.pm 931 2011-10-25 12:10:56Z willem $
+# $Id: PX.pm 932 2011-10-26 12:40:48Z willem $
 #
 use strict;
-BEGIN { 
+BEGIN {
     eval { require bytes; }
-} 
+}
 use vars qw(@ISA $VERSION);
 
 @ISA     = qw(Net::DNS::RR);
-$VERSION = (qw$LastChangedRevision: 931 $)[1];
+$VERSION = (qw$LastChangedRevision: 932 $)[1];
 
 
 
@@ -144,7 +144,7 @@ Returns the X.400 part of the RFC1327 mapping information.
 
 =head1 COPYRIGHT
 
-Copyright (c) 1997-2002 Michael Fuhr. 
+Copyright (c) 1997-2002 Michael Fuhr.
 
 Portions Copyright (c) 2002-2004 Chris Reinhardt.
 Portions Copyright (c) 2005 Olaf Kolkman NLnet Labs.

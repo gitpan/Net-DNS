@@ -1,11 +1,11 @@
 package Net::DNS::Question;
 #
-# $Id: Question.pm 931 2011-10-25 12:10:56Z willem $
+# $Id: Question.pm 932 2011-10-26 12:40:48Z willem $
 #
 use strict;
-BEGIN { 
+BEGIN {
     eval { require bytes; }
-} 
+}
 
 use vars qw($VERSION $AUTOLOAD);
 
@@ -249,7 +249,7 @@ __END__
 
 =head1 COPYRIGHT
 
-Copyright (c) 1997-2002 Michael Fuhr. 
+Copyright (c) 1997-2002 Michael Fuhr.
 
 Portions Copyright (c) 2002-2004 Chris Reinhardt.
 

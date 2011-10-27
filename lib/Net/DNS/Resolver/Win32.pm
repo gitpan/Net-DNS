@@ -1,6 +1,6 @@
 package Net::DNS::Resolver::Win32;
 #
-# $Id: Win32.pm 931 2011-10-25 12:10:56Z willem $
+# $Id: Win32.pm 932 2011-10-26 12:40:48Z willem $
 #
 
 use strict;
@@ -9,36 +9,36 @@ use vars qw(@ISA $VERSION);
 use Net::DNS::Resolver::Base ();
 
 @ISA     = qw(Net::DNS::Resolver::Base);
-$VERSION = (qw$LastChangedRevision: 931 $)[1];
+$VERSION = (qw$LastChangedRevision: 932 $)[1];
 
 use Win32::IPHelper;
 use Win32::TieRegistry qw(KEY_READ REG_DWORD);
 use Data::Dumper;
 sub init {
-  
+
 	my $debug=0;
 	my ($class) = @_;
-	
+
 	my $defaults = $class->defaults;
 
 
 	my $FIXED_INFO={};
 
 	my $ret = Win32::IPHelper::GetNetworkParams($FIXED_INFO);
-	
+
 	if ($ret == 0)
 	  {
 		  print Dumper $FIXED_INFO if $debug;
 	  }
 	else
 	  {
-		  
+
 		  Carp::croak "GetNetworkParams() error %u: %s\n", $ret, Win32::FormatMessage($ret);
 	  }
-	
+
 
 	my @nameservers = map { $_->{'IpAddress'} } @{$FIXED_INFO->{'DnsServersList'}};
-	
+
 
 	if (@nameservers) {
 		# remove blanks and dupes
@@ -52,11 +52,11 @@ sub init {
 	}
 
 	my $domain=$FIXED_INFO->{'DomainName'}||'';
-	my $searchlist; 
-	
+	my $searchlist;
+
 
 	#
-	# The Win32::IPHelper  does not return searchlist. Lets do a best effort attempt to get 
+	# The Win32::IPHelper  does not return searchlist. Lets do a best effort attempt to get
 	# a searchlist from the registry.
 
 	my $usedevolution = 0;
@@ -73,14 +73,14 @@ sub init {
 		$defaults->{'domain'} = $domain;
 		$searchlist = $domain;
 	}
-	
+
 	if (defined $reg_tcpip){
 		$searchlist .= "," if $searchlist; # $domain already in there
 		$searchlist .= $reg_tcpip->GetValue('SearchList');
 		my ($value, $type) = $reg_tcpip->GetValue('UseDomainNameDevolution');
 		$usedevolution = defined $value && $type == REG_DWORD ? hex $value : 0;
 	}
-	
+
 	if ($searchlist) {
 		# fix devolution if configured, and simultaneously make sure no dups (but keep the order)
 		my @a;
@@ -133,7 +133,7 @@ for all your resolving needs.
 
 =head1 COPYRIGHT
 
-Copyright (c) 1997-2002 Michael Fuhr. 
+Copyright (c) 1997-2002 Michael Fuhr.
 
 Portions Copyright (c) 2002-2004 Chris Reinhardt.
 

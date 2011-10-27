@@ -1,15 +1,15 @@
 package Net::DNS::RR::SOA;
 #
-# $Id: SOA.pm 931 2011-10-25 12:10:56Z willem $
+# $Id: SOA.pm 932 2011-10-26 12:40:48Z willem $
 #
 use strict;
-BEGIN { 
+BEGIN {
     eval { require bytes; }
-} 
+}
 use vars qw(@ISA $VERSION);
 
 @ISA     = qw(Net::DNS::RR);
-$VERSION = (qw$LastChangedRevision: 931 $)[1];
+$VERSION = (qw$LastChangedRevision: 932 $)[1];
 
 sub new {
 	my ($class, $self, $data, $offset) = @_;
@@ -29,7 +29,7 @@ sub new_from_string {
 
 	if ($string) {
 		$string =~ tr/()//d;
-		
+
 		# XXX do we need to strip out comments here now that RR.pm does it?
 		$string =~ s/;.*$//mg;
 
@@ -129,9 +129,9 @@ sub _canonicalRdata {
 
     # Assume that if one field exists, they all exist.  Script will
     # print a warning otherwise.
-    
+
     if (exists $self->{"mname"}) {
-		$rdata .= $self->_name2wire(lc($self->{"mname"}));		
+		$rdata .= $self->_name2wire(lc($self->{"mname"}));
 		$rdata .= $self->_name2wire(lc($self->{"rname"}));
 		$rdata .= pack("N5", @{$self}{qw(serial refresh retry expire minimum)});
 	}
@@ -245,7 +245,7 @@ otherwise the existing value will be incremented as above.
 
 =head1 COPYRIGHT
 
-Copyright (c) 1997-2002 Michael Fuhr. 
+Copyright (c) 1997-2002 Michael Fuhr.
 
 Portions Copyright (c) 2002-2004 Chris Reinhardt.
 

@@ -1,6 +1,6 @@
 package Net::DNS::Resolver::Cygwin; # -*- tab-width:4 -*-
 #
-# $Id: Cygwin.pm 931 2011-10-25 12:10:56Z willem $
+# $Id: Cygwin.pm 932 2011-10-26 12:40:48Z willem $
 #
 
 use strict;
@@ -9,29 +9,29 @@ use vars qw(@ISA $VERSION);
 use Net::DNS::Resolver::Base ();
 
 @ISA	 = qw(Net::DNS::Resolver::Base);
-$VERSION = (qw$LastChangedRevision: 931 $)[1];
+$VERSION = (qw$LastChangedRevision: 932 $)[1];
 
 sub getregkey {
 	my $key	  = $_[0] . $_[1];
 	my $value = '';
 
-	local *LM;	  
+	local *LM;
 
 	if (open(LM, "<$key")) {
 		$value = <LM>;
 		$value =~ s/\0+$// if $value;
 		close(LM);
 	}
-	
+
 	return $value;
 }
 
 sub init {
 	my ($class) = @_;
 	my $defaults = $class->defaults;
-	
+
 	local *LM;
-	
+
 	my $root = '/proc/registry/HKEY_LOCAL_MACHINE/SYSTEM/CurrentControlSet/Services/Tcpip/Parameters/';
 
 	unless (-d $root) {
@@ -44,13 +44,13 @@ sub init {
 	# if domain ends up blank, we're probably (?) not connected anywhere
 	# a DNS server is interesting either...
 	my $domain = getregkey($root, 'Domain') || getregkey($root, 'DhcpDomain') || '';
-	
+
 	# If nothing else, the searchlist should probably contain our own domain
 	# also see below for domain name devolution if so configured
 	# (also remove any duplicates later)
 	my $searchlist = "$domain ";
 	$searchlist	 .= getregkey($root, 'SearchList');
-	
+
 	# This is (probably) adequate on NT4
 	my $nt4nameservers = getregkey($root, 'NameServer') || getregkey($root, 'DhcpNameServer');
 	my $nameservers = "";
@@ -97,7 +97,7 @@ sub init {
             }
         }
     }
-	
+
 	if (!$nameservers) {
 		$nameservers = $nt4nameservers;
 	}

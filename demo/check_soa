@@ -1,5 +1,5 @@
 #!/usr/local/bin/perl -w
-# $Id: check_soa 931 2011-10-25 12:10:56Z willem $
+# $Id: check_soa 264 2005-04-06 09:16:15Z olaf $
 
 =head1 NAME
 

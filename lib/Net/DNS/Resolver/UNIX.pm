@@ -1,6 +1,6 @@
 package Net::DNS::Resolver::UNIX;
 #
-# $Id: UNIX.pm 931 2011-10-25 12:10:56Z willem $
+# $Id: UNIX.pm 932 2011-10-26 12:40:48Z willem $
 #
 
 use strict;
@@ -9,7 +9,7 @@ use vars qw(@ISA $VERSION);
 use Net::DNS::Resolver::Base ();
 
 @ISA     = qw(Net::DNS::Resolver::Base);
-$VERSION = (qw$LastChangedRevision: 931 $)[1];
+$VERSION = (qw$LastChangedRevision: 932 $)[1];
 
 my $resolv_conf = '/etc/resolv.conf';
 my $dotfile     = '.resolv.conf';
@@ -20,25 +20,25 @@ push(@config_path, '.');
 
 sub init {
 	my ($class) = @_;
-	
-	$class->read_config_file($resolv_conf) if -f $resolv_conf && -r _; 
-	
+
+	$class->read_config_file($resolv_conf) if -f $resolv_conf && -r _;
+
 	foreach my $dir (@config_path) {
 		my $file = "$dir/$dotfile";
 		$class->read_config_file($file) if -f $file && -r _ && -o _;
 	}
-	
+
 	$class->read_env;
-	
+
 	my $defaults = $class->defaults;
-	
+
 	if (!$defaults->{'domain'} && @{$defaults->{'searchlist'}}) {
 		$defaults->{'domain'} = $defaults->{'searchlist'}[0];
 	} elsif (!@{$defaults->{'searchlist'}} && $defaults->{'domain'}) {
 		$defaults->{'searchlist'} = [ $defaults->{'domain'} ];
 	}
 }
-	
+
 1;
 __END__
 
@@ -60,7 +60,7 @@ for all your resolving needs.
 
 =head1 COPYRIGHT
 
-Copyright (c) 1997-2002 Michael Fuhr. 
+Copyright (c) 1997-2002 Michael Fuhr.
 
 Portions Copyright (c) 2002-2004 Chris Reinhardt.
 

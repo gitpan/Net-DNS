@@ -1,15 +1,15 @@
 package Net::DNS::RR::SRV;
 #
-# $Id: SRV.pm 931 2011-10-25 12:10:56Z willem $
+# $Id: SRV.pm 932 2011-10-26 12:40:48Z willem $
 #
 use strict;
-BEGIN { 
+BEGIN {
     eval { require bytes; }
-} 
+}
 use vars qw(@ISA $VERSION);
 
 @ISA     = qw(Net::DNS::RR);
-$VERSION = (qw$LastChangedRevision: 931 $)[1];
+$VERSION = (qw$LastChangedRevision: 932 $)[1];
 
 
 
@@ -45,7 +45,7 @@ sub new {
 	if ($self->{'rdlength'} > 0) {
 		@{$self}{qw(priority weight port)} = unpack("\@$offset n3", $$data);
 		$offset += 3 * Net::DNS::INT16SZ();
-		
+
 		($self->{'target'}) = Net::DNS::Packet::dn_expand($data, $offset);
 	}
 
@@ -87,7 +87,7 @@ sub rr_rdata {
 		$rdata .=  $self->_name2wire ($self->{"target"});
 
 	      }
-	
+
 	return $rdata;
 }
 
@@ -144,7 +144,7 @@ Returns the target host.
 
 =head1 COPYRIGHT
 
-Copyright (c) 1997-2002 Michael Fuhr. 
+Copyright (c) 1997-2002 Michael Fuhr.
 
 Portions Copyright (c) 2002-2004 Chris Reinhardt.
 

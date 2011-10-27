@@ -1,15 +1,15 @@
 package Net::DNS::RR::RT;
 #
-# $Id: RT.pm 931 2011-10-25 12:10:56Z willem $
+# $Id: RT.pm 932 2011-10-26 12:40:48Z willem $
 #
 use strict;
-BEGIN { 
+BEGIN {
     eval { require bytes; }
-} 
+}
 use vars qw(@ISA $VERSION);
 
 @ISA     = qw(Net::DNS::RR);
-$VERSION = (qw$LastChangedRevision: 931 $)[1];
+$VERSION = (qw$LastChangedRevision: 932 $)[1];
 
 # Highest preference sorted first.
 __PACKAGE__->set_rrsort_func("preference",
@@ -32,7 +32,7 @@ sub new {
 	if ($self->{"rdlength"} > 0) {
 		($self->{"preference"})   = unpack("\@$offset n", $$data);
 		$offset += Net::DNS::INT16SZ();
-		
+
 		($self->{"intermediate"}) = Net::DNS::Packet::dn_expand($data, $offset);
 	}
 
@@ -123,7 +123,7 @@ Returns the domain name of the intermediate host.
 
 =head1 COPYRIGHT
 
-Copyright (c) 1997-2002 Michael Fuhr. 
+Copyright (c) 1997-2002 Michael Fuhr.
 
 Portions Copyright (c) 2002-2004 Chris Reinhardt.
 Portions Copyright (c) 2005 Olaf Kolkman NLnet Labs.
