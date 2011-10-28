@@ -1,4 +1,4 @@
-# $Id: 00-version.t 940 2011-10-28 14:10:01Z willem $ -*-perl-*-
+# $Id: 00-version.t 944 2011-10-28 14:52:01Z willem $ -*-perl-*-
 
 use Test::More;
 use File::Spec;
@@ -42,7 +42,7 @@ SKIP : {
     while (<$fh>) {
 	chomp;
 	if ( m/[^\d](\d+)\s*;?\s*#\s*WIN32VERSION\b/ ) {
-	    ok($win32version == $1, 'win32version in Resolver.pm matches '
+	    ok($1 <= $win32version, 'win32version in Resolver.pm <= '
 				  . '$Net::DNS::Resolver::Win32::VERSION' );
 	    last;
 	}

@@ -1,4 +1,4 @@
-# $Id: 07-misc.t 940 2011-10-28 14:10:01Z willem $ -*-perl-*-
+# $Id: 07-misc.t 944 2011-10-28 14:52:01Z willem $ -*-perl-*-
 
 use Test::More tests => 37;
 use strict;

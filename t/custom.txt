@@ -1,4 +1,4 @@
-# $Id: custom.txt 940 2011-10-28 14:10:01Z willem $
+# $Id: custom.txt 944 2011-10-28 14:52:01Z willem $
 domain t2.net-dns.org
 search alt.net-dns.org ext.net-dns.org
 nameserver 10.0.1.42 10.0.2.42

@@ -1,4 +1,4 @@
-# $Id: 01-resolver-env.t 940 2011-10-28 14:10:01Z willem $  -*-perl-*-
+# $Id: 01-resolver-env.t 944 2011-10-28 14:52:01Z willem $  -*-perl-*-
 
 
 use Test::More tests => 17;
