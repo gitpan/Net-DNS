@@ -1,4 +1,4 @@
-# $Id: 05-rr-rrsort.t 682 2007-09-27 07:50:27Z olaf $   -*-perl-*-
+# $Id: 05-rr-rrsort.t 940 2011-10-28 14:10:01Z willem $   -*-perl-*-
 
 use Test::More;
 use strict;

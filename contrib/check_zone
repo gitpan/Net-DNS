@@ -1,5 +1,5 @@
 #!/usr/local/bin/perl -w
-# $Id: check_zone 638 2007-05-15 18:59:26Z olaf $
+# $Id: check_zone 940 2011-10-28 14:10:01Z willem $
 
 =head1 NAME
 

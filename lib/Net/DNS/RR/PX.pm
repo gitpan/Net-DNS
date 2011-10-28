@@ -1,6 +1,6 @@
 package Net::DNS::RR::PX;
 #
-# $Id: PX.pm 932 2011-10-26 12:40:48Z willem $
+# $Id: PX.pm 940 2011-10-28 14:10:01Z willem $
 #
 use strict;
 BEGIN {
@@ -9,7 +9,7 @@ BEGIN {
 use vars qw(@ISA $VERSION);
 
 @ISA     = qw(Net::DNS::RR);
-$VERSION = (qw$LastChangedRevision: 932 $)[1];
+$VERSION = (qw$LastChangedRevision: 940 $)[1];
 
 
 

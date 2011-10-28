@@ -2,11 +2,11 @@ package Net::DNS::DomainName;
 use base qw(Net::DNS::Domain);
 
 #
-# $Id: DomainName.pm 903 2011-09-30 19:34:42Z willem $
+# $Id: DomainName.pm 940 2011-10-28 14:10:01Z willem $
 #
 
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 903 $)[1];
+$VERSION = (qw$LastChangedRevision: 940 $)[1];
 
 
 =head1 NAME

@@ -1,8 +1,8 @@
-# $Id: 00-load.t 899 2011-09-22 21:45:52Z willem $	-*-perl-*-
+# $Id: 00-load.t 940 2011-10-28 14:10:01Z willem $	-*-perl-*-
 
 use strict;
 use diagnostics;
-use Test::More;
+use Test::More "no_plan";
 
 
 BEGIN {
@@ -65,5 +65,5 @@ foreach my $rr (@rrs) {
 
 
 ##############
-done_testing()
+#done_testing()
 ##############

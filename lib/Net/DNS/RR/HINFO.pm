@@ -1,6 +1,6 @@
 package Net::DNS::RR::HINFO;
 #
-# $Id: HINFO.pm 932 2011-10-26 12:40:48Z willem $
+# $Id: HINFO.pm 940 2011-10-28 14:10:01Z willem $
 #
 use strict;
 BEGIN {
@@ -10,7 +10,7 @@ use vars qw(@ISA $VERSION);
 use Net::DNS::RR::TXT;
 
 @ISA     = qw(Net::DNS::RR Net::DNS::RR::TXT);
-$VERSION = (qw$LastChangedRevision: 932 $)[1];
+$VERSION = (qw$LastChangedRevision: 940 $)[1];
 
 sub new {
 	my ($class, $self, $data, $offset) = @_;

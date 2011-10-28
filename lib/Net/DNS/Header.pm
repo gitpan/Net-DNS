@@ -1,6 +1,6 @@
 package Net::DNS::Header;
 #
-# $Id: Header.pm 932 2011-10-26 12:40:48Z willem $
+# $Id: Header.pm 940 2011-10-28 14:10:01Z willem $
 #
 
 use strict;
@@ -17,7 +17,7 @@ use Net::DNS;
 
 use constant MAX_ID => 65535;
 
-$VERSION = (qw$LastChangedRevision: 932 $)[1];
+$VERSION = (qw$LastChangedRevision: 940 $)[1];
 
 =head1 NAME
 

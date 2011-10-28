@@ -1,4 +1,4 @@
-# $Id: 05-rr-sshfp.t 616 2006-10-18 09:15:48Z olaf $
+# $Id: 05-rr-sshfp.t 940 2011-10-28 14:10:01Z willem $
 
 use Test::More;
 use strict;

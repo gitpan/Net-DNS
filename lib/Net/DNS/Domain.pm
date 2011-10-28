@@ -1,10 +1,10 @@
 package Net::DNS::Domain;
 
 #
-# $Id: Domain.pm 916 2011-10-10 14:55:19Z willem $
+# $Id: Domain.pm 940 2011-10-28 14:10:01Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 916 $)[1];
+$VERSION = (qw$LastChangedRevision: 940 $)[1];
 
 
 =head1 NAME

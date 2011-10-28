@@ -1,5 +1,5 @@
 
-# $Id: Makefile.PL 935 2011-10-27 12:41:31Z willem $ -*-perl-*-
+# $Id: Makefile.PL 940 2011-10-28 14:10:01Z willem $ -*-perl-*-
 
 use strict;
 $^W = 1;
@@ -325,6 +325,11 @@ EOF
 	close(F) or return;
 
 	my $ret = system("$Config{'cc'}  -c compile.c -o compile$Config{obj_ext}");
+	if ($ret == 0) {
+	    $ret = system("$Config{'ar'} "
+		. ($^O eq 'MSWin32' && $Config{'cc'} eq 'cl'?'/OUT:':'cr ')
+		. " compile$Config{lib_ext} compile$Config{obj_ext}");
+	}
 	
 	foreach my $file (glob('compile*')) {
 		unlink($file) || warn "Could not delete $file: $!\n";
