@@ -1,6 +1,6 @@
 package Net::DNS::Nameserver;
 #
-# $Id: Nameserver.pm 944 2011-10-28 14:52:01Z willem $
+# $Id: Nameserver.pm 932 2011-10-26 12:40:48Z willem $
 #
 
 use Net::DNS;
@@ -23,7 +23,7 @@ use constant	STATE_ACCEPTED => 1;
 use constant	STATE_GOT_LENGTH => 2;
 use constant	STATE_SENDING => 3;
 
-$VERSION = (qw$LastChangedRevision: 944 $)[1];
+$VERSION = (qw$LastChangedRevision: 932 $)[1];
 
 
 

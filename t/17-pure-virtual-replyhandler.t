@@ -1,4 +1,4 @@
-# $Id: 17-pure-virtual-replyhandler.t 944 2011-10-28 14:52:01Z willem $
+# $Id: 17-pure-virtual-replyhandler.t 946 2011-10-31 13:12:14Z willem $
 # This code is not supposed to be included into the distribution.
 
 use Test::More;
@@ -17,11 +17,12 @@ use vars qw(
             $lameloop
 	    );
 
-$TestPort1 = 53000 + int(rand(250));
-$TestPort2 = 53250 + int(rand(250));
-$TestPort3 = 53500 + int(rand(250));
-$TestPort4 = 53750 + int(rand(250));
 $address   = "127.0.0.1";
+sub freeport {
+    my @sockets = map { IO::Socket::INET->new(Listen => 1) } (1..shift);
+    return map { $_->sockport } @sockets;
+}
+($TestPort1, $TestPort2, $TestPort3, $TestPort4) = freeport(4);
 
 package MyNameserver;
 

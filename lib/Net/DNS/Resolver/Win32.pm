@@ -1,6 +1,6 @@
 package Net::DNS::Resolver::Win32;
 #
-# $Id: Win32.pm 944 2011-10-28 14:52:01Z willem $
+# $Id: Win32.pm 932 2011-10-26 12:40:48Z willem $
 #
 
 use strict;
@@ -9,7 +9,7 @@ use vars qw(@ISA $VERSION);
 use Net::DNS::Resolver::Base ();
 
 @ISA     = qw(Net::DNS::Resolver::Base);
-$VERSION = (qw$LastChangedRevision: 944 $)[1];
+$VERSION = (qw$LastChangedRevision: 932 $)[1];
 
 use Win32::IPHelper;
 use Win32::TieRegistry qw(KEY_READ REG_DWORD);

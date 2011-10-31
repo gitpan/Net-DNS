@@ -1,6 +1,6 @@
 package Net::DNS::Question;
 #
-# $Id: Question.pm 944 2011-10-28 14:52:01Z willem $
+# $Id: Question.pm 932 2011-10-26 12:40:48Z willem $
 #
 use strict;
 BEGIN {

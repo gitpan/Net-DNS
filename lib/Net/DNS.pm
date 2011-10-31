@@ -1,7 +1,7 @@
 
 package Net::DNS;
 #
-# $Id: DNS.pm 944 2011-10-28 14:52:01Z willem $
+# $Id: DNS.pm 950 2011-10-31 14:00:30Z willem $
 #
 use strict;
 
@@ -48,8 +48,8 @@ BEGIN {
 
 
 
-    $VERSION = '0.66_04';
-    $SVNVERSION = (qw$LastChangedRevision: 944 $)[1];
+    $VERSION = '0.66_06';
+    $SVNVERSION = (qw$LastChangedRevision: 950 $)[1];
 
 
 
@@ -483,8 +483,6 @@ sub presentation2wire {
             #backslash found
             if ($presentation =~ /\G(\d\d\d)/gc) {
                 $wire.=pack("C",$1);
-            } elsif ($presentation =~ /\Gx([0..9a..fA..F][0..9a..fA..F])/gc){
-                $wire.=pack("H*",$1);
             } elsif ($presentation =~ /\G([@().\\])/gc){
                 $wire .= $1;
             }
