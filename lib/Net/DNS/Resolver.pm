@@ -1,12 +1,12 @@
 package Net::DNS::Resolver;
 #
-# $Id: Resolver.pm 950 2011-10-31 14:00:30Z willem $
+# $Id: Resolver.pm 934 2011-10-27 09:44:44Z willem $
 #
 
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = (qw$LastChangedRevision: 950 $)[1];
+$VERSION = (qw$LastChangedRevision: 934 $)[1];
 
 #BEGIN {
 	if ($^O eq 'MSWin32') {
@@ -18,7 +18,7 @@ $VERSION = (qw$LastChangedRevision: 950 $)[1];
 		# Keep $win32version up to date with the value of
 		# $Net::DNS::Resolver::Win32::VERSION
 		#
-		my $win32version = 950; # WIN32VERSION - do not remove!
+		my $win32version = 932; # WIN32VERSION - do not remove!
 					#              - used in t/00-version.t
 
 		if ($@ || $Net::DNS::Resolver::Win32::VERSION < $win32version) {
