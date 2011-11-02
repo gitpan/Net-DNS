@@ -2,11 +2,10 @@ package Net::DNS::DomainName;
 use base qw(Net::DNS::Domain);
 
 #
-# $Id: DomainName.pm 903 2011-09-30 19:34:42Z willem $
+# $Id: DomainName.pm 954 2011-11-02 21:32:55Z willem $
 #
-
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 903 $)[1];
+$VERSION = (qw$LastChangedRevision: 954 $)[1];
 
 
 =head1 NAME
@@ -118,7 +117,7 @@ for inclusion in a DNS packet buffer.
 =cut
 
 sub encode {
-	join '', map { pack 'C a*', length($_), $_ } shift->_wire, '';
+	join '', map pack( 'C a*', length($_), $_ ), shift->_wire, '';
 }
 
 
@@ -127,9 +126,9 @@ sub encode {
 sub _wire {				## Generate list of wire-format labels
 	my $self = shift;
 
-	return @{$self->{label} || []} unless $self->{origin};
-
-	return ( @{$self->{label} || []}, $self->{origin}->_wire );
+	my @label = @{$self->{label}} if $self->{label};
+	my @suffx = $self->{origin}->_wire if $self->{origin};
+	return ( @label, @suffx );
 }
 
 
@@ -176,7 +175,7 @@ sub encode {
 	my $offset = shift || 0;				# offset in data buffer
 	my $hash   = shift;					# hashed offset by name
 
-	return join '', map { pack 'C a*', length($_), _lc($_) } $self->_wire, '' unless defined $hash;
+	return join '', map pack( 'C a*', length($_), _lc($_) ), $self->_wire, '' unless defined $hash;
 
 	my @labels = $self->_wire;
 	my $data   = '';
@@ -197,11 +196,10 @@ sub encode {
 }
 
 
-use constant ASCII => eval { chr(91) eq '['; };
-
 sub _lc {
-	return ( my $arg = shift ) =~ tr [\101-\132] [\141-\172] unless ASCII;
-	return lc(shift);
+	local $_ = shift;
+	tr [\101-\132] [\141-\172];
+	return $_;
 }
 
 
@@ -242,17 +240,16 @@ canonical form defined in RFC2535(8.1).
 sub encode {
 	my ( $self, $offset, $hash ) = @_;
 
-	return join '', map { pack 'C a*', length $_, $_ } $self->_wire, '' if defined $hash;
+	return join '', map pack( 'C a*', length($_), $_ ), $self->_wire, '' if defined $hash;
 
-	join '', map { pack 'C a*', length($_), _lc($_) } $self->_wire, '';    # canonical
+	return join '', map pack( 'C a*', length($_), _lc($_) ), $self->_wire, '';
 }
 
 
-use constant ASCII => eval { chr(91) eq '['; };
-
 sub _lc {
-	return ( my $arg = shift ) =~ tr [\101-\132] [\141-\172] unless ASCII;
-	return lc(shift);
+	local $_ = shift;
+	tr [\101-\132] [\141-\172];
+	return $_;
 }
 
 

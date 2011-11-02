@@ -1,32 +1,28 @@
 package Net::DNS::Resolver;
 #
-# $Id: Resolver.pm 934 2011-10-27 09:44:44Z willem $
+# $Id: Resolver.pm 954 2011-11-02 21:32:55Z willem $
 #
 
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = (qw$LastChangedRevision: 934 $)[1];
+$VERSION = (qw$LastChangedRevision: 954 $)[1];
 
 #BEGIN {
 	if ($^O eq 'MSWin32') {
 		require Net::DNS::Resolver::Win32;
 		@ISA = qw(Net::DNS::Resolver::Win32);
+
 	} elsif ($^O eq 'cygwin') {
 		eval { require Net::DNS::Resolver::Win32; };
 
-		# Keep $win32version up to date with the value of
-		# $Net::DNS::Resolver::Win32::VERSION
-		#
-		my $win32version = 932; # WIN32VERSION - do not remove!
-					#              - used in t/00-version.t
-
-		if ($@ || $Net::DNS::Resolver::Win32::VERSION < $win32version) {
-		    require Net::DNS::Resolver::Cygwin;
-		    @ISA = qw(Net::DNS::Resolver::Cygwin);
+		unless ($@) {
+			@ISA = qw(Net::DNS::Resolver::Win32);
 		} else {
-		    @ISA = qw(Net::DNS::Resolver::Win32);
+			require Net::DNS::Resolver::Cygwin;
+			@ISA = qw(Net::DNS::Resolver::Cygwin);
 		}
+
 	} else {
 		require Net::DNS::Resolver::UNIX;
 		@ISA = qw(Net::DNS::Resolver::UNIX);

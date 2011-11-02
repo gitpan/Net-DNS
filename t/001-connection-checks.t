@@ -1,4 +1,4 @@
-# $Id: 001-connection-checks.t 765 2008-12-24 09:38:22Z olaf $ -*-perl-*-
+# $Id: 001-connection-checks.t 954 2011-11-02 21:32:55Z willem $ -*-perl-*-
 
 my $has_inet6;
 use Test::More;

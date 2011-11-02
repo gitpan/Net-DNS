@@ -1,4 +1,4 @@
-# $Id: 01-resolver-opt.t 737 2008-12-17 11:32:10Z olaf $    -*-perl-*-
+# $Id: 01-resolver-opt.t 954 2011-11-02 21:32:55Z willem $    -*-perl-*-
 
 
 use Test::More tests => 62;

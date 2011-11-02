@@ -1,4 +1,4 @@
-# $Id: 00-load.t 938 2011-10-28 13:27:31Z willem $	-*-perl-*-
+# $Id: 00-load.t 954 2011-11-02 21:32:55Z willem $	-*-perl-*-
 
 use strict;
 use diagnostics;
