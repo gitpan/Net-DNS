@@ -1,7 +1,7 @@
 
 package Net::DNS;
 #
-# $Id: DNS.pm 954 2011-11-02 21:32:55Z willem $
+# $Id: DNS.pm 947 2011-10-31 13:17:06Z willem $
 #
 use strict;
 
@@ -48,8 +48,8 @@ BEGIN {
 
 
 
-    $VERSION = '0.66_08';
-    $SVNVERSION = (qw$LastChangedRevision: 954 $)[1];
+    $VERSION = '0.67';
+    $SVNVERSION = (qw$LastChangedRevision: 947 $)[1];
 
 
 

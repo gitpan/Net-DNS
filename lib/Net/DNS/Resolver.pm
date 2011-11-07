@@ -1,14 +1,14 @@
 package Net::DNS::Resolver;
 #
-# $Id: Resolver.pm 954 2011-11-02 21:32:55Z willem $
+# $Id: Resolver.pm 955 2011-11-03 22:56:41Z willem $
 #
 
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = (qw$LastChangedRevision: 954 $)[1];
+$VERSION = (qw$LastChangedRevision: 955 $)[1];
 
-#BEGIN {
+BEGIN {
 	if ($^O eq 'MSWin32') {
 		require Net::DNS::Resolver::Win32;
 		@ISA = qw(Net::DNS::Resolver::Win32);
@@ -27,7 +27,7 @@ $VERSION = (qw$LastChangedRevision: 954 $)[1];
 		require Net::DNS::Resolver::UNIX;
 		@ISA = qw(Net::DNS::Resolver::UNIX);
 	}
-#}
+}
 
 __PACKAGE__->init();
 

@@ -1,4 +1,4 @@
-# $Id: 08-online.t 954 2011-11-02 21:32:55Z willem $ -*-perl-*-
+# $Id: 08-online.t 924 2011-10-23 22:25:32Z willem $ -*-perl-*-
 
 use Test::More;
 use strict;

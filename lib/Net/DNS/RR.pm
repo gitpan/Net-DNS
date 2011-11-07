@@ -1,6 +1,6 @@
 package Net::DNS::RR;
 #
-# $Id: RR.pm 954 2011-11-02 21:32:55Z willem $
+# $Id: RR.pm 932 2011-10-26 12:40:48Z willem $
 #
 use strict;
 
@@ -15,7 +15,7 @@ use Net::DNS qw (wire2presentation name2labels stripdot);
 use Net::DNS::RR::Unknown;
 
 
-$VERSION = (qw$LastChangedRevision: 954 $)[1];
+$VERSION = (qw$LastChangedRevision: 932 $)[1];
 
 =head1 NAME
 

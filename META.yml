@@ -1,10 +1,10 @@
 --- #YAML:1.0
 name:               Net-DNS
-version:            0.66_08
+version:            0.67
 abstract:           Perl DNS resolver module
 author:
     - Olaf Kolkman <olaf@net-dns.org>
-license:            unknown
+license:            perl
 distribution_type:  module
 configure_requires:
     ExtUtils::MakeMaker:  0

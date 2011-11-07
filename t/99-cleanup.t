@@ -1,4 +1,4 @@
-# $Id: 99-cleanup.t 954 2011-11-02 21:32:55Z willem $ -*-perl-*-
+# $Id: 99-cleanup.t 795 2009-01-26 17:28:44Z olaf $ -*-perl-*-
 use Test::More;
 plan tests => 1;
 
