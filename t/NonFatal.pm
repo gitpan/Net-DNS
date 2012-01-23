@@ -1,4 +1,4 @@
-# $Id: NonFatal.pm 895 2011-09-19 14:48:24Z willem $	-*-perl-*-
+# $Id: NonFatal.pm 973 2012-01-23 13:33:08Z willem $	-*-perl-*-
 
 # Test::More calls functions from Test::Builder. Those functions all eventually
 # call Test::Builder::ok (on a builder instance) for reporting the status.

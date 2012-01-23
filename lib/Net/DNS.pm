@@ -1,21 +1,42 @@
-
 package Net::DNS;
-#
-# $Id: DNS.pm 947 2011-10-31 13:17:06Z willem $
-#
-use strict;
 
-
+#
+# $Id: DNS.pm 973 2012-01-23 13:33:08Z willem $
+#
+use vars qw($SVNVERSION $VERSION);
 BEGIN {
-    eval { require bytes; }
+	$SVNVERSION = (qw$LastChangedRevision: 973 $)[1];
+	$VERSION = '0.67_01';
 }
+
+
+=head1 NAME
+
+Net::DNS - Perl interface to the Domain Name System
+
+=head1 SYNOPSIS
+
+    use Net::DNS;
+
+=head1 DESCRIPTION
+
+Net::DNS is a collection of Perl modules that act as a Domain
+Name System (DNS) resolver.  It allows the programmer to perform
+DNS queries that are beyond the capabilities of C<gethostbyname>
+and C<gethostbyaddr>.
+
+The programmer should be somewhat familiar with the format of
+a DNS packet and its various sections.  See RFC 1035 or
+I<DNS and BIND> (Albitz & Liu) for details.
+
+=cut
+
+
 
 
 
 use vars qw(
     $HAVE_XS
-    $VERSION
-    $SVNVERSION
     $DNSSEC
     $DN_EXPAND_ESCAPES
     @ISA
@@ -44,14 +65,6 @@ BEGIN {
     # these need to live here because of dependencies further on.
     @EXPORT = qw(mx yxrrset nxrrset yxdomain nxdomain rr_add rr_del SEQUENTIAL UNIXTIME YYYYMMDDxx);
     @EXPORT_OK= qw(name2labels wire2presentation rrsort stripdot);
-
-
-
-
-    $VERSION = '0.67';
-    $SVNVERSION = (qw$LastChangedRevision: 947 $)[1];
-
-
 
 
     $HAVE_XS = eval {
@@ -88,13 +101,14 @@ BEGIN {
 }
 
 
+use strict;
+use Carp;
 use Net::DNS::Resolver;
 use Net::DNS::Packet;
 use Net::DNS::Update;
 use Net::DNS::Header;
 use Net::DNS::Question;
 use Net::DNS::RR;   # use only after $Net::DNS::DNSSEC has been evaluated
-use Carp;
 
 
 
@@ -503,11 +517,11 @@ sub presentation2wire {
 #	$successor = $soa->serial(YYYYMMDDxx);
 #
 
-sub SEQUENTIAL() { undef }
+sub SEQUENTIAL { undef }
 
-sub UNIXTIME() { return CORE::time; }
+sub UNIXTIME { return CORE::time; }
 
-sub YYYYMMDDxx() {
+sub YYYYMMDDxx {
 	my ( $dd, $mm, $yy ) = ( localtime )[3 .. 5];
 	return 1900010000 + sprintf '%d%0.2d%0.2d00', $yy, $mm, $dd;
 }
@@ -556,24 +570,7 @@ sub rrsort {
 1;
 __END__
 
-=head1 NAME
 
-Net::DNS - Perl interface to the DNS resolver
-
-=head1 SYNOPSIS
-
-C<use Net::DNS;>
-
-=head1 DESCRIPTION
-
-Net::DNS is a collection of Perl modules that act as a Domain
-Name System (DNS) resolver.  It allows the programmer to perform
-DNS queries that are beyond the capabilities of C<gethostbyname>
-and C<gethostbyaddr>.
-
-The programmer should be somewhat familiar with the format of
-a DNS packet and its various sections.  See RFC 1035 or
-I<DNS and BIND> (Albitz & Liu) for details.
 
 =head2 Resolver Objects
 
@@ -970,22 +967,27 @@ has arrived.
       warn "timed out after $timeout seconds\n";
   }
 
+
 =head1 BUGS
 
 C<Net::DNS> is slow.
 
-For other items to be fixed, please see the TODO file included with
-the source distribution.
+For other items to be fixed, or if you discover a bug in this
+distribution please use the CPAN bug reporting system.
+
 
 =head1 COPYRIGHT
 
-Copyright (c) 1997-2002 Michael Fuhr.
-Portions Copyright (c) 2002-2004 Chris Reinhardt.
-Portions Copyright (c) 2005 Olaf Kolkman (RIPE NCC)
-Portions Copyright (c) 2006 Olaf Kolkman (NLnet Labs)
+Copyright (c)1997-2002 Michael Fuhr.
+Portions Copyright(c)2002-2004 Chris Reinhardt.
+Portions Copyright(c)2005 Olaf Kolkman (RIPE NCC)
+Portions Copyright(c)2006 Olaf Kolkman (NLnet Labs)
 
-All rights reserved.  This program is free software; you may redistribute
-it and/or modify it under the same terms as Perl itself.
+All rights reserved.
+
+This program is free software; you may redistribute it and/or
+modify it under the same terms as Perl itself.
+
 
 =head1 AUTHOR INFORMATION
 
@@ -1006,13 +1008,14 @@ Net::DNS was created by:
 For more information see:
     http://www.net-dns.org/
 
-Stay tuned and syncicate:
+Stay tuned and syndicate:
     http://www.net-dns.org/blog/
 
 =head1 SEE ALSO
 
-L<perl(1)>, L<Net::DNS::Resolver>, L<Net::DNS::Packet>, L<Net::DNS::Update>,
+L<perl>, L<Net::DNS::Resolver>, L<Net::DNS::Packet>, L<Net::DNS::Update>,
 L<Net::DNS::Header>, L<Net::DNS::Question>, L<Net::DNS::RR>, RFC 1035,
 I<DNS and BIND> by Paul Albitz & Cricket Liu
 
 =cut
+

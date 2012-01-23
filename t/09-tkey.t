@@ -1,4 +1,4 @@
-#  $Id: 09-tkey.t 795 2009-01-26 17:28:44Z olaf $    -*-perl-*-
+#  $Id: 09-tkey.t 973 2012-01-23 13:33:08Z willem $    -*-perl-*-
 
 use Test::More tests => 7;
 use strict;

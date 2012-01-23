@@ -1,6 +1,6 @@
 package Net::DNS::RR::PTR;
 #
-# $Id: PTR.pm 932 2011-10-26 12:40:48Z willem $
+# $Id: PTR.pm 973 2012-01-23 13:33:08Z willem $
 #
 use strict;
 BEGIN {
@@ -9,7 +9,7 @@ BEGIN {
 use vars qw(@ISA $VERSION);
 
 @ISA     = qw(Net::DNS::RR);
-$VERSION = (qw$LastChangedRevision: 932 $)[1];
+$VERSION = (qw$LastChangedRevision: 973 $)[1];
 
 sub new {
 	my ($class, $self, $data, $offset) = @_;
@@ -42,7 +42,7 @@ sub rr_rdata {
 	my $rdata = "";
 
 	if (exists $self->{"ptrdname"}) {
-		$rdata .= $packet->dn_comp(lc($self->{"ptrdname"}), $offset);
+		$rdata .= $packet->dn_comp($self->{"ptrdname"}, $offset);
 	}
 
 	return $rdata;
@@ -62,7 +62,7 @@ sub  _canonicalRdata {
 	my $rdata = "";
 
 	if (exists $self->{"ptrdname"}) {
-		$rdata .= $self->_name2wire($self->{"ptrdname"});
+		$rdata .= $self->_name2wire(lc($self->{"ptrdname"}));
 	}
 
 	return $rdata;

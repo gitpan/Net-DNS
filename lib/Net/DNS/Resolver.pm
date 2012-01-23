@@ -1,12 +1,12 @@
 package Net::DNS::Resolver;
 #
-# $Id: Resolver.pm 955 2011-11-03 22:56:41Z willem $
+# $Id: Resolver.pm 973 2012-01-23 13:33:08Z willem $
 #
 
 use strict;
 use vars qw($VERSION @ISA);
 
-$VERSION = (qw$LastChangedRevision: 955 $)[1];
+$VERSION = (qw$LastChangedRevision: 973 $)[1];
 
 BEGIN {
 	if ($^O eq 'MSWin32') {

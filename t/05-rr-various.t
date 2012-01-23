@@ -1,4 +1,4 @@
-# $Id: 05-rr-various.t 901 2011-09-27 20:33:41Z willem $   -*-perl-*-
+# $Id: 05-rr-various.t 973 2012-01-23 13:33:08Z willem $   -*-perl-*-
 # Contains a number of additional test for RR related functionality
 
 

@@ -1,4 +1,4 @@
-# $Id: 12-compression.t 704 2008-02-06 21:30:59Z olaf $   -*-perl-*-
+# $Id: 12-compression.t 973 2012-01-23 13:33:08Z willem $   -*-perl-*-
 # build DNS packet which has an endless loop in compression
 # check it against XS and PP implementation of dn_expand
 # both should return (undef,undef) as a sign that the packet

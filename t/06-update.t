@@ -1,4 +1,4 @@
-# $Id: 06-update.t 818 2009-11-29 23:25:08Z olaf $  -*-perl-*-
+# $Id: 06-update.t 973 2012-01-23 13:33:08Z willem $  -*-perl-*-
 
 use Test::More tests => 72;
 use strict;
@@ -8,12 +8,17 @@ BEGIN { use_ok('Net::DNS'); } #1
 
 
 sub is_empty {
-	my ($string) = @_;
+	local $_ = shift;
 	
-	return 1 if not $string;
-	
-	return ($string eq "; no data" || $string eq "; rdlength = 0");
+	return 0 unless defined $_;
+	return 1 unless length $_;
+
+	return 1 if /\\# 0/;
+	return 1 if /; no data/;
+	return 1 if /; rdlength = 0/;
+	return 0;
 }
+
 
 #------------------------------------------------------------------------------
 # Canned data.
@@ -213,4 +218,4 @@ is(scalar(@pre), 4,                     'pushed inserted correctly'); #62
 is($pre[0]->class, $class,              'first class right');         #63
 is($pre[1]->class, $class,              'second class right');        #64
 is($pre[2]->class, 'ANY',               'third class right');         #65
-is($pre[3]->class, 'NONE',              'forth class right');         #66
+is($pre[3]->class, 'NONE',              'fourth class right');        #66

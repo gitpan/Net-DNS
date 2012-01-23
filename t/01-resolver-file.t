@@ -1,4 +1,4 @@
-# $Id: 01-resolver-file.t 616 2006-10-18 09:15:48Z olaf $
+# $Id: 01-resolver-file.t 973 2012-01-23 13:33:08Z willem $
 
 
 use Test::More tests => 8;

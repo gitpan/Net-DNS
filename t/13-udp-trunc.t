@@ -1,4 +1,4 @@
-# $Id: 13-udp-trunc.t 837 2009-12-30 10:23:25Z olaf $ -*-perl-*-
+# $Id: 13-udp-trunc.t 973 2012-01-23 13:33:08Z willem $ -*-perl-*-
 # Bulk of this code is contributed by Aaron Crane in 2008
 # via rt.cpan.org ticket 33547
 # Portions (c) 2009 Olaf Kolkman
@@ -58,7 +58,7 @@ BEGIN{
     my @full_response;
     my $ns = Net::DNS::Nameserver->new(
         LocalPort    => $TestPort,
-	LocalAddres  => $Address,
+	LocalAddr    => $Address,
         ReplyHandler => sub { NOERROR => @full_response },
     );
     for (trad_query(), edns_query(1024), edns_query(2048)) {
