@@ -1,6 +1,6 @@
 package Net::DNS::RR::APL;
 #
-# $Id: APL.pm 973 2012-01-23 13:33:08Z willem $
+# $Id: APL.pm 978 2012-01-26 10:19:38Z willem $
 #
 use strict;
 BEGIN {

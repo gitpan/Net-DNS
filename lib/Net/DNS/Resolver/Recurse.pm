@@ -1,13 +1,13 @@
 package Net::DNS::Resolver::Recurse;
 #
-# $Id: Recurse.pm 973 2012-01-23 13:33:08Z willem $
+# $Id: Recurse.pm 978 2012-01-26 10:19:38Z willem $
 #
 use strict;
 use Net::DNS::Resolver;
 
 use vars qw($VERSION @ISA);
 
-$VERSION = (qw$LastChangedRevision: 973 $)[1];
+$VERSION = (qw$LastChangedRevision: 978 $)[1];
 @ISA = qw(Net::DNS::Resolver);
 
 
@@ -436,7 +436,7 @@ Portions Copyright (c) 2005, Olaf M Kolkman.
 This module is free software; you can redistribute
 it and/or modify it under the same terms as Perl itself.
 
-$Id: Recurse.pm 973 2012-01-23 13:33:08Z willem $
+$Id: Recurse.pm 978 2012-01-26 10:19:38Z willem $
 
 =cut
 

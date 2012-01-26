@@ -1,6 +1,6 @@
 package Net::DNS::RR::HIP;
 #
-# $Id: HIP.pm 973 2012-01-23 13:33:08Z willem $
+# $Id: HIP.pm 978 2012-01-26 10:19:38Z willem $
 #
 # See RFC 5205 for the specification of this record.
 

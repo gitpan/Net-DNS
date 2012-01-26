@@ -1,6 +1,6 @@
 package Net::DNS::RR::MX;
 #
-# $Id: MX.pm 973 2012-01-23 13:33:08Z willem $
+# $Id: MX.pm 978 2012-01-26 10:19:38Z willem $
 #
 use strict;
 BEGIN {
@@ -9,7 +9,7 @@ BEGIN {
 use vars qw(@ISA $VERSION);
 
 @ISA     = qw(Net::DNS::RR);
-$VERSION = (qw$LastChangedRevision: 973 $)[1];
+$VERSION = (qw$LastChangedRevision: 978 $)[1];
 
 
 # Highest preference sorted first.

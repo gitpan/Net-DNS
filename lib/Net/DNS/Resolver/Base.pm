@@ -1,6 +1,6 @@
 package Net::DNS::Resolver::Base;
 #
-# $Id: Base.pm 973 2012-01-23 13:33:08Z willem $
+# $Id: Base.pm 978 2012-01-26 10:19:38Z willem $
 #
 
 use strict;
@@ -24,7 +24,7 @@ use IO::Select;
 use Net::DNS;
 use Net::DNS::Packet;
 
-$VERSION = (qw$LastChangedRevision: 973 $)[1];
+$VERSION = (qw$LastChangedRevision: 978 $)[1];
 
 
 #

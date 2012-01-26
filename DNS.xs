@@ -1,5 +1,5 @@
 /*
- * $Id: DNS.xs 973 2012-01-23 13:33:08Z willem $
+ * $Id: DNS.xs 978 2012-01-26 10:19:38Z willem $
  *
  *
  * Copyright (c) 2005 Olaf Kolkman
