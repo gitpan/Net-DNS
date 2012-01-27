@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:               Net-DNS
-version:            0.67_03
+version:            0.67_04
 abstract:           Perl DNS resolver module
 author:
     - Olaf Kolkman <olaf@net-dns.org>

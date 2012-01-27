@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-$VERSION = (qw$LastChangedRevision: 978 $)[1] || 0.34;
+$VERSION = (qw$LastChangedRevision: 979 $)[1] || 0.34;
 
 
 =head1 NAME
