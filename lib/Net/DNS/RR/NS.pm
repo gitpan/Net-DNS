@@ -1,5 +1,5 @@
 #
-# $Id: NS.pm 979 2012-01-27 08:43:38Z willem $
+# $Id: NS.pm 932 2011-10-26 12:40:48Z willem $
 #
 package Net::DNS::RR::NS;
 
@@ -10,7 +10,7 @@ BEGIN {
 use vars qw(@ISA $VERSION);
 
 @ISA     = qw(Net::DNS::RR);
-$VERSION = (qw$LastChangedRevision: 979 $)[1];
+$VERSION = (qw$LastChangedRevision: 932 $)[1];
 
 sub new {
 	my ($class, $self, $data, $offset) = @_;

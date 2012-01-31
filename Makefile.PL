@@ -1,5 +1,5 @@
 
-# $Id: Makefile.PL 979 2012-01-27 08:43:38Z willem $ -*-perl-*-
+# $Id: Makefile.PL 957 2011-11-04 14:23:13Z willem $ -*-perl-*-
 
 use strict;
 $^W = 1;

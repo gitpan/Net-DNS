@@ -1,4 +1,4 @@
-# $Id: 02-mailbox.t 979 2012-01-27 08:43:38Z willem $	-*-perl-*-
+# $Id: 02-mailbox.t 965 2011-12-02 22:04:30Z willem $	-*-perl-*-
 
 use strict;
 use diagnostics;

@@ -1,4 +1,4 @@
-# $Id: 02-domain.t 979 2012-01-27 08:43:38Z willem $	-*-perl-*-
+# $Id: 02-domain.t 915 2011-10-10 14:25:06Z willem $	-*-perl-*-
 
 use strict;
 use diagnostics;
