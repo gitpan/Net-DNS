@@ -1,10 +1,10 @@
 package Net::DNS::RR;
 
 #
-# $Id: RR.pm 969 2011-12-13 10:34:39Z willem $
+# $Id: RR.pm 1028 2012-10-23 20:18:49Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 969 $)[1];
+$VERSION = (qw$LastChangedRevision: 1028 $)[1];
 
 
 =head1 NAME
@@ -13,12 +13,12 @@ Net::DNS::RR - DNS Resource Record base class
 
 =head1 SYNOPSIS
 
-use Net::DNS;
+    use Net::DNS;
 
     $rr = new Net::DNS::RR('example.com IN A 192.0.2.99');
 
     $rr = new Net::DNS::RR(
-	    name    => 'example.com'
+	    name    => 'example.com',
 	    type    => 'A',
 	    address => '192.0.2.99'
 	    );
@@ -26,209 +26,21 @@ use Net::DNS;
 
 =head1 DESCRIPTION
 
-C<Net::DNS::RR> is the base class for DNS Resource Record (RR) objects.
-See also the manual pages for each RR type.
+Net::DNS::RR is the base class for DNS Resource Record (RR) objects.
+See also the manual pages for each specific RR type.
 
 =cut
 
 
+use constant COMPATIBLE => 1;				## enable architecture transition code
+
 use strict;
 use integer;
 use Carp;
-use Net::DNS qw (wire2presentation name2labels stripdot);
-use Net::DNS::RR::Unknown;
 
-
-# %RR needs to be available within the scope of the BEGIN block.
-# $RR_REGEX is a global just to be on the safe side.
-# %_LOADED is used internally for autoloading the RR subclasses.
-use vars qw(%RR %_LOADED $RR_REGEX);
-
-BEGIN {
-
-	%RR = map { $_ => 1 } qw(
-		A
-		AAAA
-		AFSDB
-		CNAME
-		CERT
-		DHCID
-		DNAME
-		EID
-		HINFO
-		ISDN
-		KX
-		LOC
-		MB
-		MG
-		MINFO
-		MR
-		MX
-		NAPTR
-		NIMLOC
-		NS
-		NSAP
-		NULL
-		PTR
-		PX
-		RP
-		RT
-		SOA
-		SRV
-		TKEY
-		TSIG
-		TXT
-		X25
-		OPT
-		APL
-		SSHFP
-		HIP
-		SPF
-		IPSECKEY
-
-	);
-
-	#  Only load DNSSEC if available
-
-	eval {
-	    local $SIG{'__DIE__'} = 'DEFAULT';
-	    require Net::DNS::RR::SIG;
-	};
-
-	unless ($@) {
-		$RR{'SIG'} = 1;
-		eval {
-		    local $SIG{'__DIE__'} = 'DEFAULT';
-		    require Net::DNS::RR::NXT;
-		};
-
-		unless ($@) {
-		    $RR{'NXT'}	= 1;
-		} else {
-		    die $@;
-		}
-
-		eval {
-		    local $SIG{'__DIE__'} = 'DEFAULT';
-		    require Net::DNS::RR::KEY;
-		};
-
-		unless ($@) {
-		    $RR{'KEY'} = 1;
-		} else {
-		    die $@;
-		}
-
-	 	eval {
-		    local $SIG{'__DIE__'} = 'DEFAULT';
-		    require Net::DNS::RR::DS;
-		};
-
-	 	unless ($@) {
-		    $RR{'DS'} = 1;
-
-		} else {
-		    die $@;
-		}
-
-	 	eval {
-		    local $SIG{'__DIE__'} = 'DEFAULT';
-		    require Net::DNS::RR::RRSIG;
-		};
-
-	 	unless ($@) {
-		    $RR{'RRSIG'} = 1;
-		    # If RRSIG is available so should the other DNSSEC types
-		    eval {
-			local $SIG{'__DIE__'} = 'DEFAULT';
-			require Net::DNS::RR::NSEC;
-		    };
-		    unless ($@) {
-		      $RR{'NSEC'} = 1;
-		    } else {
-		    die $@;
-		  }
-		    eval {
-			local $SIG{'__DIE__'} = 'DEFAULT';
-			require Net::DNS::RR::DNSKEY;
-		    };
-
-		    unless ($@) {
-		      $RR{'DNSKEY'} = 1;
-		    } else {
-		      die $@;
-		    }
-		}
-
-	 	eval {
-		  local $SIG{'__DIE__'} = 'DEFAULT';
-		  require Net::DNS::RR::DLV;
-		};
-
-		unless ($@) {
-		  $RR{'DLV'} =1;
-		} else {
-		  # Die only if we are dealing with a version for which DLV is
-		  # available
-		  die $@ if defined ($Net::DNS::SEC::HAS_DLV) ;
-
-		}
-
-	 	eval {
-		  local $SIG{'__DIE__'} = 'DEFAULT';
-		  require Net::DNS::RR::NSEC3;
-		};
-
-		unless ($@) {
-		  $RR{'NSEC3'} =1;
-		} else {
-		  # Die only if we are dealing with a version for which NSEC3 is		  # available
-		  die $@ if defined ($Net::DNS::SEC::HAS_NSEC3);
-		}
-
-
-	 	eval {
-		  local $SIG{'__DIE__'} = 'DEFAULT';
-		  require Net::DNS::RR::NSEC3PARAM;
-		};
-
-		unless ($@) {
-		  $RR{'NSEC3PARAM'} =1;
-		} else {
-		  # Die only if we are dealing with a version for which NSEC3 is
-		  # available
-
-		  die $@ if defined($Net::DNS::SEC::SVNVERSION) &&  $Net::DNS::SEC::SVNVERSION > 619;   # In the code since. (for users of the SVN trunk)
-		}
-
-
-
-    }
-}
-
-sub build_regex {
-	my $classes = join('|', keys %Net::DNS::classesbyname, 'CLASS\\d+');
-
-	# Longest ones go first, so the regex engine will match AAAA before A.
-	my $types   = join('|', sort { length $b <=> length $a } keys %Net::DNS::typesbyname);
-
-	$types .= '|TYPE\\d+';
-
-	$RR_REGEX   = " ^
-					\\s*
-    	            (\\S+) # name anything non-space will do
-    	            \\s*
-    	            (\\d+)?
-    	            \\s*
-    	            ($classes)?
-    	            \\s*
-    	            ($types)?
-    	            \\s*
-    	            (.*)
-    	            \$";
-
-#	print STDERR "Regex: $RR_REGEX\n";
-}
+use Net::DNS::Parameters;
+use Net::DNS::DomainName;
+use Net::DNS::Question;
 
 
 =head1 METHODS
@@ -238,18 +50,32 @@ are of a particular type -- always check the object type before calling
 any of its methods.  If you call an unknown method, you will get an
 error message and execution will be terminated.
 
+=cut
+
+sub new {
+	my ($class) = @_;
+
+	if (COMPATIBLE) {
+		return &_new_from_rdata if ref $_[1];		# resolve new() usage conflict
+		return @_ > 3 ? &new_hash : &new_string;	# avoid exception trap/reraise
+	}
+
+	return eval { @_ > 3 ? &new_hash : &new_string; } || croak "${@}new $class( ... )";
+}
+
 
 =head2 new (from string)
 
- $a     = Net::DNS::RR->new("foo.example.com. 86400 A 10.1.2.3");
- $mx    = Net::DNS::RR->new("example.com. 7200 MX 10 mailhost.example.com.");
- $cname = Net::DNS::RR->new("www.example.com 300 IN CNAME www1.example.com");
- $txt   = Net::DNS::RR->new('baz.example.com 3600 HS TXT "text record"');
+    $a	   = new Net::DNS::RR('host.example.com. 86400 A 192.0.2.1');
+    $mx	   = new Net::DNS::RR('example.com. 7200 MX 10 mailhost.example.com.');
+    $cname = new Net::DNS::RR('www.example.com 300 IN CNAME host.example.com');
+    $txt   = new Net::DNS::RR('txt.example.com 3600 HS TXT "text data"');
 
-Returns a C<Net::DNS::RR> object of the appropriate type and
-initialized from the string passed by the user.  The format of the
-string is that used in zone files, and is compatible with the string
-returned by C<< Net::DNS::RR->string >>.
+Returns an RR object of the appropriate type, or a C<Net::DNS::RR>
+object if the type is not implemented.	The attribute values are
+extracted from the string passed by the user.  The syntax of the
+argument string follows the RFC1035 specification for zone files,
+and is compatible with the result returned by the string method.
 
 The name and RR type are required; all other information is optional.
 If omitted, the TTL defaults to 0 and the RR class defaults to IN.
@@ -257,373 +83,404 @@ Omitting the optional fields is useful for creating the empty RDATA
 sections required for certain dynamic update operations.  See the
 C<Net::DNS::Update> manual page for additional examples.
 
-All names must be fully qualified.  The trailing dot (.) is optional.
+All names are interpreted as fully qualified domain names.
+The trailing dot (.) is optional.
 
-=head2 new (from hash)
-
- $rr = Net::DNS::RR->new(
-	 name    => "foo.example.com",
-	 ttl     => 86400,
-	 class   => "IN",
-	 type    => "A",
-	 address => "10.1.2.3",
- );
-
- $rr = Net::DNS::RR->new(
-	 name => "foo.example.com",
-	 type => "A",
- );
-
-Returns an RR object of the appropriate type, or a C<Net::DNS::RR>
-object if the type isn't implemented.  See the manual pages for
-each RR type to see what fields the type requires.
-
-The C<Name> and C<Type> fields are required; all others are optional.
-If omitted, C<TTL> defaults to 0 and C<Class> defaults to IN.  Omitting
-the optional fields is useful for creating the empty RDATA sections
-required for certain dynamic update operations.
-
-The fields are case-insensitive, but starting each with uppercase
-is recommended.
+RR owner names in in-addr.arpa or ip6.arpa namespaces may be specified
+using appropriate RFC4291 or RFC4632 IP address/prefix notation.
 
 =cut
 
+my $CLASS_REGEX = join '|', 'CLASS\d+', keys %classbyname;
 
-
-sub new {
-	return new_from_string(@_) if @_ == 2;
-	return new_from_string(@_) if @_ == 3;
-	return new_from_hash(@_);
-}
-
-
-sub new_from_data {
+sub new_string {
 	my $class = shift;
-	my ($name, $rrtype, $rrclass, $ttl, $rdlength, $data, $offset) = @_;
+	local $_ = shift || croak 'empty or undefined argument';
+	my $update = shift;
 
-	my $self = {	name		=> $name,
-			type		=> $rrtype,
-			class		=> $rrclass,
-			ttl		=> $ttl,
-			rdlength	=> $rdlength,
-			rdata		=> substr($$data, $offset, $rdlength)
+	# parse into quoted strings, contiguous non-whitespace, (discarded) brackets and comments
+	s/\\\\/\\092/g;						# disguise escaped escape
+	s/\\"/\\034/g;						# disguise escaped double quote
+	s/\\'/\\039/g;						# disguise escaped single quote
+	s/\\;/\\059/g;						# disguise escaped semicolon
+	s/\n(\S)/$1/g if COMPATIBLE;				# gloss over syntax errors in Net::DNS::SEC test data
+	my @parse = grep length($_), split /("[^"]*")|('[^']*')|;.*\n|;.*$|[()]|\s+/;
+
+	my $name    = shift @parse;				# name [ttl] [class] type ...
+	my $ttl	    = shift @parse if @parse && $parse[0] =~ /^\d/;
+	my $rrclass = shift @parse if @parse && $parse[0] =~ /^$CLASS_REGEX$/io;
+	$ttl = shift @parse if @parse && $parse[0] =~ /^\d/;	# name [class] [ttl] type ...
+	my $rrtype = shift @parse;
+
+	if ($update) {
+
+		for ( lc $update ) {
+			/yxrrset/ and do {
+				$rrclass = 'ANY' unless @parse;
+				last;
 			};
 
-	if ($RR{$rrtype}) {
-		my $subclass = $class->_get_subclass($rrtype);
-		return $subclass->new($self, $data, $offset);
+			/nxrrset/ and do {
+				$rrclass = 'NONE';
+				@parse	 = ();
+				last;
+			};
+
+			/yxdomain/ and do {
+				$rrclass = 'ANY';
+				$rrtype	 = 'ANY';
+				@parse	 = ();
+				last;
+			};
+
+			/nxdomain/ and do {
+				$rrclass = 'NONE';
+				$rrtype	 = 'ANY';
+				@parse	 = ();
+				last;
+			};
+
+			/rr_add/ and do {
+				$ttl ||= 86400;
+				last;
+			};
+
+			/rr_del/ and do {
+				$rrclass = @parse ? 'NONE' : 'ANY';
+				last;
+			};
+		}
+
+		$rrtype ||= 'ANY';
+		$ttl	||= 0;
+	}
+
+	my $base = new Net::DNS::Question( $name, $rrtype, $rrclass );
+	my $self = $class->_subclass( $base, scalar @parse );	# RR with defaults (if appropriate)
+	$self->{ttl} = $ttl;					# rr->{ttl} may be undefined
+
+	return $self unless @parse;				# empty RR
+
+	if ( $parse[0] eq '\\#' ) {
+		shift @parse;					# RFC3597 hexadecimal format
+		my $length = shift @parse;
+		my $rdata  = pack 'H*', join '', @parse;
+		my $octets = $self->{rdlength} = length $rdata;
+		croak 'length and hexadecimal data inconsistent' unless $length == $octets;
+		return $self unless $octets;
+		return ref($self)->new( $self, \$rdata, 0 ) if COMPATIBLE;
+		$self->decode_rdata( \$rdata, 0 );		# unpack RDATA
+	} elsif (COMPATIBLE) {
+		$self->{ttl} ||= 0;				# gloss over bugs in RRSIG
+		return ref($self)->new_from_string( $self, join( ' ', @parse ), @parse );
 	} else {
-		return Net::DNS::RR::Unknown->new($self, $data, $offset);
+		$self->parse_rdata(@parse);			# parse arguments
 	}
-
+	return $self;
 }
 
-sub new_from_string {
-	my ($class, $rrstring, $update_type) = @_;
 
-	build_regex() unless $RR_REGEX;
+=head2 new (from hash)
 
-	# strip out comments
-	# Comments start with a semi collon and run till end of line.
-	# However if the semi colon is escaped or inside a character string then we should keep it
-	# see e.g. rt.cpan 49035
-	my $loopdetection=length($rrstring);
-	my $cleanstring;
-	while ($rrstring) {
+    $rr = new Net::DNS::RR(
+	    name    => 'host.example.com',
+	    ttl	    => 86400,
+	    class   => 'IN',
+	    type    => 'A',
+	    address => '192.0.2.1'
+	    );
+ 
+    $rr = new Net::DNS::RR(
+	    name    => 'txt.example.com',
+	    type    => 'TXT',
+	    txtdata => [ 'one', 'two' ]
+	    );
 
-		if ($rrstring=~s/^([^\\;'"]*)//o){       # Anything not special in this context.
-			$cleanstring.=$1;
-		}
-		if ($rrstring=~s/^(\\.)//o){             # Escaped special character
-			$cleanstring.=$1;
-		}
+Returns an RR object of the appropriate type, or a C<Net::DNS::RR>
+object if the type is not implemented.	See the manual pages for
+each RR type to see what fields the type requires.
 
-		if ($rrstring=~s/^((['"]).*(?<!\\)\2)//o){ # Anything within a matching string block. (non escaped terminator)
-			$cleanstring.=$1;
+The C<name> and C<type> fields are required; all others are optional.
+If omitted, C<ttl> defaults to 0 and C<class> defaults to IN.
+Omitting the optional fields is useful for creating the empty RDATA
+sections required for certain dynamic update operations.
 
-			# Next: Anything within a non matched string upto
-			# the first encountered comment (but first we
-			# want to make sure we captured all the nested
-			# blocks hence elsif
-		}elsif ($rrstring=~s/^((['"]).*((?<!\\);)?)//o){
-			$cleanstring.=$1;
-		}
+=cut
 
-		$rrstring=~s/^(;.*\n)//o;  # comment till newline
-		$rrstring=~s/^(;.*$)//o;   # comment till end of string
-		#print STDERR ".";
-
-		confess "Failed stripping:loop will not terminate. Please report this info: ". $cleanstring ."---". $rrstring."\n"
-		  if ($loopdetection==length($rrstring));
-		$loopdetection=length($rrstring);
-
-
+sub new_hash {
+	my $base = shift;
+	my %attribute = ( name => '.' );
+	while (@_) {
+		my $key = lc shift;
+		$attribute{$key} = shift;
 	}
+	croak('RR type not specified') unless defined $attribute{type};
 
+	my $temp  = new Net::DNS::Question( @attribute{qw(name type)} );
+	my $class = $attribute{class};
+	my $ttl	  = $attribute{ttl};
+	delete @attribute{qw(name class type ttl rdlength)};	# strip non-RDATA fields
 
+	my $populated = scalar %attribute;			# RDATA specified
 
+	my $self = $base->_subclass( $temp, $populated );	# RR with defaults (if appropriate)
+	$self->class($class) if defined $class;			# specify CLASS
+	$self->ttl($ttl)     if defined $ttl;			# specify TTL
+	$self->{ttl} ||= 0 if COMPATIBLE;
 
-	($cleanstring =~ m/$RR_REGEX/xso) ||
-		confess qq|Internal Error: "$rrstring" did not match RR pat.\nPlease report this to the author!\n|;
-
-	my $name    = $1;
-	my $ttl     = $2 || 0;
-	my $rrclass = $3 || '';
-
-
-	my $rrtype  = $4 || '';
-	my $rdata   = $5 || '';
-
-	$rdata =~ s/\s+$//o if $rdata;
-
-	$name  = stripdot($name)  if $name;
-
-
-
-	# RFC3597 tweaks
-	# This converts to known class and type if specified as TYPE###
-	$rrtype  = Net::DNS::typesbyval(Net::DNS::typesbyname($rrtype))      if $rrtype  =~ m/^TYPE\d+/o;
-	$rrclass = Net::DNS::classesbyval(Net::DNS::classesbyname($rrclass)) if $rrclass =~ m/^CLASS\d+/o;
-
-
-	if (!$rrtype && $rrclass && $rrclass eq 'ANY') {
-		$rrtype  = 'ANY';
-		$rrclass = 'IN';
-	} elsif (!$rrclass) {
-		$rrclass = 'IN';
-	}
-
-	$rrtype ||= 'ANY';
-
-
-	if ($update_type) {
-		$update_type = lc $update_type;
-
-		if ($update_type eq 'yxrrset') {
-			$ttl     = 0;
-			$rrclass = 'ANY' unless $rdata;
-		} elsif ($update_type eq 'nxrrset') {
-			$ttl     = 0;
-			$rrclass = 'NONE';
-			$rdata   = '';
-		} elsif ($update_type eq 'yxdomain') {
-			$ttl     = 0;
-			$rrclass = 'ANY';
-			$rrtype  = 'ANY';
-			$rdata   = '';
-		} elsif ($update_type eq 'nxdomain') {
-			$ttl     = 0;
-			$rrclass = 'NONE';
-			$rrtype  = 'ANY';
-			$rdata   = '';
-		} elsif ($update_type =~ /^(rr_)?add$/o) {
-			$ttl = 86400 unless $ttl;
-		} elsif ($update_type =~ /^(rr_)?del(ete)?$/o) {
-			$ttl     = 0;
-			$rrclass = $rdata ? 'NONE' : 'ANY';
+	while ( my ( $method, $argument ) = each %attribute ) {
+		if ( UNIVERSAL::isa( $argument, 'ARRAY' ) ) {
+			$self->$method(@$argument);		# name => [ ... ]
+		} else {
+			$self->$method($argument);		# name => value
 		}
 	}
 
-	# We used to check if $rrtype was defined at this point.  However,
-	# we just defaulted it to ANY earlier....
+	$self->_normalize_dnames if COMPATIBLE and $populated;	# strip trailing dot from RDATA names
 
-	my $self = {
-		'name'     => $name,
-		'type'     => $rrtype,
-		'class'    => $rrclass,
-		'ttl'      => $ttl,
-		'rdlength' => 0,
-		'rdata'    => '',
-	};
-
-	if ($RR{$rrtype} && $rdata !~ m/^\s*\\#/o ) {
-		my $subclass = $class->_get_subclass($rrtype);
-		return $subclass->new_from_string($self, $rdata);
-	} elsif ($RR{$rrtype}) {   # A RR type known to Net::DNS starting with \#
-		$rdata =~ m/\\\#\s+(\d+)\s+(.*)$/o;
-
-		my $rdlength = $1;
-		my $hexdump  = $2;
-		$hexdump =~ s/\s*//og;
-
-		die "$rdata is inconsistent; length does not match content"
-			if length($hexdump) != $rdlength*2;
-
-		$rdata = pack('H*', $hexdump);
-
-		return Net::DNS::RR->new_from_data(
-			$name,
-			$rrtype,
-			$rrclass,
-			$ttl,
-			$rdlength,
-			\$rdata,
-			length($rdata) - $rdlength
-		);
-	} elsif ($rdata=~/\s*\\\#\s+\d+\s+/o) {
-		#We are now dealing with the truly unknown.
-		die 'Expected RFC3597 representation of RDATA'
-			unless $rdata =~ m/\\\#\s+(\d+)\s+(.*)$/o;
-
-		my $rdlength = $1;
-		my $hexdump  = $2;
-		$hexdump =~ s/\s*//og;
-
-		die "$rdata is inconsistent; length does not match content"
-			if length($hexdump) != $rdlength*2;
-
-		$rdata = pack('H*', $hexdump);
-
-		return Net::DNS::RR->new_from_data(
-			$name,
-			$rrtype,
-			$rrclass,
-			$ttl,
-			$rdlength,
-			\$rdata,
-			length($rdata) - $rdlength
-		);
-	} else {
-		#God knows how to handle these... bless them in the RR class.
-		bless $self, $class;
-		return $self
-	}
-
-}
-
-sub new_from_hash {
-	my $class    = shift;
-	my %keyval   = @_;
-	my $self     = {};
-
-
-
-	while ( my ($key, $val) = each %keyval ) {
-	        $self->{lc $key} = $val ;
-	}
-
-	croak('RR name not specified') unless defined $self->{name};
-	croak('RR type not specified') unless defined $self->{type};
-
-	$self->{'ttl'}   ||= 0;
-	$self->{'class'} ||= 'IN';
-
-	$self->{'rdlength'} = length $self->{'rdata'}
-		if $self->{'rdata'};
-
-	if ($RR{$self->{'type'}}) {
-		my $subclass = $class->_get_subclass($self->{'type'});
-	    if (uc $self->{'type'} ne 'OPT') {
-		        bless $self, $subclass;
-			$self->_normalize_dnames();
-			return _normalize_rdata($self);
-
-	    } else {
-			# Special processing of OPT. Since TTL and CLASS are
-			# set by other variables. See Net::DNS::RR::OPT
-			# documentation
-			return $subclass->new_from_hash($self);
-	    }
-	} elsif ($self->{'type'} =~ /TYPE\d+/o) {
-		bless $self, 'Net::DNS::RR::Unknown';
-		return $self;
-	} else {
-	 	bless $self, $class;
-	 	return $self;
-	}
-}
-
-
-
-# Normalizes the content of the rdata so that comparing can be done between
-# RRs created via various methods.
-
-# Based on first creating packet format and then parsing it.
-
-sub _normalize_rdata {
-	my $self     = shift;
-
-
-
-	# There are a bunch of META RR types we do not want to mess with
-	return $self if ( ( uc $self ->{'type'} eq "TSIG" )||
-			  ( uc $self ->{'type'} eq "TKEY" )
-			);
-
-
-	my $pkt = {	header		=> Net::DNS::Header->new,
-			question	=> [],
-			answer		=> [],
-			authority	=> [],
-			additional	=> []	};
-
-	bless $pkt, "Net::DNS::Packet";
-	$pkt->push( answer => $self );
-	my $pkt2 = Net::DNS::Packet->new( \$pkt->data );
-	undef ($self);
-	return ($pkt2->answer)[0];
-}
-
-# When new_from_hash is used to generate the objects then it may be
-# that the names passed are not consistently FQDN or not.  Note that
-# the internal storage is without trailing dot.  this function
-# normalizes the domain names and is implemented in the records
-# themselves if more specific handling is needed
-
-sub _normalize_dnames {
-	my $self=shift;
-	$self->_normalize_ownername();
-}
-
-
-sub _normalize_ownername {
-	my $self=shift;
-	return $self->{'name'}=stripdot($self->{'name'});
+	return $self;
 }
 
 
 =head2 decode
 
-    ($rrobj, $offset) = Net::DNS::RR->decode(\$data, $offset);
+    ( $rr, $next ) = decode Net::DNS::RR( \$data, $offset, @opaque );
 
-Decodes a DNS resource record at the specified location within a DNS packet.
-The first argument is a reference to the packet data.
-The second argument is the offset within the packet where the resource record begins.
+Decodes a DNS resource record at the specified location within a
+DNS packet.
 
-Returns a Net::DNS::RR object and the offset of the next location in the packet.
+The argument list consists of a reference to the buffer containing
+the packet data and offset indicating where resource record begins.
+Remaining arguments, if any, are passed as opaque data to
+subordinate decoders.
 
-Decoding is aborted if the object could not be created (e.g., corrupt or insufficient data).
+Returns a C<Net::DNS::RR> object and the offset of the next record
+in the packet.
+
+An exception is raised if the data buffer contains insufficient or
+corrupt data.
+
+Any remaining arguments are passed as opaque data to subordinate
+decoders and do not form part of the published interface.
 
 =cut
 
 use constant RRFIXEDSZ => length pack 'n2 N n', (0) x 4;
 
 sub decode {
-	my ($objclass, $data, $offset) = @_;
+	my $class = shift;
+	my $self = bless {}, $class;
+	my ( $data, $offset, @opaque ) = @_;
 
-	my ($name, $index) = Net::DNS::Packet::dn_expand($data, $offset || 0);
-	die 'Exception: corrupt or incomplete data' unless $index;
+	( $self->{owner}, $offset ) = decode Net::DNS::DomainName1035(@_);
 
-	my $rdindex = $index + RRFIXEDSZ;
-	die 'Exception: incomplete data' if length $$data < $rdindex;
-	my ($type, $class, $ttl, $rdlength) = unpack("\@$index n2 N n", $$data);
+	my $index = $offset + RRFIXEDSZ;
+	die 'corrupt wire-format data' if length $$data < $index;
+	@{$self}{qw(type class ttl rdlength)} = unpack "\@$offset n2 N n", $$data;
+	$self->type( typebyval( $self->{type} ) )    if COMPATIBLE;
+	$self->class( classbyval( $self->{class} ) ) if COMPATIBLE;
 
-	my $next = $rdindex + $rdlength;
-	die 'Exception: incomplete data' if length $$data < $next;
+	$self = $class->_subclass($self);
 
-	$type = Net::DNS::typesbyval($type) || $type;
+	my $next = $index + $self->{rdlength};
+	die 'corrupt wire-format data' if length $$data < $next;
 
-	# Special case for OPT RR where CLASS should be
-	# interpreted as 16 bit unsigned (RFC2671, 4.3)
-	if ($type ne 'OPT') {
-		$class = Net::DNS::classesbyval($class) || $class;
+	if (COMPATIBLE) {
+		ref($self)->new( $self, $data, $index, @opaque );
+		return wantarray ? ( $self, $next ) : $self;
 	}
-	# else just retain numerical value
 
-	my $self = $objclass->new_from_data($name, $type, $class, $ttl, $rdlength, $data, $rdindex);
-	die 'Exception: corrupt or incomplete RR subtype data' unless defined $self;
+	$self->decode_rdata( $data, $index, @opaque ) if $next > $index or $self->type eq 'OPT';
 
-	return wantarray ? ($self, $next) : $self;
+	return wantarray ? ( $self, $next ) : $self;
+}
+
+
+=head2 encode
+
+    $data = $rr->encode( $offset, @opaque );
+
+Returns the C<Net::DNS::RR> in binary format suitable for inclusion
+in a DNS packet buffer.
+
+The offset indicates the intended location within the packet data
+where the C<Net::DNS::RR> is to be stored.
+
+Any remaining arguments are opaque data which are passed intact to
+subordinate encoders.
+
+=cut
+
+sub encode {
+	my $self = shift;
+	my ( $offset, @opaque ) = @_;
+	( $offset, @opaque ) = ( 0, {} ) unless @_;
+
+	if (COMPATIBLE) {
+		my ( $hash, $packet ) = @opaque;
+		$packet ||= bless {}, qw(Net::DNS::Packet);
+		$packet->{compnames} = $hash || {};
+		my $name   = $self->name;
+		my $owner  = $self->{owner}->encode(@_);
+		my $index  = $offset + length($owner) + RRFIXEDSZ;
+		my $rdata  = eval { $self->rr_rdata( $packet, $index, @opaque ); } || '';
+		my $itype  = typebyname( $self->type );
+		my $iclass = classbyname( $self->class );
+		delete $packet->{compnames};
+		return pack 'a* n2 N n a*', $owner, $itype, $iclass, $self->ttl, length $rdata, $rdata;
+	}
+
+	my $owner = $self->{owner}->encode(@_);
+	my $index = $offset + length($owner) + RRFIXEDSZ;
+	my $rdata = eval { $self->encode_rdata( $index, @opaque ); } || '';
+	return pack 'a* n2 N n a*', $owner, @{$self}{qw(type class)}, $self->ttl, length $rdata, $rdata;
+}
+
+
+=head2 canonical
+
+    $data = $rr->canonical;
+
+Returns the C<Net::DNS::RR> in canonical binary format suitable for
+DNSSEC signature validation.
+
+The absence of the associative array argument signals to subordinate
+encoders that the canonical uncompressed lower case form of embedded
+domain names is to be used.
+
+=cut
+
+sub canonical {
+	my $self = shift;
+
+	if (COMPATIBLE) {
+		my $dummy  = $self->name;
+		my $owner  = $self->{owner}->encode(0);
+		my $index  = RRFIXEDSZ + length $owner;
+		my $rdata  = eval { $self->_canonicalRdata($index); } || '';
+		my $itype  = typebyname( $self->type );
+		my $iclass = classbyname( $self->class );
+		return pack 'a* n2 N n a*', $owner, $itype, $iclass, $self->ttl, length $rdata, $rdata;
+	}
+
+	my $owner = $self->{owner}->encode(0);
+	my $index = RRFIXEDSZ + length $owner;
+	my $rdata = eval { $self->encode_rdata($index); } || '';
+	pack 'a* n2 N n a*', $owner, @{$self}{qw(type class)}, $self->ttl, length $rdata, $rdata;
+}
+
+
+=head2 name
+
+    $name = $rr->name;
+
+Returns the owner name of the record.
+
+=cut
+
+sub name {
+	my $self = shift;
+
+	if (COMPATIBLE) {
+		$self->{owner} = new Net::DNS::DomainName1035(shift) if @_;
+		$self->{owner} = new Net::DNS::DomainName1035( $self->{name} ) unless $self->{owner};
+		return $self->{name} = $self->{owner}->name;
+	}
+
+	$self->{owner} = new Net::DNS::DomainName1035(shift) if @_;
+	$self->{owner}->name if defined wantarray;
+}
+
+
+=head2 type
+
+    $type = $rr->type;
+
+Returns the record type.
+
+=cut
+
+sub type {
+	my $self = shift;
+
+	if (COMPATIBLE) {
+		$self->{type} = shift if @_;
+		return $self->{type} || 'A';
+	}
+
+	$self->{class} = classbyname(shift) if @_;
+	confess 'not possible to change RR->type' if @_;
+	typebyval( $self->{type} || 1 );
+}
+
+
+=head2 class
+
+    $class = $rr->class;
+
+Resource record class.
+
+=cut
+
+sub class {
+	my $self = shift;
+
+	if (COMPATIBLE) {
+		$self->{class} = shift if @_;
+		return $self->{class} || 'IN';
+	}
+
+	$self->{class} = classbyname(shift) if @_;
+	classbyval( $self->{class} || 1 );
+}
+
+
+=head2 ttl
+
+    $ttl = $rr->ttl;
+    $ttl = $rr->ttl(3600);
+
+Resource record time to live in seconds.
+
+=cut
+
+# The following time units are recognised, but are not part of the
+# application program interface. These are required for parsing BIND
+# zone files but should not be used in other contexts.
+my %unit = ( w => 604800, d => 86400, h => 3600, m => 60, s => 1 );
+
+sub ttl {
+	my $self = shift;
+
+	return $self->{ttl} || 0 unless @_;			# avoid defining rr->{ttl}
+
+	my $ttl = 0;
+	my %time = reverse split /(\D)\D*/, lc( shift || '0' ) . 's';
+	while ( my ( $u, $t ) = each %time ) {
+		$ttl += $unit{$u} > 1 ? $t * $unit{$u} : $t;
+	}
+	$self->{ttl} = $ttl;
+}
+
+
+=head2 rdata
+
+    $rr = new Net::DNS::RR( type => NULL, rdata => 'arbitrary' );
+
+Resource record data section when viewed as opaque octets.
+
+=cut
+
+sub rdata {
+	my $self = shift;
+
+	return eval { $self->encode_rdata( 0x4000, {} ); } || '' unless @_;
+
+	my $buffer = $self->{rdata}    = shift;
+	my $octets = $self->{rdlength} = length $buffer;
+	my $hash   = {};
+	$self->decode_rdata( \$buffer, 0, $hash ) if $octets;
+	croak 'compression pointer seen in rdata' if %$hash;
 }
 
 
@@ -631,510 +488,359 @@ sub decode {
 
     $rr->print;
 
-Prints the record to the standard output.  Calls the B<string> method
-to get the RR's string representation.
+Prints the record to the standard output.  Calls the B<string>
+method to get the RR string representation.
 
 =cut
-#' someone said that emacs gets screwy here.  Who am I to claim otherwise...
 
-sub print {	print &string, "\n"; }
+sub print {
+	print shift->string, "\n";
+}
+
 
 =head2 string
 
     print $rr->string, "\n";
 
-Returns a string representation of the RR.  Calls the B<rdatastr>
-method to get the RR-specific data. Domain names arereturned in
-RFC1035 format, i.e. all non letter, digit, hyphen characters are
-represented as \DDD. Besides, all domain names are expanded to fully
-qualified domain names, with trailing dot.  This is in contrast to
-accessor methods of individual data elements in RR objects, like
-B<name>, which will not return the trailing dot.
+Returns a string representation of the RR using the zone file format
+described in RFC1035.  All domain names are fully qualified with
+trailing dot.  This differs from RR attribute methods, which omit
+the trailing dot.
 
 =cut
 
 sub string {
 	my $self = shift;
-	my $data = $self->rdatastr || '; no data';
 
-	join "\t", "$self->{name}.", $self->{ttl}, $self->{class}, $self->{type}, $data;
+	my $name = $self->name if COMPATIBLE;
+	my @basic = ( $self->{owner}->string, $self->ttl, $self->class, $self->type );
+
+	my $rdata = $self->rdstring;
+
+	return join "\t", @basic, '; no data' unless length $rdata;
+
+	chomp $rdata;
+	$rdata =~ s/\n+/\n\t/g;
+	return join "\t", @basic, $rdata;
 }
 
-=head2 rdatastr
 
-    $s = $rr->rdatastr;
+=head2 rdstring
 
-Returns a string containing RR-specific data.  Subclasses will need
-to implement this method.
+    $rdstring = $rr->rdstring;
+
+Returns a string representation of the RR-specific data.
 
 =cut
 
-sub rdatastr {
-	my $self = shift;
-	return exists $self->{'rdlength'}
-	       ? "; rdlength = $self->{'rdlength'}"
-	       : '';
-}
-
-=head2 name
-
-    $name = $rr->name;
-
-Returns the record's domain name.
-
-=head2 type
-
-    $type = $rr->type;
-
-Returns the record's type.
-
-=head2 class
-
-    $class = $rr->class;
-
-Returns the record's class.
-
-=cut
-
-# Used to AUTOLOAD this, but apparently some versions of Perl (specifically
-# 5.003_07, included with some Linux distributions) would return the
-# class the object was blessed into, instead of the RR's class.
-
-sub class {
+sub rdstring {
 	my $self = shift;
 
-	if (@_) {
-		$self->{'class'} = shift;
-	} elsif (!exists $self->{'class'}) {
-		Carp::carp('class: no such method');
-		return undef;
-	}
-	return $self->{'class'};
+	my $rdata = eval {
+		return $self->rdatastr if COMPATIBLE;
+		return $self->format_rdata;
+	} || '';
+	carp $@ if $@;
+
+	return $rdata;
 }
 
 
-=head2 ttl
-
-    $ttl = $rr->ttl;
-
-Returns the record's time-to-live (TTL).
-
-=head2 rdlength
-
-    $rdlength = $rr->rdlength;
-
-Returns the length of the record's data section.
-
-=head2 rdata
-
-    $rdata = $rr->rdata
-
-Returns the record's data section as binary data.
-
-=cut
-#'
-sub rdata {
-	my $self = shift;
-	my $retval = undef;
-
-	if (@_ == 2) {
-		my ($packet, $offset) = @_;
-		$retval = $self->rr_rdata($packet, $offset);
-	}
-	elsif (exists $self->{'rdata'}) {
-		$retval = $self->{'rdata'};
-	}
-
-	return $retval;
-}
-
-sub rr_rdata {
-	my $self = shift;
-	return exists $self->{'rdata'} ? $self->{'rdata'} : '';
-}
-
-
-#------------------------------------------------------------------------------
-# sub encode
-#
-# This method is called by Net::DNS::Packet->data to get the binary
-# representation of an RR.
-#------------------------------------------------------------------------------
-
-sub encode {
-	my ( $self, $offset, $hash, $packet ) = @_;
-	$offset ||= 0;
-	$packet ||= bless {}, qw(Net::DNS::Packet);
-	$packet->{compnames} = $hash || {};
-
-	# Don't compress TSIG or TKEY names and don't mess with EDNS0 packets
-	my $data;
-	if (uc($self->{'type'}) eq 'TSIG' || uc($self->{'type'}) eq 'TKEY') {
-		my $tmp_packet = Net::DNS::Packet->new();
-		$data = $tmp_packet->dn_comp($self->{'name'}, 0);
-		return undef unless defined $data;
-	} elsif (uc($self->{'type'}) eq 'OPT') {
-		my $tmp_packet = Net::DNS::Packet->new();
-		$data = $tmp_packet->dn_comp('', 0);
-	} else {
-		$data  = $packet->dn_comp($self->{'name'}, $offset);
-		return undef unless defined $data;
-	}
-
-	my $qtype     = uc($self->{'type'});
-	my $qtype_val = ($qtype =~ m/^\d+$/o) ? $qtype : Net::DNS::typesbyname($qtype);
-	$qtype_val    = 0 if !defined($qtype_val);
-
-	my $qclass     = uc($self->{'class'});
-	my $qclass_val = ($qclass =~ m/^\d+$/o) ? $qclass : Net::DNS::classesbyname($qclass);
-	$qclass_val    = 0 if !defined($qclass_val);
-	$data .= pack('n', $qtype_val);
-
-	# If the type is OPT then class will need to contain a decimal number
-	# containing the UDP payload size. (RFC2671 section 4.3)
-	if (uc($self->{'type'}) ne 'OPT') {
-	    $data .= pack('n', $qclass_val);
-	} else {
-	    $data .= pack('n', $self->{'class'});
-	}
-
-	$data .= pack('N', $self->{'ttl'});
-
-	$offset += length($data) + &Net::DNS::INT16SZ;	# allow for rdlength
-
-	my $rdata = $self->rdata($packet, $offset);
-
-	$data .= pack('n', length $rdata);
-	$data.=$rdata;
-
-	return $data;
-}
-
-
-
-
-
-#------------------------------------------------------------------------------
-#  This method is called by SIG objects verify method.
-#  It is almost the same as data but needed to get an representation of the
-#  packets in wire format withoud domain name compression.
-#  It is essential to DNSSEC RFC 2535 section 8
-#------------------------------------------------------------------------------
-
-sub canonical {&_canonicaldata}
-
-sub _canonicaldata {
-	my $self = shift;
-	my $data='';
-	{
-	    my $name=$self->{'name'};
-	    my @dname=Net::DNS::name2labels($name);
-	    for (my $i=0;$i<@dname;$i++){
-		$data .= pack ('C',length $dname[$i] );
-		$data .= lc($dname[$i] );
-	    }
-	    $data .= pack ('C','0');
-	}
-	$data .= pack('n', Net::DNS::typesbyname(uc($self->{'type'})));
-	$data .= pack('n', Net::DNS::classesbyname(uc($self->{'class'})));
-	$data .= pack('N', $self->{'ttl'});
-
-
-	my $rdata = $self->_canonicalRdata;
-
-	$data .= pack('n', length $rdata);
-	$data .= $rdata;
-	return $data;
-
-
-}
-
-# These are methods that are used in the DNSSEC context...  Some RR
-# have domain names in them. Verification works only on RRs with
-# uncompressed domain names. (Canonical format as in sect 8 of
-# RFC2535) _canonicalRdata is overwritten in those RR objects that
-# have domain names in the RDATA and _name2wire is used to convert a
-# domain name to "wire format"
-
-
-sub _canonicalRdata {
-    my $self=shift;
-    my $packet=Net::DNS::Packet->new();
-    my $rdata = $self->rr_rdata($packet,0);
-    return $rdata;
-}
-
-
-
-
-
-sub _name2wire   {
-    my ($self, $name) = @_;
-
-    my $rdata="";
-    my $compname = "";
-    my @dname = Net::DNS::name2labels($name);
-
-
-    for (@dname) {
-		$rdata .= pack('C', length $_);
-		$rdata .= $_ ;
-    }
-
-    $rdata .= pack('C', '0');
-    return $rdata;
-}
-
-
-
-
-use vars qw($AUTOLOAD);
-
-sub AUTOLOAD {
-	my ($self) = @_;  # If we do shift here, it will mess up the goto below.
-	my ($name) = $AUTOLOAD =~ m/^.*::(.*)$/o;
-	if ($name =~ /set_rrsort_func/){
-	    return Net::DNS::RR::set_rrsort_func(@_);
-	}
-	if ($name =~ /get_rrsort_func/){
-	    return Net::DNS::RR::get_rrsort_func(@_);
-	}
-	# XXX -- We should test that we do in fact carp on unknown methods.
-	unless (exists $self->{$name}) {
-	    my $rr_string = $self->string;
-	    Carp::carp(<<"AMEN");
-
-***
-***  WARNING!!!  The program has attempted to call the method
-***  "$name" for the following RR object:
-***
-***  $rr_string
-***
-***  This object does not have a method "$name".  THIS IS A BUG
-***  IN THE CALLING SOFTWARE, which has incorrectly assumed that
-***  the object would be of a particular type.  The calling
-***  software should check the type of each RR object before
-***  calling any of its methods.
-***
-***  Net::DNS has returned undef to the caller.
-***
-
-AMEN
-return;
-	}
-
-	no strict q/refs/;
-
-	# Build a method in the class.
-	*{$AUTOLOAD} = sub {
-	    my ($self, $new_val) = @_;
-
-	    if (defined $new_val) {
-		$self->{$name} = $new_val;
-	    }
-
-	    return $self->{$name};
-	};
-
-	# And jump over to it.
-	goto &{$AUTOLOAD};
-}
-
-sub DESTROY {}
-
-
-#
-#  Net::DNS::RR->_get_subclass($type)
-#
-# Return a subclass, after loading a subclass (if needed)
-#
-sub _get_subclass {
-	my ($class, $type) = @_;
-
-	return unless $type and $RR{$type};
-
-	my $subclass = join('::', $class, $type);
-
-	unless ($_LOADED{$subclass}) {
-		eval "require $subclass";
-		die $@ if $@;
-		$_LOADED{$subclass}++;
-	}
-
-	return $subclass;
-}
-
-
-
+###################################################################################
 
 =head1 Sorting of RR arrays
 
-As of version 0.55 there is functionality to help you sort RR
-arrays. The sorting is done by Net::DNS::rrsort(), see the
-L<Net::DNS> documentation. This package provides class methods to set
-the sorting functions used for a particular RR based on a particular
-attribute.
+Sorting of RR arrays is done by Net::DNS::rrsort(), see documentation
+for L<Net::DNS>. This package provides class methods to set the
+sorting functions used for a particular RR based on its attributes.
 
 
 =head2 set_rrsort_func
 
-Net::DNS::RR::SRV->set_rrsort_func("priority",
+    Net::DNS::RR::SRV->set_rrsort_func('priority',
 			       sub {
 				   my ($a,$b)=($Net::DNS::a,$Net::DNS::b);
 				   $a->priority <=> $b->priority
 				   ||
 				   $b->weight <=> $a->weight
-                     }
+		     }
 
-Net::DNS::RR::SRV->set_rrsort_func("default_sort",
+    Net::DNS::RR::SRV->set_rrsort_func('default_sort',
 			       sub {
 				   my ($a,$b)=($Net::DNS::a,$Net::DNS::b);
 				   $a->priority <=> $b->priority
 				   ||
 				   $b->weight <=> $a->weight
-                     }
+		     }
 
 set_rrsort_func needs to be called as a class method. The first
 argument is the attribute name on which the sorting will need to take
-place. If you specify "default_sort" than that is the sort algorithm
+place. If you specify "default_sort" then that is the sort algorithm
 that will be used in the case that rrsort() is called without an RR
 attribute as argument.
 
-The second argument is a reference to a function that uses the
-variables $a and $b global to the C<from Net::DNS>(!!)package for the
-sorting. During the sorting $a and $b will contain references to
-objects from the class you called the set_prop_sort from. In other
+The second argument is a reference to a comparison function that uses
+the global variables $a and $b in the C<from Net::DNS>(!!)package.
+During sorting, the variables $a and $b will contain references to
+objects of the class from which you called the set_prop_sort. In other
 words, you can rest assured that the above sorting function will only
-get Net::DNS::RR::SRV objects.
+be applied to Net::DNS::RR::SRV objects.
 
-The above example is the sorting function that actually is implemented in
-SRV.
+The above example is the sorting function implemented in SRV.
 
 =cut
 
-
-
 use vars qw(%rrsortfunct);
 
-sub set_rrsort_func{
-    my $class=shift;
-    my $attribute=shift;
-    my $funct=shift;
-#    print "Using ".__PACKAGE__."set_rrsort: $class\n";
-    my ($type) = $class =~ m/^.*::(.*)$/o;
-    $Net::DNS::RR::rrsortfunct{$type}{$attribute}=$funct;
+sub set_rrsort_func {
+	my $class     = shift;
+	my $attribute = shift;
+	my $funct     = shift;
+
+	#    print "Using ".__PACKAGE__."set_rrsort: $class\n";
+	my ($type) = $class =~ m/^.*::(.*)$/;
+	$Net::DNS::RR::rrsortfunct{$type}{$attribute} = $funct;
 }
 
 sub get_rrsort_func {
-    my $class=shift;
-    my $attribute=shift;  #can be undefined.
-    my $sortsub;
-    my ($type) = $class =~ m/^.*::(.*)$/o;
+	my $class     = shift;
+	my $attribute = shift;					# can be undefined.
+	my $sortsub;
+	my ($type) = $class =~ m/^.*::(.*)$/;
 
+	if (	   defined($attribute)
+		&& exists( $Net::DNS::RR::rrsortfunct{$type} )
+		&& exists( $Net::DNS::RR::rrsortfunct{$type}{$attribute} ) ) {
 
-#    print "Using ".__PACKAGE__." get_rrsort: $class ($type,$attribute)\n";
-#    use Data::Dumper;
-#    print Dumper %Net::DNS::rrsortfunct;
+		#  The default overwritten by the class variable in Net::DNS
+		return $Net::DNS::RR::rrsortfunct{$type}{$attribute};
+	} elsif ( !defined($attribute)
+		&& exists( $Net::DNS::RR::rrsortfunct{$type} )
+		&& exists( $Net::DNS::RR::rrsortfunct{$type}{default_sort} ) ) {
 
-    if (defined($attribute) &&
-	exists($Net::DNS::RR::rrsortfunct{$type}) &&
-	exists($Net::DNS::RR::rrsortfunct{$type}{$attribute})
-	){
-	#  The default overwritten by the class variable in Net::DNS
-	return $Net::DNS::RR::rrsortfunct{$type}{$attribute};
-    }elsif(
-	! defined($attribute) &&
-	exists($Net::DNS::RR::rrsortfunct{$type}) &&
-	exists($Net::DNS::RR::rrsortfunct{$type}{'default_sort'})
-	){
-	#  The default overwritten by the class variable in Net::DNS
-	return $Net::DNS::RR::rrsortfunct{$type}{'default_sort'};
-    }
-    elsif( defined($attribute) ){
+		#  The default overwritten by the class variable in Net::DNS
+		return $Net::DNS::RR::rrsortfunct{$type}{default_sort};
+	} elsif ( defined($attribute) ) {
 
-	return sub{
-	    my ($a,$b)=($Net::DNS::a,$Net::DNS::b);
-	    ( exists($a->{$attribute}) &&
-	      $a->{$attribute} <=> $b->{$attribute})
-		||
-		$a->_canonicaldata() cmp $b->_canonicaldata()
-	};
-    }else{
-	return sub{
-	    my ($a,$b)=($Net::DNS::a,$Net::DNS::b);
-	    $a->_canonicaldata() cmp $b->_canonicaldata()
-	};
-    }
+		return sub {
+			my ( $a, $b ) = ( $Net::DNS::a, $Net::DNS::b );
+			exists( $a->{$attribute} )
+					? $a->$attribute() <=> $b->$attribute()
+					: $a->canonical() cmp $b->canonical();
+		};
+	} else {
+		return sub {
+			my ( $a, $b ) = ( $Net::DNS::a, $Net::DNS::b );
+			$a->canonical() cmp $b->canonical();
+		};
+	}
 
-    return $sortsub;
+	return $sortsub;
 }
 
 
+###################################################################################
+##
+##	Default implementation for unknown RR type
+##
+###################################################################################
 
-
-
-
-sub STORABLE_freeze {
-	my ($self, $cloning) = @_;
-
-	return if $cloning;
-
-	return ('', {%$self});
-}
-
-sub STORABLE_thaw {
-	my ($self, $cloning, undef, $data) = @_;
-
-	%{$self}  = %{$data};
-
-	__PACKAGE__->_get_subclass($self->{'type'});
-
-	return $self;
+sub decode_rdata {				## decode rdata from wire-format byte string
+	my ( $self, $data, $offset ) = @_;
+	my $rdlength = $self->{rdlength} || length $$data;
+	$self->{rdata} = substr $$data, $offset, $rdlength;
 }
 
 
-#
-#	dump
-#
-#	    $rr->dump;
-#
-#	Prints a depth-first recursive listing of the record data structure.
-#
+sub encode_rdata {				## encode rdata as wire-format byte string
+	my $self = shift;
+	$self->{rdata} || '';
+}
+
+
+sub format_rdata {				## format rdata portion of RR string
+	my $self = shift;
+	my $data = $self->{rdata} || $self->encode_rdata;	# unknown RR, per RFC3597
+	my $length = length $data;
+	join ' ', '\\#', $length, $length ? unpack( 'H*', $data ) : ();
+}
+
+
+sub parse_rdata {				## parse RR attributes in argument list
+	my ( $self, @rdata ) = @_;
+	confess join ' ', 'unable to parse', $self->type, "record\n" if @rdata;
+}
+
+
+sub defaults { }				## set attribute default values
+
+
+###################################################################################
+
+use vars qw($AUTOLOAD);
+
+sub AUTOLOAD {				## Default method
+	my $self = shift;
+	confess "method '$AUTOLOAD' undefined" unless ref $self;
+
+	my $method = $1 if $AUTOLOAD =~ m/^.*::(.*)$/;
+
+	if (COMPATIBLE) {
+		return $self->{$method} = shift if @_;
+		return $self->{$method} if exists $self->{$method};
+	}
+
+	my $object = $self->string;
+
+	@_ = (<<"END");
+***  FATAL PROGRAM ERROR!!	Unknown method '$method'
+***  which the program has attempted to call for the object:
+***
+***  $object
+***
+***  This object does not have a method '$method'.  THIS IS A BUG
+***  IN THE CALLING SOFTWARE, which incorrectly assumes that the
+***  object would be of a particular type.  The type of an object
+***  should be checked before calling any of its methods.
+END
+	no strict;
+	goto &{'Carp::confess'};
+}
+
+
+sub DESTROY { }				## Avoid tickling AUTOLOAD (in cleanup)
+
 
 sub dump {				## print internal data structure
 	use Data::Dumper;
+	$Data::Dumper::Sortkeys = sub { return [sort keys %{$_[0]}] };
+	return Dumper(shift) if defined wantarray;
 	print Dumper(shift);
 }
 
 
-=head1 BUGS
+#
+#  Net::DNS::RR->_subclass($object)
+#  Net::DNS::RR->_subclass($object, $default)
+#
+# Create a new object blessed into appropriate RR subclass, after
+# loading the subclass module (if necessary).  A subclass with no
+# corresponding module will be regarded as unknown and blessed
+# into the RR base class.
+#
+# The optional second argument indicates that default values are
+# to be copied into the newly created object.
 
-This version of C<Net::DNS::RR> does little sanity checking on user-created
-RR objects.
+use vars qw(%_LOADED %_DEFAULTS);
+
+sub _subclass {
+	my $class   = shift || '';
+	my $object  = shift;
+	my $default = shift;
+	die "Usage:\tuse Net::DNS;\n\t\$rr = new $class( ... )\n"
+			unless $class eq __PACKAGE__;
+
+	my $required = join '::', $class, $object->type;	# full package name
+
+	my $subclass = $_LOADED{$required};			# load once only
+	unless ($subclass) {
+		eval "require $required";
+		$subclass = $_LOADED{$required} = $@ ? $class : $required;
+		$_DEFAULTS{$subclass} = bless {}, $subclass;	# cache default values
+		$_DEFAULTS{$subclass}->defaults;
+	}
+
+	my $defaults = $default ? $_DEFAULTS{$subclass} : {};	# clone object to avoid problem with
+	my $clone = bless {%$object, %$defaults}, $subclass;	# storage reclamation on some platforms
+	return $clone unless COMPATIBLE;
+	$object->name;
+	$clone->type( $object->type );
+	$clone->class( $object->class );
+	return $clone;
+}
+
+
+###################################################################################
+##	Compatibility interface to allow old and new RR architectures to coexist
+##
+##	"new" modules inherit these methods to wrap themselves in "old" clothing.
+###################################################################################
+
+sub _new_from_rdata {				## decode rdata from wire-format byte string
+	my $class = shift;
+	my $self  = shift;
+	$self->decode_rdata(@_) if $self->{rdlength} or $self->type eq 'OPT';
+	return $self;
+}
+
+
+sub new_from_string {				## parse RR attributes in argument list
+	my ( $class, $self, undef, @parse ) = @_;		# new_from_string() is a misnomer
+	$self->parse_rdata(@parse);				# string already parsed in new_string()
+	return $self;
+}
+
+
+sub rdatastr {					## format rdata portion of RR string
+	my $self = shift;
+	return $self->format_rdata;
+}
+
+
+sub rr_rdata {					## encode rdata as wire-format byte string
+	my $self   = shift;
+	my $packet = shift;
+	return $self->encode_rdata(@_);
+}
+
+
+sub _canonicaldata {				## encode RR in canonical form
+	&canonical;
+}
+
+sub _canonicalRdata {				## encode rdata in canonical form
+	my ( $self, $offset ) = @_;
+	return $self->rr_rdata( undef, $offset );
+}
+
+
+sub _name2wire {				## emulate
+	my $class = shift;
+	new Net::DNS::DomainName(shift)->encode();
+}
+
+sub _normalize_ownername { }				## ignore
+
+sub _normalize_dnames { }				## ignore
+
+###################################################################################
+
+
+1;
+__END__
+
 
 =head1 COPYRIGHT
 
-Copyright (c)1997-2002 Michael Fuhr.
+Copyright (c)1997-2002 Michael Fuhr. 
 
 Portions Copyright (c)2002-2004 Chris Reinhardt.
 
-Portions Copyright (c)2005-2007 Olaf Kolkman
+Portions Copyright (c)2005-2007 Olaf Kolkman.
 
-Portions Copyright (c)2007 Dick Franks
+Portions Copyright (c)2007,2012 Dick Franks.
 
 All rights reserved.
 
 This program is free software; you may redistribute it and/or
 modify it under the same terms as Perl itself.
 
-EDNS0 extensions by Olaf Kolkman.
 
 =head1 SEE ALSO
 
-L<perl>, L<Net::DNS>, L<Net::DNS::Resolver>, L<Net::DNS::Packet>,
-L<Net::DNS::Update>, L<Net::DNS::Header>, L<Net::DNS::Question>,
-RFC 1035 Section 4.1.3
+L<perl>, L<Net::DNS>, L<Net::DNS::Question>,
+L<Net::DNS::Packet>, L<Net::DNS::Update>,
+RFC1035 Section 4.1.3, RFC1123, RFC3597
 
 =cut
 
-1;

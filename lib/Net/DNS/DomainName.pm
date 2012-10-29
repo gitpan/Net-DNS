@@ -2,10 +2,10 @@ package Net::DNS::DomainName;
 use base qw(Net::DNS::Domain);
 
 #
-# $Id: DomainName.pm 964 2011-12-02 10:23:51Z willem $
+# $Id: DomainName.pm 1006 2012-08-24 14:18:12Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 964 $)[1];
+$VERSION = (qw$LastChangedRevision: 1006 $)[1];
 
 
 =head1 NAME
@@ -197,9 +197,9 @@ sub encode {
 
 
 sub _lc {
-	local $_ = shift;
-	tr [\101-\132] [\141-\172];
-	return $_;
+	my $s = shift;
+	$s =~ tr [\101-\132] [\141-\172];
+	return $s;
 }
 
 
@@ -247,9 +247,9 @@ sub encode {
 
 
 sub _lc {
-	local $_ = shift;
-	tr [\101-\132] [\141-\172];
-	return $_;
+	my $s = shift;
+	$s =~ tr [\101-\132] [\141-\172];
+	return $s;
 }
 
 

@@ -1,12 +1,12 @@
 package Net::DNS;
 
 #
-# $Id: DNS.pm 981 2012-01-27 23:01:31Z willem $
+# $Id: DNS.pm 1024 2012-10-19 10:13:54Z willem $
 #
 use vars qw($SVNVERSION $VERSION);
 BEGIN {
-	$SVNVERSION = (qw$LastChangedRevision: 981 $)[1];
-	$VERSION = '0.68';
+	$SVNVERSION = (qw$LastChangedRevision: 1024 $)[1];
+	$VERSION = '0.68_01';
 }
 
 
@@ -92,24 +92,31 @@ BEGIN {
 BEGIN {
 
     $DNSSEC = eval {
-	    local $SIG{'__DIE__'} = 'DEFAULT';
-	    require Net::DNS::SEC;
-	    1
-	    } ? 1 : 0;
+		local $SIG{'__DIE__'} = 'DEFAULT';
+		require Net::DNS::SEC;
+		} ? 1 : 0;
 
-
+	if ( $DNSSEC ) {
+		eval { require Net::DNS::RR::DLV };
+		eval { require Net::DNS::RR::DNSKEY };
+		eval { require Net::DNS::RR::DS };
+		eval { require Net::DNS::RR::KEY };
+		eval { require Net::DNS::RR::NSEC };
+		eval { require Net::DNS::RR::NSEC3 };
+		eval { require Net::DNS::RR::NSEC3PARAM };
+		eval { require Net::DNS::RR::NXT };
+		eval { require Net::DNS::RR::RRSIG };
+		eval { require Net::DNS::RR::SIG };
+	}
 }
 
 
 use strict;
 use Carp;
-use Net::DNS::Resolver;
+use Net::DNS::RR;
 use Net::DNS::Packet;
 use Net::DNS::Update;
-use Net::DNS::Header;
-use Net::DNS::Question;
-use Net::DNS::RR;   # use only after $Net::DNS::DNSSEC has been evaluated
-
+use Net::DNS::Resolver;
 
 
 #
@@ -174,7 +181,8 @@ use Net::DNS::RR;   # use only after $Net::DNS::DNSSEC has been evaluated
     'DHCID'     => 49,      # RFC4701
     'NSEC3'     => 50,      # RFC5155
     'NSEC3PARAM' => 51,     # RFC5155
-# 52-54 are unassigned
+    'TLSA'	=> 52,      # RFC6698
+# 53-54 are unassigned
     'HIP'       => 55,      # RFC5205
     'NINFO'     => 56,      # non-standard					NOT IMPLEMENTED
     'RKEY'      => 57,      # non-standard					NOT IMPLEMENTED
@@ -312,7 +320,7 @@ sub classesbyval {
     'QUERY'        => 0,        # RFC 1035
     'IQUERY'       => 1,        # RFC 1035
     'STATUS'       => 2,        # RFC 1035
-    'NS_NOTIFY_OP' => 4,        # RFC 1996
+    'NOTIFY'       => 4,        # RFC 1996
     'UPDATE'       => 5,        # RFC 2136
 );
 %opcodesbyval = reverse %opcodesbyname;
@@ -417,43 +425,15 @@ sub name2labels {
 
 
 sub wire2presentation {
-    my  $wire=shift;
-    my  $presentation="";
-    my $length=length($wire);
-    # There must be a nice regexp to do this.. but since I failed to
-    # find one I scan the name string until I find a '\', at that time
-    # I start looking forward and do the magic.
+    my $presentation=shift; # Really wire...
 
-    my $i=0;
+    # Prepend these with a backslash
+    $presentation =~ s/(["$();@.\\])/\\$1/g;
 
-    while ($i < $length ){
-	my $char=unpack("x".$i."C1",$wire);
-	if ( $char < 33 || $char > 126 ){
-	    $presentation.= sprintf ("\\%03u" ,$char);
-	}elsif ( $char == ord( "\"" )) {
-	    $presentation.= "\\\"";
-	}elsif ( $char == ord( "\$" )) {
-	    $presentation.= "\\\$";
-	}elsif ( $char == ord( "(" )) {
-	    $presentation.= "\\(";
-	}elsif ( $char == ord( ")" )) {
-	    $presentation.= "\\)";
-	}elsif ( $char == ord( ";" )) {
-	    $presentation.= "\\;";
-	}elsif ( $char == ord( "@" )) {
-	    $presentation.= "\\@";
-	}elsif ( $char == ord( "\\" )) {
-	    $presentation.= "\\\\" ;
-	}elsif ( $char==ord (".") ){
-	    $presentation.= "\\." ;
-	}else{
-	    $presentation.=chr($char) 	;
-	}
-	$i++;
-    }
+    # Convert < 33 and > 126 to \x<\d\d\d>
+    $presentation =~ s/([^\x21-\x7E])/sprintf("\\%03u", ord($1))/eg; 
 
     return $presentation;
-
 }
 
 

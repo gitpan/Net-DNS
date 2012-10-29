@@ -1,4 +1,4 @@
-# $Id: 10-recurse.t 897 2011-09-20 12:44:28Z willem $ -*-perl-*-
+# $Id: 10-recurse.t 990 2012-02-27 14:51:45Z willem $ -*-perl-*-
 
 use Test::More;
 use strict;
@@ -120,7 +120,7 @@ SKIP: {
 	
 	$res->query_dorecursion('a.t.net-dns.org', 'A');
 	
-	is($count, 3);
+	ok($count >= 3, "Lookup took $count queries which is at least 3.");
     }
 } 
 

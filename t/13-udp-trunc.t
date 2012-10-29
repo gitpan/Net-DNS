@@ -1,4 +1,4 @@
-# $Id: 13-udp-trunc.t 961 2011-11-22 13:31:10Z willem $ -*-perl-*-
+# $Id: 13-udp-trunc.t 1020 2012-10-04 09:11:25Z willem $ -*-perl-*-
 # Bulk of this code is contributed by Aaron Crane in 2008
 # via rt.cpan.org ticket 33547
 # Portions (c) 2009 Olaf Kolkman
@@ -109,9 +109,8 @@ sub trad_query {
 
 sub edns_query {
     my $size = shift;
-    my $edns_rr = Net::DNS::RR->new(type => 'OPT', class => $size, name => '');
     my $query = Net::DNS::Packet->new($ZONE);
-    $query->push(additional => $edns_rr);
+    $query->edns->size($size);
     return [$query, $size];
 }
 

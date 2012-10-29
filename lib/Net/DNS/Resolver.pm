@@ -1,43 +1,53 @@
 package Net::DNS::Resolver;
+
 #
-# $Id: Resolver.pm 955 2011-11-03 22:56:41Z willem $
+# $Id: Resolver.pm 1020 2012-10-04 09:11:25Z willem $
 #
+use vars qw($VERSION);
+$VERSION = (qw$LastChangedRevision: 1020 $)[1];
+
+=head1 NAME
+
+Net::DNS::Resolver - DNS resolver class
+
+=cut
+
 
 use strict;
-use vars qw($VERSION @ISA);
 
-$VERSION = (qw$LastChangedRevision: 955 $)[1];
+use vars qw(@ISA);
 
 BEGIN {
-	if ($^O eq 'MSWin32') {
-		require Net::DNS::Resolver::Win32;
-		@ISA = qw(Net::DNS::Resolver::Win32);
+	for ($^O) {				## Perl OS identifier
 
-	} elsif ($^O eq 'cygwin') {
-		eval { require Net::DNS::Resolver::Win32; };
+		/cygwin/ && do {
+			eval { require Net::DNS::Resolver::MSWin32; };
+
+			unless ($@) {
+				@ISA = qw(Net::DNS::Resolver::MSWin32);
+				last;
+			}
+		};
+
+
+		eval "require Net::DNS::Resolver::$_;";
 
 		unless ($@) {
-			@ISA = qw(Net::DNS::Resolver::Win32);
+			@ISA = ("Net::DNS::Resolver::$_");
 		} else {
-			require Net::DNS::Resolver::Cygwin;
-			@ISA = qw(Net::DNS::Resolver::Cygwin);
+			require Net::DNS::Resolver::UNIX;
+			@ISA = qw(Net::DNS::Resolver::UNIX);
 		}
-
-	} else {
-		require Net::DNS::Resolver::UNIX;
-		@ISA = qw(Net::DNS::Resolver::UNIX);
 	}
 }
 
 __PACKAGE__->init();
 
+
 1;
 
 __END__
 
-=head1 NAME
-
-Net::DNS::Resolver - DNS resolver class
 
 =head1 SYNOPSIS
 
@@ -332,6 +342,12 @@ Gets or sets the nameservers to be queried.
 
 Also see the IPv6 transport notes below
 
+=head2 empty_nameservers
+
+    $res->empty_nameservers();
+
+Empties the list of nameservers.
+ 
 =head2 print
 
     $res->print;
@@ -351,6 +367,12 @@ Returns a string representation of the resolver state.
 
 Gets or sets the resolver search list.
 
+=head2 empty_searchlist
+
+    $res->empty_searchlist();
+
+Empties the searchlist.
+ 
 =head2 port
 
     print 'sending queries to port ', $res->port, "\n";
@@ -604,7 +626,7 @@ secured zones will contain DNSKEY, NSEC and RRSIG records.
 Setting calling the dnssec method with a non-zero value will set the
 UDP packet size to the default value of 2048. If that is to small or
 to big for your environment you should call the udppacketsize()
-method immeditatly after.
+method immediately after.
 
    $res->dnssec(1);    # turns on DNSSEC and sets udp packetsize to 2048
    $res->udppacketsize(1028);   # lowers the UDP pakcet size
@@ -767,7 +789,7 @@ it and/or modify it under the same terms as Perl itself.
 
 =head1 SEE ALSO
 
-L<perl(1)>, L<Net::DNS>, L<Net::DNS::Packet>, L<Net::DNS::Update>,
+L<perl>, L<Net::DNS>, L<Net::DNS::Packet>, L<Net::DNS::Update>,
 L<Net::DNS::Header>, L<Net::DNS::Question>, L<Net::DNS::RR>,
 L<resolver(5)>, RFC 1035, RFC 1034 Section 4.3.5
 

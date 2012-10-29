@@ -1,117 +1,102 @@
 package Net::DNS::RR::TXT;
+
 #
-# $Id: TXT.pm 932 2011-10-26 12:40:48Z willem $
+# $Id: TXT.pm 1037 2012-10-24 21:50:15Z willem $
 #
-use strict;
-BEGIN {
-    eval { require bytes; }
-}
-use vars qw(@ISA $VERSION);
+use vars qw($VERSION);
+$VERSION = (qw$LastChangedRevision: 1037 $)[1];
 
-use Text::ParseWords;
+use base Net::DNS::RR;
 
-@ISA     = qw(Net::DNS::RR);
-$VERSION = (qw$LastChangedRevision: 932 $)[1];
-
-sub new {
-	my ($class, $self, $data, $offset) = @_;
-
-	my $rdlength = $self->{'rdlength'} or return bless $self, $class;
-	my $end      = $offset + $rdlength;
-
-	while ($offset < $end) {
-		my $strlen = unpack("\@$offset C", $$data);
-		++$offset;
-
-		my $char_str = substr($$data, $offset, $strlen);
-		$offset += $strlen;
-
-		push(@{$self->{'char_str_list'}}, $char_str);
-	}
-
-	return bless $self, $class;
-}
-
-sub new_from_string {
-    my ( $class, $self, $rdata_string ) = @_ ;
-
-    bless $self, $class;
-
-    $self->_build_char_str_list($rdata_string);
-
-    return $self;
-}
-
-sub txtdata {
-	my $self = shift;
-	return join(' ',  $self->char_str_list());
-}
-
-sub rdatastr {
-	my $self = shift;
-
-	if ($self->char_str_list) {
-		return join(' ', map {
-			my $str = $_;
-			$str =~ s/"/\\"/g;
-			$str =~ s/;/\\;/g;
-			#$str =~ s/([\x00-\x1F\x7F-\xFF])/sprintf"\\%.3d",ord($1)/eg;
-			qq("$str");
-		} @{$self->{'char_str_list'}});
-	}
-
-	return '';
-}
-
-sub _build_char_str_list {
-	my ($self, $rdata_string) = @_;
-
-	my @words;
-
-	@words= shellwords($rdata_string) if $rdata_string;
-
-	$self->{'char_str_list'} = [];
-
-	if (@words) {
-		foreach my $string (@words) {
-		    $string =~ s/\\"/"/g;
-		    push(@{$self->{'char_str_list'}}, $string);
-		}
-	}
-}
-
-sub char_str_list {
-	my $self = shift;
-
-	if (not $self->{'char_str_list'}) {
-		$self->_build_char_str_list( $self->{'txtdata'} );
-	}
-
-	return @{$self->{'char_str_list'}}; # unquoted strings
-}
-
-sub rr_rdata {
-	my $self  = shift;
-	my $rdata = '';
-
-	foreach my $string ($self->char_str_list) {
-	    $rdata .= pack("C", length $string );
-	    $rdata .= $string;
-	}
-
-	return $rdata;
-}
-
-1;
-__END__
+=encoding utf8
 
 =head1 NAME
 
 Net::DNS::RR::TXT - DNS TXT resource record
 
+=cut
+
+
+use strict;
+use integer;
+
+use Net::DNS::Text;
+
+
+sub decode_rdata {			## decode rdata from wire-format octet string
+	my $self = shift;
+	my ( $data, $offset ) = @_;
+
+	my $limit = $offset + $self->{rdlength};
+	my $text;
+	$self->{txtdata} = [];
+	while ( $offset < $limit ) {
+		( $text, $offset ) = decode Net::DNS::Text( $data, $offset );
+		push @{$self}{txtdata}, $text;
+	}
+
+	croak('corrupt TXT data') unless $offset == $limit;	# more or less FUBAR
+}
+
+
+sub encode_rdata {			## encode rdata as wire-format octet string
+	my $self = shift;
+
+	my $txtdata = $self->{txtdata} || [];
+	join '', map $_->encode, @$txtdata;
+}
+
+
+sub format_rdata {			## format rdata portion of RR string.
+	my $self = shift;
+
+	my $txtdata = $self->{txtdata} || [];
+	join ' ', map $_->string, @$txtdata;
+}
+
+
+sub parse_rdata {			## populate RR from rdata in argument list
+	my $self = shift;
+
+	@{$self}{txtdata} = [map Net::DNS::Text->new($_), @_];
+}
+
+
+sub txtdata {
+	my $self = shift;
+
+	@{$self}{txtdata} = [map Net::DNS::Text->new($_), @_] if @_;
+
+	my $txtdata = $self->{txtdata} || [];
+
+	return ( map $_->value, @$txtdata ) if wantarray;
+
+	join ' ', map $_->value, @$txtdata if defined wantarray;
+}
+
+
+sub char_str_list {				## historical
+	return (&txtdata);
+}
+
+1;
+__END__
+
+
 =head1 SYNOPSIS
 
-C<use Net::DNS::RR>;
+    use Net::DNS;
+    $rr = new Net::DNS::RR( 'name TXT    txtdata ...' );
+
+    $rr = new Net::DNS::RR(
+	...
+	txtdata => 'single text string'
+	  or
+	txtdata => [ 'multiple', 'strings', ... ]
+	);
+
+    use encoding 'utf8';
+    $rr = new Net::DNS::RR( 'jp  TXT     古池や　蛙飛込む　水の音' );
 
 =head1 DESCRIPTION
 
@@ -119,70 +104,39 @@ Class for DNS Text (TXT) resource records.
 
 =head1 METHODS
 
+The available methods are those inherited from the base class augmented
+by the type-specific methods defined in this package.
+
+Use of undocumented package features or direct access to internal data
+structures is discouraged and could result in program termination or
+other unpredictable behaviour.
+
+
 =head2 txtdata
 
-    print "txtdata = ", $rr->txtdata, "\n";
+    $string = $rr->txtdata;
+    @list   = $rr->txtdata;
 
-Returns the descriptive text as a single string, regardless of actual
-number of <character-string> elements.  Of questionable value.  Should
-be deprecated.
+When invoked in scalar context, txtdata() returns the descriptive text
+as a single string, regardless of the number of elements.
 
-Use C<< $txt->rdatastr() >> or C<< $txt->char_str_list() >> instead.
-
-
-=head2 char_str_list
-
- print "Individual <character-string> list: \n\t",
-       join("\n\t", $rr->char_str_list());
-
-Returns a list of the individual <character-string> elements,
-as unquoted strings.  Used by TXT->rdatastr and TXT->rr_rdata.
-
-NB: rdatastr will return quoted strings.
-
-
-=head1 FEATURES
-
-The RR.pm module accepts semi-colons as a start of a comment. This is
-to allow the RR.pm to deal with RFC1035 specified zonefile format.
-
-For some applications of the TXT RR the semicolon is relevant, you
-will need to escape it on input.
-
-Also note that you should specify the several character strings
-separately. The easiest way to do so is to include the whole argument
-in single quotes and the several character strings in double
-quotes. Double quotes inside the character strings will need to be
-escaped.
-
-my $TXTrr=Net::DNS::RR->new('txt2.t.net-dns.org.	60	IN
-	TXT  "Test1 \" \; more stuff"  "Test2"');
-
-would result in
-$TXTrr->char_str_list())[0] containing 'Test1 " ; more stuff'
-and
-$TXTrr->char_str_list())[1] containing 'Test2'
-
-Note that the rdatastr method (and therefore the print, and string
-method) returns the escaped format.
-
-
+In a list context, txtdata() returns a list of the text elements.
 
 
 =head1 COPYRIGHT
 
-Copyright (c) 1997-2002 Michael Fuhr.
+Copyright (c)2011 Dick Franks.
 
-Portions Copyright (c) 2002-2004 Chris Reinhardt.
-Portions Copyright (c) 2005 Olaf Kolkman (NLnet Labs)
+Package template (c)2009,2012 O.M.Kolkman and R.W.Franks.
 
-All rights reserved.  This program is free software; you may redistribute
-it and/or modify it under the same terms as Perl itself.
+All rights reserved.
+
+This program is free software; you may redistribute it and/or
+modify it under the same terms as Perl itself.
+
 
 =head1 SEE ALSO
 
-L<perl(1)>, L<Net::DNS>, L<Net::DNS::Resolver>, L<Net::DNS::Packet>,
-L<Net::DNS::Header>, L<Net::DNS::Question>, L<Net::DNS::RR>,
-RFC 1035 Section 3.3.14
+L<perl>, L<Net::DNS>, L<Net::DNS::RR>, RFC1035 Section 3.3.14, RFC3629
 
 =cut

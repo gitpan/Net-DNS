@@ -1,4 +1,4 @@
-# $Id: 00-load.t 938 2011-10-28 13:27:31Z willem $	-*-perl-*-
+# $Id: 00-load.t 1027 2012-10-23 20:00:28Z willem $	-*-perl-*-
 
 use strict;
 use diagnostics;
@@ -9,9 +9,6 @@ BEGIN {
 	use_ok('Net::DNS');
 	use_ok('Net::DNS::Resolver::Recurse');
 	use_ok('Net::DNS::Nameserver');
-	use_ok('Net::DNS::Resolver::Cygwin');
-
-	# can't test windows, has registry stuff
 }
 
 
@@ -29,11 +26,11 @@ sub is_rr_loaded {
 
 
 #
-# Check on-demand loading using this list of RR packages
-my @rrs = qw( CNAME HINFO MB MG MINFO MR MX NULL NS PTR SOA TXT A
+# Check on-demand loading using this (incomplete) list of RR packages
+my @rrs = qw( CNAME HINFO MINFO MX NULL NS PTR SOA TXT A
 		AFSDB DNAME KX NAPTR PX RP RT SRV
-		AAAA APL CERT DHCID EID HIP IPSECKEY ISDN LOC
-		NIMLOC OPT SPF SSHFP TKEY TSIG X25 );
+		AAAA APL CERT DHCID HIP IPSECKEY ISDN LOC
+		OPT SPF SSHFP TKEY TSIG X25 );
 
 
 #
