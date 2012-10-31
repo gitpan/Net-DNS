@@ -1,6 +1,6 @@
 package Net::DNS::Resolver::Base;
 #
-# $Id: Base.pm 1005 2012-08-23 13:44:16Z willem $
+# $Id: Base.pm 1039 2012-10-30 09:46:56Z willem $
 #
 
 use strict;
@@ -24,7 +24,7 @@ use IO::Select;
 use Net::DNS;
 use Net::DNS::Packet;
 
-$VERSION = (qw$LastChangedRevision: 1005 $)[1];
+$VERSION = (qw$LastChangedRevision: 1039 $)[1];
 
 
 #
@@ -1236,6 +1236,7 @@ sub axfr_start {
 	$self->{'axfr_sel'}       = $sel;
 	$self->{'axfr_rr'}        = [];
 	$self->{'axfr_soa_count'} = 0;
+	$self->{'axfr_ns'}        = $ns;
 
 	return $sock;
 }
@@ -1306,8 +1307,11 @@ sub axfr_next {
 			return wantarray ? (undef, $err) : undef;
 		}
 
-		my $ans = Net::DNS::Packet->new(\$buf, $self->{debug});
+		my $ans = Net::DNS::Packet->new(\$buf);
 		my $err = $@;
+
+		$ans->answerfrom($self->{'axfr_ns'});
+		$ans->print if $self->{debug};
 
 		if ($ans) {
 			if ($ans->header->rcode ne 'NOERROR') {
