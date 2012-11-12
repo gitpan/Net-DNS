@@ -1,10 +1,10 @@
 package Net::DNS::Resolver;
 
 #
-# $Id: Resolver.pm 1020 2012-10-04 09:11:25Z willem $
+# $Id: Resolver.pm 1046 2012-11-09 12:21:41Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1020 $)[1];
+$VERSION = (qw$LastChangedRevision: 1046 $)[1];
 
 =head1 NAME
 
@@ -624,8 +624,8 @@ When set to true the answer and additional section of queries from
 secured zones will contain DNSKEY, NSEC and RRSIG records.
 
 Setting calling the dnssec method with a non-zero value will set the
-UDP packet size to the default value of 2048. If that is to small or
-to big for your environment you should call the udppacketsize()
+UDP packet size to the default value of 2048. If that is too small or
+too big for your environment you should call the udppacketsize()
 method immediately after.
 
    $res->dnssec(1);    # turns on DNSSEC and sets udp packetsize to 2048

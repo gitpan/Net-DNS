@@ -1,4 +1,4 @@
-# $Id: 01-resolver.t 964 2011-12-02 10:23:51Z willem $	-*-perl-*-
+# $Id: 01-resolver.t 1047 2012-11-09 21:51:36Z willem $	-*-perl-*-
 
 use strict;
 use Test::More tests => 47;
@@ -8,7 +8,7 @@ use Net::DNS;
 
 my $res = Net::DNS::Resolver->new();
 
-for (qw[Cygwin Win32]) {
+for ($^O) {
 	diag $_ if eval { $res->SUPER::isa("Net::DNS::Resolver::$_") };
 }
 

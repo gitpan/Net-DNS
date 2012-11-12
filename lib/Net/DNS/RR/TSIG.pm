@@ -1,10 +1,10 @@
 package Net::DNS::RR::TSIG;
 
 #
-# $Id: TSIG.pm 1037 2012-10-24 21:50:15Z willem $
+# $Id: TSIG.pm 1042 2012-11-01 21:03:37Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1037 $)[1];
+$VERSION = (qw$LastChangedRevision: 1042 $)[1];
 
 use base Net::DNS::RR;
 
@@ -202,7 +202,7 @@ sub sig_data {
 	$sigdata = pack 'H*', $self->{request_mac} if $self->{request_mac};
 
 	$sigdata .= $packet->data;
-	push @{$packet}{additional}, $self;
+	push @{$packet->{additional}}, $self;
 
 	my $kname = $self->{owner}->encode(0);			# uncompressed key name
 	$sigdata .= pack 'a* n N', $kname, ANY, 0;

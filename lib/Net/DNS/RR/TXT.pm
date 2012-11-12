@@ -1,10 +1,10 @@
 package Net::DNS::RR::TXT;
 
 #
-# $Id: TXT.pm 1037 2012-10-24 21:50:15Z willem $
+# $Id: TXT.pm 1042 2012-11-01 21:03:37Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1037 $)[1];
+$VERSION = (qw$LastChangedRevision: 1042 $)[1];
 
 use base Net::DNS::RR;
 
@@ -32,7 +32,7 @@ sub decode_rdata {			## decode rdata from wire-format octet string
 	$self->{txtdata} = [];
 	while ( $offset < $limit ) {
 		( $text, $offset ) = decode Net::DNS::Text( $data, $offset );
-		push @{$self}{txtdata}, $text;
+		push @{$self->{txtdata}}, $text;
 	}
 
 	croak('corrupt TXT data') unless $offset == $limit;	# more or less FUBAR

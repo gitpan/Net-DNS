@@ -1,10 +1,10 @@
 package Net::DNS::RR::HIP;
 
 #
-# $Id: HIP.pm 1037 2012-10-24 21:50:15Z willem $
+# $Id: HIP.pm 1042 2012-11-01 21:03:37Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1037 $)[1];
+$VERSION = (qw$LastChangedRevision: 1042 $)[1];
 
 use base Net::DNS::RR;
 
@@ -36,7 +36,7 @@ sub decode_rdata {			## decode rdata from wire-format octet string
 	while ( $offset < $limit ) {
 		my $item;
 		( $item, $offset ) = decode Net::DNS::DomainName($data,$offset );
-		push @{$self}{servers}, $item;
+		push @{$self->{servers}}, $item;
 	}
 	croak('corrupt HIP data') unless $offset == $limit;	# more or less FUBAR
 }

@@ -1,4 +1,4 @@
-# $Id: 00-version.t 1027 2012-10-23 20:00:28Z willem $ -*-perl-*-
+# $Id: 00-version.t 1044 2012-11-01 22:39:29Z willem $ -*-perl-*-
 
 use Test::More;
 use File::Spec;
@@ -9,19 +9,17 @@ use strict;
 my @files;
 my $blib = File::Spec->catfile(qw(blib lib));
 	
-find( sub { push(@files, $File::Find::name) if /\.pm$/}, $blib);
+find( sub { push(@files, $File::Find::name) if /\.pm$/ && !/Template/}, $blib);
 
 plan skip_all => 'No versions from git checkouts' if -e '.git';
 
 plan skip_all => 'Not sure how to parse versions.' unless eval { MM->can('parse_version') };
 
+plan tests => scalar @files;
 
 foreach my $file ( sort @files ) {
-	next if $file =~ /Template/;
 	my $version = MM->parse_version($file);
 	diag("$file\t=>\t$version") if $ENV{'NET_DNS_DEBUG'};
 	ok( $version =~ /[\d.]{3}/, "file version: $version\t$file" );
 }
-
-done_testing();
 

@@ -1,6 +1,6 @@
 package Net::DNS::Resolver::Base;
 #
-# $Id: Base.pm 1039 2012-10-30 09:46:56Z willem $
+# $Id: Base.pm 1046 2012-11-09 12:21:41Z willem $
 #
 
 use strict;
@@ -24,7 +24,7 @@ use IO::Select;
 use Net::DNS;
 use Net::DNS::Packet;
 
-$VERSION = (qw$LastChangedRevision: 1039 $)[1];
+$VERSION = (qw$LastChangedRevision: 1046 $)[1];
 
 
 #
@@ -1113,7 +1113,7 @@ sub make_query_packet {
 	my $optrr = Net::DNS::RR->new(
 						Type         => 'OPT',
 						Name         => '',
-						Class        => $self->{'udppacketsize'},  # Decimal UDPpayload
+						Class        => $self->{'udppacketsize'},  # requestor's UDP payload size
 						ednsflags    => 0x8000, # first bit set see RFC 3225
 				   );
 
@@ -1126,7 +1126,7 @@ sub make_query_packet {
 	    my $optrr = Net::DNS::RR->new(
 						Type         => 'OPT',
 						Name         => '',
-						Class        => $self->{'udppacketsize'},  # Decimal UDPpayload
+						Class        => $self->{'udppacketsize'},  # requestor's UDP payload size
 						TTL          => 0x0000 # RCODE 32bit Hex
 				    );
 

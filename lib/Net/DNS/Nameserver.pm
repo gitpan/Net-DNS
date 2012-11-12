@@ -1,10 +1,10 @@
 package Net::DNS::Nameserver;
 
 #
-# $Id: Nameserver.pm 1019 2012-10-04 08:29:09Z willem $
+# $Id: Nameserver.pm 1046 2012-11-09 12:21:41Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1019 $)[1];
+$VERSION = (qw$LastChangedRevision: 1046 $)[1];
 
 
 =head1 NAME
@@ -516,7 +516,7 @@ sub loop_once {
 					# victims of DoS (client sending lots of queries and never reading
 					# from it's socket).
 					# Note that this does not disable serialisation on part of the
-					# client. The split second it should take for us to lookip the
+					# client. The split second it should take for us to lookup the
 					# next query, is likely faster than the time it takes to
 					# send the response... well, unless it's a lot of tiny queries,
 					# in which case we will be generating an entire TCP packet per
@@ -593,7 +593,7 @@ Creates a nameserver object.  Attributes are:
     Verbose		Print info about received
 			queries.			Defaults to 0 (off).
     Truncate		Truncates UDP packets that
-			are to big for the reply	Defaults to 1 (on)
+			are too big for the reply	Defaults to 1 (on)
     IdleTimeout		TCP clients are disconnected
 			if they are idle longer than
 			this duration.			Defaults to 120 (secs)

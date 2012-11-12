@@ -1,10 +1,10 @@
 package Net::DNS::RR::X25;
 
 #
-# $Id: X25.pm 1037 2012-10-24 21:50:15Z willem $
+# $Id: X25.pm 1047 2012-11-09 21:51:36Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1037 $)[1];
+$VERSION = (qw$LastChangedRevision: 1047 $)[1];
 
 use base Net::DNS::RR;
 
@@ -31,7 +31,7 @@ sub decode_rdata {			## decode rdata from wire-format octet string
 sub encode_rdata {			## encode rdata as wire-format octet string
 	my $self = shift;
 
-	my $length = length($self->{address}) || return '';
+	my $length = length( $self->{address} || return '' );
 	pack 'C a*', $length, $self->{address};
 }
 
@@ -39,7 +39,6 @@ sub encode_rdata {			## encode rdata as wire-format octet string
 sub format_rdata {			## format rdata portion of RR string.
 	my $self = shift;
 
-	return '' unless length($self->{address});
 	$self->address;
 }
 
@@ -94,7 +93,7 @@ in X.121.
 
 =head1 COPYRIGHT
 
-Copyright (c) 1997 Michael Fuhr. 
+Copyright (c)1997 Michael Fuhr. 
 
 Package template (c)2009,2012 O.M.Kolkman and R.W.Franks.
 

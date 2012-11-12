@@ -1,10 +1,10 @@
 package Net::DNS::RR::SSHFP;
 
 #
-# $Id: SSHFP.pm 1037 2012-10-24 21:50:15Z willem $
+# $Id: SSHFP.pm 1046 2012-11-09 12:21:41Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1037 $)[1];
+$VERSION = (qw$LastChangedRevision: 1046 $)[1];
 
 use base Net::DNS::RR;
 
@@ -106,7 +106,7 @@ __END__
 
 =head1 DESCRIPTION
 
-DNS SSH Fingerprint (SSHFP) resource records.
+DNS SSH Fingerprint (SSHFP) resource records - RFC 4255.
 
 =head1 METHODS
 

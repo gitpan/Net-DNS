@@ -1,6 +1,6 @@
 # t::Testdata
 # Stores some information for t/05-rr.t which is useful for reuse in other test modules that are not distributed.
-# $Id$
+# $Id: TestData.pm 1047 2012-11-09 21:51:36Z willem $
 
 
 
