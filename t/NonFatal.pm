@@ -1,4 +1,4 @@
-# $Id: NonFatal.pm 895 2011-09-19 14:48:24Z willem $	-*-perl-*-
+# $Id: NonFatal.pm 1049 2012-11-12 10:03:27Z willem $	-*-perl-*-
 
 # Test::More calls functions from Test::Builder. Those functions all eventually
 # call Test::Builder::ok (on a builder instance) for reporting the status.
@@ -24,6 +24,8 @@
 
 	sub ok {
 		my ($self, $test, $name) = @_;
+
+		$name ||= '';
 
 		$name = "NOT OK, but tolerating failure, $name" unless $test;
 		
