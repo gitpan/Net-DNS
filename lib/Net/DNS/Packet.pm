@@ -1,10 +1,10 @@
 package Net::DNS::Packet;
 
 #
-# $Id: Packet.pm 1042 2012-11-01 21:03:37Z willem $
+# $Id: Packet.pm 1051 2012-11-19 11:58:34Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1042 $)[1];
+$VERSION = (qw$LastChangedRevision: 1051 $)[1];
 
 
 =head1 NAME
@@ -27,13 +27,12 @@ A C<Net::DNS::Packet> object represents a DNS protocol packet.
 =cut
 
 
+use base Exporter;
+@EXPORT_OK = qw(dn_expand);
+
 use strict;
 use integer;
 use Carp;
-
-use Exporter 'import';
-use vars qw(@EXPORT_OK);
-@EXPORT_OK = qw(dn_expand);
 
 use Net::DNS::Header;
 use Net::DNS::Question;
@@ -454,8 +453,8 @@ sub push {
 			}
 		}
 
-		return CORE::push( @{$self->{answer}},	 @rr ) if /^ans|^pre/;
-		return CORE::push( @{$self->{authority}},	 @rr ) if /^auth|^upd/;
+		return CORE::push( @{$self->{answer}},	   @rr ) if /^ans|^pre/;
+		return CORE::push( @{$self->{authority}},  @rr ) if /^auth|^upd/;
 		return CORE::push( @{$self->{additional}}, @rr ) if /^add/;
 	}
 
@@ -513,9 +512,9 @@ sub pop {
 
 	for ($section) {
 		return CORE::pop( @{$self->{additional}} ) if /^add/;
-		return CORE::pop( @{$self->{answer}} )	 if /^ans|^pre/;
-		return CORE::pop( @{$self->{authority}} )	 if /^auth|^upd/;
-		return CORE::pop( @{$self->{question}} )	 if /^question/;
+		return CORE::pop( @{$self->{answer}} )	   if /^ans|^pre/;
+		return CORE::pop( @{$self->{authority}} )  if /^auth|^upd/;
+		return CORE::pop( @{$self->{question}} )   if /^question/;
 	}
 
 	carp qq(invalid section "$section");
