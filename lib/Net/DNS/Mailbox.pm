@@ -2,10 +2,10 @@ package Net::DNS::Mailbox;
 use base qw(Net::DNS::DomainName);
 
 #
-# $Id: Mailbox.pm 1006 2012-08-24 14:18:12Z willem $
+# $Id: Mailbox.pm 1055 2012-11-21 23:08:47Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1006 $)[1];
+$VERSION = (qw$LastChangedRevision: 1055 $)[1];
 
 
 =head1 NAME
@@ -58,10 +58,13 @@ sub new {
 	s/^(".*)\@(.*")/$1\\064$2/g;				# disguise quoted @
 
 	my ( $mbox, @host ) = split /\@/;			# split on @ if present
-	$mbox ||= '';
-	$mbox =~ s/^"(.*)"$/$1/;				# strip quotes
-	$mbox =~ s/\\\./\\046/g;				# disguise escaped dot
-	$mbox =~ s/\./\\046/g if @host;				# escape dots in local part
+	for ( $mbox ||= '' ) {
+		s/\\\s/\\032/g;					# disguise escaped white space
+		s/^(".*)\s+(.*")/$1\\032$2/g;			# disguise quoted white space
+		s/^"(.*)"/$1/;					# strip quotes
+		s/\\\./\\046/g;					# disguise escaped dot
+		s/\./\\046/g if @host;				# escape dots in local part
+	}
 
 	bless __PACKAGE__->SUPER::new( join '.', $mbox, @host ), $class;
 }

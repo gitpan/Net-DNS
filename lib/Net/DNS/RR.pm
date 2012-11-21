@@ -1,10 +1,10 @@
 package Net::DNS::RR;
 
 #
-# $Id: RR.pm 1047 2012-11-09 21:51:36Z willem $
+# $Id: RR.pm 1054 2012-11-21 14:09:01Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1047 $)[1];
+$VERSION = (qw$LastChangedRevision: 1054 $)[1];
 
 
 =head1 NAME
@@ -109,7 +109,7 @@ sub new_string {
 
 	my $name    = shift @token;				# name [ttl] [class] type ...
 	my $ttl	    = shift @token if @token && $token[0] =~ /^\d/;
-	my $rrclass = shift @token if @token && $token[0] =~ /^$CLASS_REGEX$/io;
+	my $rrclass = shift @token if @token && $token[0] =~ /^($CLASS_REGEX)$/io;
 	$ttl = shift @token if @token && $token[0] =~ /^\d/;	# name [class] [ttl] type ...
 	my $rrtype = shift(@token);
 

@@ -1,4 +1,4 @@
-# $Id: 07-zonefile.t 1048 2012-11-12 07:11:28Z willem $	-*-perl-*-
+# $Id: 07-zonefile.t 1055 2012-11-21 23:08:47Z willem $	-*-perl-*-
 
 use strict;
 use FileHandle;
@@ -9,20 +9,22 @@ use t::NonFatal;
 
 use constant UTF8 => eval {
 	require Encode;
-	use encoding 'utf8';
-	Encode::decode_utf8( chr(91) ) eq '[';			# specifically not UTF-EBCDIC
-};
+	die if Encode::decode_utf8( chr(91) ) ne '[';		# not UTF-EBCDIC  [see UTR#16 3.6]
+	Encode::find_encoding('UTF8');
+} || 0;
 
 use constant LIBIDN => eval {					# optional IDN support
 	require Net::LibIDN;
 	Net::LibIDN::idn_to_ascii( pack( 'U*', 20013, 22269 ), 'utf-8' ) eq 'xn--fiqs8s';
-};
+} || 0;
 
 
 BEGIN {
 	use_ok('Net::DNS::ZoneFile');
-	NonFatalBegin();
 }
+
+
+NonFatalBegin();
 
 
 my $seq;
@@ -214,15 +216,15 @@ EOF
 
 
 {
-	my $data  = "";
-	my $listref = Net::DNS::ZoneFile->parse( \$data );
+	my $string  = "";
+	my $listref = Net::DNS::ZoneFile->parse( \$string );
 	is( scalar(@$listref), 0, 'parse empty string' );
 }
 
 
 {
-	my $data  = "a1.example A 192.0.2.1\na2.example A 192.0.2.2";
-	my $listref = Net::DNS::ZoneFile->parse( \$data );	# this also tests readfh()
+	my $string  = "a1.example A 192.0.2.1\na2.example A 192.0.2.2";
+	my $listref = Net::DNS::ZoneFile->parse( \$string );	# this also tests readfh()
 	is( scalar(@$listref), 2, 'parse RR string' );
 }
 

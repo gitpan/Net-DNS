@@ -1,10 +1,10 @@
 package Net::DNS::ZoneFile;
 
 #
-# $Id: ZoneFile.pm 1053 2012-11-19 12:51:40Z willem $
+# $Id: ZoneFile.pm 1055 2012-11-21 23:08:47Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1053 $)[1];
+$VERSION = (qw$LastChangedRevision: 1055 $)[1];
 
 
 =head1 NAME
@@ -51,11 +51,11 @@ use FileHandle;
 use Net::DNS::Domain;
 use Net::DNS::RR;
 
-
 use constant UTF8 => eval {
 	require Encode;
-	Encode::decode_utf8( chr(91) ) eq '[';			# specifically not UTF-EBCDIC
-};
+	die if Encode::decode_utf8( chr(91) ) ne '[';		# not UTF-EBCDIC  [see UTR#16 3.6]
+	Encode::find_encoding('UTF8');
+} || 0;
 
 
 =head1 METHODS
