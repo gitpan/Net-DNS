@@ -1,10 +1,10 @@
 package Net::DNS::RR::HIP;
 
 #
-# $Id: HIP.pm 1042 2012-11-01 21:03:37Z willem $
+# $Id: HIP.pm 1063 2012-12-03 22:13:02Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1042 $)[1];
+$VERSION = (qw$LastChangedRevision: 1063 $)[1];
 
 use base Net::DNS::RR;
 
@@ -59,9 +59,9 @@ sub format_rdata {			## format rdata portion of RR string.
 	return '' unless $self->{hitbin};
 	my $algorithm = $self->pkalgorithm;
 	my $hit	      = $self->hit;
-	my $base64    = MIME::Base64::encode $self->keybin;
+	my $base64    = MIME::Base64::encode $self->keybin, "";
 	my @servers   = map $_->string, @{$self->{servers}};
-	return "$algorithm $hit (\n$base64@servers )";
+	return "$algorithm $hit (\n$base64\n@servers )";
 }
 
 

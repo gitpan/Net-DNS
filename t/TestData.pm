@@ -1,6 +1,6 @@
 # t::Testdata
 # Stores some information for t/05-rr.t which is useful for reuse in other test modules that are not distributed.
-# $Id: TestData.pm 1047 2012-11-09 21:51:36Z willem $
+# $Id: TestData.pm 1063 2012-12-03 22:13:02Z willem $
 
 
 
@@ -158,12 +158,12 @@ use vars qw(  @rrs   @EXPORT  );
       {	#[23]
        type         => 'LOC',
        version      => 0,
-       size         => 3000,
-       horiz_pre    => 500000,
-       vert_pre     => 500,
-       latitude     => 2001683648,
-       longitude    => 1856783648,
-       altitude     => 9997600,
+       size         => 5,
+       horiz_pre    => 2,
+       vert_pre     => 2,
+       latitude     => 52.3565556,
+       longitude    => 4.9557639,
+       altitude     => -2,
       }, 	#[24]
       {
        type         => 'CERT',

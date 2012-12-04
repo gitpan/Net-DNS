@@ -1,10 +1,10 @@
 package Net::DNS::RR;
 
 #
-# $Id: RR.pm 1054 2012-11-21 14:09:01Z willem $
+# $Id: RR.pm 1061 2012-12-03 14:43:09Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1054 $)[1];
+$VERSION = (qw$LastChangedRevision: 1061 $)[1];
 
 
 =head1 NAME
@@ -57,10 +57,10 @@ sub new {
 
 	if (COMPATIBLE) {
 		return &_new_from_rdata if ref $_[1];		# resolve new() usage conflict
-		return @_ > 3 ? &new_hash : &new_string;	# avoid exception trap/reraise
+		return scalar @_ > 2 ? &new_hash : &new_string; # avoid exception trap/reraise
 	}
 
-	return eval { @_ > 3 ? &new_hash : &new_string; } || croak "${@}new $class( ... )";
+	return eval { scalar @_ > 2 ? &new_hash : &new_string; } || croak "${@}new $class( ... )";
 }
 
 
@@ -97,7 +97,6 @@ my %dnssectype = map { ( $_, 1 ) } qw(DLV DNSKEY DS KEY NSEC NSEC3 NSEC3PARAM NX
 sub new_string {
 	my $class = shift;
 	local $_ = shift || croak 'empty or undefined argument';
-	my $update = shift;
 
 	# parse into quoted strings, contiguous non-whitespace, (discarded) brackets and comments
 	s/\\\\/\\092/g;						# disguise escaped escape
@@ -111,50 +110,7 @@ sub new_string {
 	my $ttl	    = shift @token if @token && $token[0] =~ /^\d/;
 	my $rrclass = shift @token if @token && $token[0] =~ /^($CLASS_REGEX)$/io;
 	$ttl = shift @token if @token && $token[0] =~ /^\d/;	# name [class] [ttl] type ...
-	my $rrtype = shift(@token);
-
-	if ($update) {
-
-		for ( lc $update ) {
-			/yxrrset/ and do {
-				$rrclass = 'ANY' unless @token;
-				last;
-			};
-
-			/nxrrset/ and do {
-				$rrclass = 'NONE';
-				@token	 = ();
-				last;
-			};
-
-			/yxdomain/ and do {
-				$rrclass = 'ANY';
-				$rrtype	 = 'ANY';
-				@token	 = ();
-				last;
-			};
-
-			/nxdomain/ and do {
-				$rrclass = 'NONE';
-				$rrtype	 = 'ANY';
-				@token	 = ();
-				last;
-			};
-
-			/rr_add/ and do {
-				$ttl ||= 86400;
-				last;
-			};
-
-			/rr_del/ and do {
-				$rrclass = @token ? 'NONE' : 'ANY';
-				last;
-			};
-		}
-
-		$rrtype ||= 'ANY';
-		$ttl	||= 0;
-	}
+	my $rrtype = shift(@token) || croak 'unable to parse RR string';
 
 	my $base = new Net::DNS::Question( $name, $rrtype, $rrclass );
 	my $self = $class->_subclass( $base, scalar @token );	# RR with defaults (if appropriate)
@@ -409,7 +365,6 @@ sub type {
 		return $self->{type} || 'A';
 	}
 
-	$self->{class} = classbyname(shift) if @_;
 	confess 'not possible to change RR->type' if @_;
 	typebyval( $self->{type} || 1 );
 }
@@ -448,7 +403,7 @@ Resource record time to live in seconds.
 # The following time units are recognised, but are not part of the
 # published API.  These are required for parsing BIND zone files but
 # should not be used in other contexts.
-my %unit = ( w => 604800, d => 86400, h => 3600, m => 60, s => 1 );
+my %unit = ( W => 604800, D => 86400, H => 3600, M => 60, S => 1 );
 
 sub ttl {
 	my $self  = shift;
@@ -457,9 +412,10 @@ sub ttl {
 	return $self->{ttl} || 0 unless defined $value;		# avoid defining rr->{ttl}
 
 	my $ttl = 0;
-	my %time = reverse split /(\D)\D*/, lc($value) . 's';
+	my %time = reverse split /(\D)\D*/, uc($value) . 'S';
 	while ( my ( $u, $t ) = each %time ) {
-		$ttl += $unit{$u} > 1 ? $t * $unit{$u} : $t;
+		my $s = $unit{$u} || croak qq(bad time unit "$u");
+		$ttl += $s > 1 ? $t * $s : $t;
 	}
 	$self->{ttl} = $ttl;
 }

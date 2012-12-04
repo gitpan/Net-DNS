@@ -1,5 +1,5 @@
 
-# $Id: Makefile.PL 1022 2012-10-04 09:51:52Z willem $ -*-perl-*-
+# $Id: Makefile.PL 1061 2012-12-03 14:43:09Z willem $ -*-perl-*-
 
 use strict;
 $^W = 1;
@@ -147,7 +147,7 @@ my %Makefile = (
 	C     => [],
 	clean => {
 		FILES =>
-'t/IPv6.enabled t/online.enabled t/online.nonfatal compile.* DNS.o DNS.c DNS.bs lib/Net/DNS/Resolver/MSWin32'
+'t/IPv6.enabled t/online.enabled t/online.nonfatal compile.* DNS.o DNS.c DNS.bs lib/Net/DNS/Resolver/MSWin32 zone[0-9].txt zone[0-9][0-9].txt'
 				},
 			);
 
