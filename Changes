@@ -1,6 +1,6 @@
-$Id: Changes 1057 2012-11-27 07:24:19Z willem $                       -*-text-*-
+$Id: Changes 1064 2012-12-04 08:51:46Z willem $                       -*-text-*-
 
-**** 0.69 Nov 26, 2012
+**** 0.69 Dec 5, 2012
 
 Feature added support for NID L32 L64 LP, RFC6742.
 
