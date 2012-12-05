@@ -1,21 +1,20 @@
-# $Id: 05-LOC.t 1066 2012-12-05 13:38:13Z willem $	-*-perl-*-
+# $Id: 05-LP.t 1050 2012-11-17 21:22:15Z willem $	-*-perl-*-
 
 use strict;
-use Test::More tests => 14;
+use Test::More tests => 13;
 
 
 use Net::DNS;
 
 
-my $name = 'LOC.example';
-my $type = 'LOC';
-my $code = 29;
-my @attr = qw( latitude longitude altitude size hp vp );
-my @data = qw( 42.35799 -71.014338 -44 2000 10 10 );
+my $name = 'LP.example';
+my $type = 'LP';
+my $code = 107;
+my @attr = qw( preference locator );
+my @data = qw( 10 locator.example.com );
 my @also = qw( );
 
-my $wire = '002513138916cb3c70c310df00988550';
-
+my $wire = join '', qw( 000a076c6f6361746f72076578616d706c6503636f6d00 );
 
 {
 	my $typecode = unpack 'xn', new Net::DNS::RR(". $type")->encode;
@@ -30,10 +29,8 @@ my $wire = '002513138916cb3c70c310df00988550';
 		%$hash
 		);
 
-
 	my $string = $rr->string;
 	my $rr2	   = new Net::DNS::RR($string);
-
 	is( $rr2->string, $string, 'new/string transparent' );
 
 	is( $rr2->encode, $rr->encode, 'new($string) and new(%hash) equivalent' );
@@ -45,8 +42,11 @@ my $wire = '002513138916cb3c70c310df00988550';
 	foreach (@also) {
 		is( $rr2->$_, $rr->$_, "additional attribute rr->$_()" );
 	}
+}
 
 
+{
+	my $rr	    = new Net::DNS::RR("$name $type @data");
 	my $null    = new Net::DNS::RR("$name NULL")->encode;
 	my $empty   = new Net::DNS::RR("$name $type")->encode;
 	my $rxbin   = decode Net::DNS::RR( \$empty )->encode;
@@ -63,6 +63,19 @@ my $wire = '002513138916cb3c70c310df00988550';
 	is( length($rxbin),  length($null), 'decoded RDATA can be empty' );
 	is( length($rxtext), length($null), 'string RDATA can be empty' );
 }
+
+
+{
+	my $lc		= new Net::DNS::RR( lc ". $type @data" );
+	my $rr		= new Net::DNS::RR( uc ". $type @data" );
+	my $hash	= {};
+	my $predecessor = $rr->encode( 0, $hash );
+	my $compressed	= $rr->encode( length $predecessor, $hash );
+	ok( length $compressed == length $predecessor, 'encoded RDATA not compressible' );
+	isnt( $rr->encode,    $lc->encode, 'encoded RDATA names not downcased' );
+	isnt( $rr->canonical, $lc->encode, 'canonical RDATA names not downcased' );
+}
+
 
 exit;
 

@@ -1,20 +1,20 @@
-# $Id: 05-LOC.t 1066 2012-12-05 13:38:13Z willem $	-*-perl-*-
+# $Id: 05-NID.t 1050 2012-11-17 21:22:15Z willem $	-*-perl-*-
 
 use strict;
-use Test::More tests => 14;
+use Test::More tests => 10;
 
 
 use Net::DNS;
 
 
-my $name = 'LOC.example';
-my $type = 'LOC';
-my $code = 29;
-my @attr = qw( latitude longitude altitude size hp vp );
-my @data = qw( 42.35799 -71.014338 -44 2000 10 10 );
+my $name = 'NID.example';
+my $type = 'NID';
+my $code = 104;
+my @attr = qw( preference nodeid );
+my @data = qw( 10 0014:4fff:ff20:ee64 );
 my @also = qw( );
 
-my $wire = '002513138916cb3c70c310df00988550';
+my $wire = '000a00144fffff20ee64';
 
 
 {
@@ -30,10 +30,8 @@ my $wire = '002513138916cb3c70c310df00988550';
 		%$hash
 		);
 
-
 	my $string = $rr->string;
 	my $rr2	   = new Net::DNS::RR($string);
-
 	is( $rr2->string, $string, 'new/string transparent' );
 
 	is( $rr2->encode, $rr->encode, 'new($string) and new(%hash) equivalent' );
