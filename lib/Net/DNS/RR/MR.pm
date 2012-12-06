@@ -1,6 +1,6 @@
 package Net::DNS::RR::MR;
 #
-# $Id: MR.pm 1037 2012-10-24 21:50:15Z willem $
+# $Id: MR.pm 1068 2012-12-06 10:38:51Z willem $
 #
 use strict;
 BEGIN {
@@ -9,7 +9,7 @@ BEGIN {
 use vars qw(@ISA $VERSION);
 
 @ISA     = qw(Net::DNS::RR);
-$VERSION = (qw$LastChangedRevision: 1037 $)[1];
+$VERSION = (qw$LastChangedRevision: 1068 $)[1];
 
 sub new {
 	my ($class, $self, $data, $offset) = @_;

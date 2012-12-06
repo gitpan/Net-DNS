@@ -1,10 +1,10 @@
 package Net::DNS::RR::SSHFP;
 
 #
-# $Id: SSHFP.pm 1046 2012-11-09 12:21:41Z willem $
+# $Id: SSHFP.pm 1068 2012-12-06 10:38:51Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1046 $)[1];
+$VERSION = (qw$LastChangedRevision: 1068 $)[1];
 
 use base Net::DNS::RR;
 

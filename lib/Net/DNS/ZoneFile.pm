@@ -1,10 +1,10 @@
 package Net::DNS::ZoneFile;
 
 #
-# $Id: ZoneFile.pm 1059 2012-11-30 11:19:14Z willem $
+# $Id: ZoneFile.pm 1068 2012-12-06 10:38:51Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1059 $)[1];
+$VERSION = (qw$LastChangedRevision: 1068 $)[1];
 
 
 =head1 NAME

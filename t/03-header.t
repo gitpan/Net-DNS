@@ -1,4 +1,4 @@
-# $Id: 03-header.t 1018 2012-10-04 08:04:01Z willem $
+# $Id: 03-header.t 1068 2012-12-06 10:38:51Z willem $
 
 use Test::More tests => 58;
 use strict;

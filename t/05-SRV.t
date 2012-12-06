@@ -1,4 +1,4 @@
-# $Id: 05-SRV.t 1032 2012-10-24 12:07:36Z willem $	-*-perl-*-
+# $Id: 05-SRV.t 1068 2012-12-06 10:38:51Z willem $	-*-perl-*-
 
 use strict;
 use Test::More tests => 15;

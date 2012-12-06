@@ -1,4 +1,4 @@
-# $Id: 06-update.t 966 2011-12-06 21:05:59Z willem $  -*-perl-*-
+# $Id: 06-update.t 1068 2012-12-06 10:38:51Z willem $  -*-perl-*-
 
 use Test::More tests => 72;
 use strict;

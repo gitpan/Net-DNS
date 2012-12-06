@@ -2,10 +2,10 @@ package Net::DNS::Mailbox;
 use base qw(Net::DNS::DomainName);
 
 #
-# $Id: Mailbox.pm 1055 2012-11-21 23:08:47Z willem $
+# $Id: Mailbox.pm 1068 2012-12-06 10:38:51Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1055 $)[1];
+$VERSION = (qw$LastChangedRevision: 1068 $)[1];
 
 
 =head1 NAME

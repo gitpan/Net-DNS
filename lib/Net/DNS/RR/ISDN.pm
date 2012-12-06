@@ -1,10 +1,10 @@
 package Net::DNS::RR::ISDN;
 
 #
-# $Id: ISDN.pm 1037 2012-10-24 21:50:15Z willem $
+# $Id: ISDN.pm 1068 2012-12-06 10:38:51Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1037 $)[1];
+$VERSION = (qw$LastChangedRevision: 1068 $)[1];
 
 use base Net::DNS::RR;
 

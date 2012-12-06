@@ -1,10 +1,10 @@
 package Net::DNS::Text;
 
 #
-# $Id: Text.pm 1006 2012-08-24 14:18:12Z willem $
+# $Id: Text.pm 1068 2012-12-06 10:38:51Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1006 $)[1];
+$VERSION = (qw$LastChangedRevision: 1068 $)[1];
 
 
 =head1 NAME

@@ -2,10 +2,10 @@ package Net::DNS::Resolver::cygwin;
 use base Net::DNS::Resolver::Base;
 
 #
-# $Id: cygwin.pm 1021 2012-10-04 09:18:29Z willem $
+# $Id: cygwin.pm 1068 2012-12-06 10:38:51Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1021 $)[1];
+$VERSION = (qw$LastChangedRevision: 1068 $)[1];
 
 =head1 NAME
 

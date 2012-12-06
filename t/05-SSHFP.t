@@ -1,4 +1,4 @@
-# $Id: 05-SSHFP.t 1034 2012-10-24 13:57:13Z willem $	-*-perl-*-
+# $Id: 05-SSHFP.t 1068 2012-12-06 10:38:51Z willem $	-*-perl-*-
 
 use strict;
 use Test::More tests => 13;
