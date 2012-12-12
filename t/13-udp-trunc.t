@@ -1,4 +1,4 @@
-# $Id: 13-udp-trunc.t 1068 2012-12-06 10:38:51Z willem $ -*-perl-*-
+# $Id: 13-udp-trunc.t 1020 2012-10-04 09:11:25Z willem $ -*-perl-*-
 # Bulk of this code is contributed by Aaron Crane in 2008
 # via rt.cpan.org ticket 33547
 # Portions (c) 2009 Olaf Kolkman

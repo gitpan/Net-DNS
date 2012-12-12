@@ -1,10 +1,10 @@
 package Net::DNS::Packet;
 
 #
-# $Id: Packet.pm 1068 2012-12-06 10:38:51Z willem $
+# $Id: Packet.pm 1051 2012-11-19 11:58:34Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1068 $)[1];
+$VERSION = (qw$LastChangedRevision: 1051 $)[1];
 
 
 =head1 NAME

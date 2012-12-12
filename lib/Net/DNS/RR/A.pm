@@ -1,10 +1,10 @@
 package Net::DNS::RR::A;
 
 #
-# $Id: A.pm 1068 2012-12-06 10:38:51Z willem $
+# $Id: A.pm 1043 2012-11-01 22:30:17Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1068 $)[1];
+$VERSION = (qw$LastChangedRevision: 1043 $)[1];
 
 use base Net::DNS::RR;
 

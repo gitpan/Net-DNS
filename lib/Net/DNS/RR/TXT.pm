@@ -1,10 +1,10 @@
 package Net::DNS::RR::TXT;
 
 #
-# $Id: TXT.pm 1068 2012-12-06 10:38:51Z willem $
+# $Id: TXT.pm 1070 2012-12-09 21:18:09Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1068 $)[1];
+$VERSION = (qw$LastChangedRevision: 1070 $)[1];
 
 use base Net::DNS::RR;
 
@@ -20,6 +20,7 @@ Net::DNS::RR::TXT - DNS TXT resource record
 use strict;
 use integer;
 
+use Carp;
 use Net::DNS::Text;
 
 
@@ -65,7 +66,7 @@ sub parse_rdata {			## populate RR from rdata in argument list
 sub txtdata {
 	my $self = shift;
 
-	@{$self}{txtdata} = [map Net::DNS::Text->new($_), @_] if @_;
+	@{$self}{txtdata} = [map Net::DNS::Text->new($_), @_] if scalar @_;
 
 	my $txtdata = $self->{txtdata} || [];
 
@@ -75,7 +76,7 @@ sub txtdata {
 }
 
 
-sub char_str_list {				## historical
+sub char_str_list {			## historical
 	return (&txtdata);
 }
 

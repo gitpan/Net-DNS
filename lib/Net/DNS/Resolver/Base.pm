@@ -1,6 +1,6 @@
 package Net::DNS::Resolver::Base;
 #
-# $Id: Base.pm 1068 2012-12-06 10:38:51Z willem $
+# $Id: Base.pm 1074 2012-12-10 20:46:01Z willem $
 #
 
 use strict;
@@ -24,7 +24,7 @@ use IO::Select;
 use Net::DNS;
 use Net::DNS::Packet;
 
-$VERSION = (qw$LastChangedRevision: 1068 $)[1];
+$VERSION = (qw$LastChangedRevision: 1074 $)[1];
 
 
 #
@@ -885,16 +885,19 @@ sub send_udp {
 				  $self->errorstring($@);
 
 				  if (defined $ans) {
-				      next SELECTOR unless ( $ans->header->qr || $self->{'ignqrid'});
-				      next SELECTOR unless  ( ($ans->header->id == $packet->header->id) || $self->{'ignqrid'} );
+				      my $header = $ans->header;
+				      next SELECTOR unless ( $header->qr || $self->{'ignqrid'});
+				      next SELECTOR unless  ( ($header->id == $packet->header->id) || $self->{'ignqrid'} );
+				      my $rcode = $header->rcode;
+				      $self->errorstring($rcode) unless $@;
+
 				      $ans->answerfrom($self->answerfrom);
-				      if ($ans->header->rcode ne "NOERROR" &&
-					  $ans->header->rcode ne "NXDOMAIN"){
+				      if ($rcode ne "NOERROR" && $rcode ne "NXDOMAIN"){
 					  # Remove this one from the stack
 
-					  print "RCODE: ".$ans->header->rcode ."; trying next nameserver\n" if $self->{'debug'};
+					  print "RCODE: $rcode; trying next nameserver\n" if $self->{'debug'};
 					  $nmbrnsfailed++;
-					  $ns->[3]="RCODE: ".$ans->header->rcode();
+					  $ns->[3]="RCODE: $rcode";
 					  $lastanswer=$ans;
 					  next NAMESERVER ;
 
@@ -1102,36 +1105,21 @@ sub make_query_packet {
 		$packet->header->rd($self->{'recurse'});
 	}
 
-    if ($self->{'dnssec'}) {
-	    # RFC 3225
-    	print ";; Adding EDNS extention with UDP packetsize $self->{'udppacketsize'} and DNS OK bit set\n"
-    		if $self->{'debug'};
+	if ( $self->{dnssec} ) {				# RFC 3225
+		print ";; Set EDNS DO flag and UDP packetsize $self->{udppacketsize}\n" if $self->{debug};
+		$packet->edns->size($self->{udppacketsize});	# advertise UDP payload size for local IP stack
+		$packet->header->do(1);
 
+		$packet->header->ad($self->{adflag});
+		$packet->header->cd($self->{cdflag});
 
-	$packet->header->cd($self->{'cdflag'});
-	$packet->header->ad($self->{'adflag'});
-	my $optrr = Net::DNS::RR->new(
-						Type         => 'OPT',
-						Name         => '',
-						Class        => $self->{'udppacketsize'},  # requestor's UDP payload size
-						ednsflags    => 0x8000, # first bit set see RFC 3225
-				   );
+	} elsif ($self->{udppacketsize} > Net::DNS::PACKETSZ()) {
+		print ";; Clear EDNS DO flag and set UDP packetsize $self->{udppacketsize}\n" if $self->{debug};
+		$packet->edns->size($self->{udppacketsize});	# advertise UDP payload size for local IP stack
+		$packet->header->do(0);
 
-
-	    $packet->push('additional', $optrr) unless defined  $packet->{'optadded'} ;
-	    $packet->{'optadded'}=1;
-	} elsif ($self->{'udppacketsize'} > Net::DNS::PACKETSZ()) {
-	    print ";; Adding EDNS extention with UDP packetsize  $self->{'udppacketsize'}.\n" if $self->{'debug'};
-	    # RFC 3225
-	    my $optrr = Net::DNS::RR->new(
-						Type         => 'OPT',
-						Name         => '',
-						Class        => $self->{'udppacketsize'},  # requestor's UDP payload size
-						TTL          => 0x0000 # RCODE 32bit Hex
-				    );
-
-	    $packet->push('additional', $optrr) unless defined  $packet->{'optadded'} ;
-	    $packet->{'optadded'}=1;
+	} else {
+		$packet->header->do(0);
 	}
 
 

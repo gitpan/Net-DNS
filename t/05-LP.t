@@ -1,4 +1,4 @@
-# $Id: 05-LP.t 1068 2012-12-06 10:38:51Z willem $	-*-perl-*-
+# $Id: 05-LP.t 1050 2012-11-17 21:22:15Z willem $	-*-perl-*-
 
 use strict;
 use Test::More tests => 13;

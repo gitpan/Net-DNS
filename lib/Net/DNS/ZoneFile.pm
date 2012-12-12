@@ -1,10 +1,10 @@
 package Net::DNS::ZoneFile;
 
 #
-# $Id: ZoneFile.pm 1068 2012-12-06 10:38:51Z willem $
+# $Id: ZoneFile.pm 1072 2012-12-09 21:39:00Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1068 $)[1];
+$VERSION = (qw$LastChangedRevision: 1072 $)[1];
 
 
 =head1 NAME
@@ -437,7 +437,7 @@ sub DESTROY { }				## Avoid tickling AUTOLOAD (in cleanup)
 				s/\\\\/\\092/g;			# disguise escaped escape
 				s/\\"/\\034/g;			# disguise escaped double quote
 				s/\\;/\\059/g;			# disguise escaped semicolon
-				my @token = grep defined && length, split /("[^"]*")|;[^\n]*|([()])|\s+/;
+				my @token = grep defined && length, split /(^\s)|("[^"]*")|;[^\n]*|([()])|\s+/;
 				last unless grep $_ eq '(', @token;
 				last if grep $_ eq ')', @token;
 				$_ = "@token " . <$fh>;

@@ -1,4 +1,4 @@
-# $Id: 05-HINFO.t 1068 2012-12-06 10:38:51Z willem $	-*-perl-*-
+# $Id: 05-HINFO.t 1033 2012-10-24 12:25:55Z willem $	-*-perl-*-
 
 use strict;
 use Test::More tests => 10;

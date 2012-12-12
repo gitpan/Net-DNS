@@ -1,12 +1,40 @@
-$Id: Changes 1068 2012-12-06 10:38:51Z willem $                       -*-text-*-
+$Id: Changes 1075 2012-12-12 09:54:19Z willem $                       -*-text-*-
+
+**** 0.71
+
+Fix rt.cpan.org #81869
+
+	Disambiguate ANY in rr_del auxilliary function, as suggested
+	by Mark Andrews
+
+Fix rt.cpan.org #81756
+
+	Test failures on Perl 5.8.5 .. 5.8.8.
+	lc(), uc() and case insensitive regex matching broken for UTF8.
+	Thanks are due to Paul Howarth for patient work with perl -d.
+	
+Fix rt.cpan.org #81787
+
+	NXDOMAIN no longer reported by $resolver->errorstring.
+
+Fix rt.cpan.org #81814
+
+	Allow zero in format, tag and algorithm fields of CERT RR.
+
+Fix rt.cpan.org #81786
+
+	Substitute last owner for leading spaces in multiline zonefile RR.
+
+Fix rt.cpan.org #77444
+
+	Make use of new extended header modus operandi for OPT records
+	also in the resolver. Preventing a warning.
 
 **** 0.70 Dec 6, 2012
 
-Fix add NID L32 L64 LP resource records + unit tests to MANIFEST.
+Feature added support for NID L32 L64 LP, RFC6742.
 
 **** 0.69 Dec 5, 2012
-
-Feature added support for NID L32 L64 LP, RFC6742.
 
 Feature rt.cpan.org #62030
 

@@ -1,4 +1,4 @@
-# $Id: 04-packet.t 1068 2012-12-06 10:38:51Z willem $	-*-perl-*-
+# $Id: 04-packet.t 1005 2012-08-23 13:44:16Z willem $	-*-perl-*-
 
 use Test::More tests => 78;
 use strict;

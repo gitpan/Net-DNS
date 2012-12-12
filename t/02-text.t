@@ -1,4 +1,4 @@
-# $Id: 02-text.t 1068 2012-12-06 10:38:51Z willem $	-*-perl-*-
+# $Id: 02-text.t 1006 2012-08-24 14:18:12Z willem $	-*-perl-*-
 
 use strict;
 use diagnostics;

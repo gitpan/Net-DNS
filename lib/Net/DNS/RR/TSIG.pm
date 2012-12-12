@@ -1,10 +1,10 @@
 package Net::DNS::RR::TSIG;
 
 #
-# $Id: TSIG.pm 1068 2012-12-06 10:38:51Z willem $
+# $Id: TSIG.pm 1042 2012-11-01 21:03:37Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1068 $)[1];
+$VERSION = (qw$LastChangedRevision: 1042 $)[1];
 
 use base Net::DNS::RR;
 

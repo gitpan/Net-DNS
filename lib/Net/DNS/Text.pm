@@ -1,10 +1,10 @@
 package Net::DNS::Text;
 
 #
-# $Id: Text.pm 1068 2012-12-06 10:38:51Z willem $
+# $Id: Text.pm 1070 2012-12-09 21:18:09Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1068 $)[1];
+$VERSION = (qw$LastChangedRevision: 1070 $)[1];
 
 
 =head1 NAME
@@ -116,7 +116,7 @@ the data buffer.
 =cut
 
 sub decode {
-	my $self   = bless [], shift;
+	my $class  = shift;
 	my $buffer = shift;					# reference to data buffer
 	my $offset = shift || 0;				# offset within buffer
 
@@ -124,7 +124,7 @@ sub decode {
 	my $next = ++$offset + $size;
 	croak 'corrupt wire-format data' if $next > length $$buffer;
 
-	push @$self, unpack "\@$offset a$size", $$buffer;
+	my $self = bless [ unpack( "\@$offset a$size", $$buffer ) ], $class;
 
 	return wantarray ? ( $self, $next ) : $self;
 }

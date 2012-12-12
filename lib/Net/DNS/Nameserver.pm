@@ -1,10 +1,10 @@
 package Net::DNS::Nameserver;
 
 #
-# $Id: Nameserver.pm 1068 2012-12-06 10:38:51Z willem $
+# $Id: Nameserver.pm 1046 2012-11-09 12:21:41Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1068 $)[1];
+$VERSION = (qw$LastChangedRevision: 1046 $)[1];
 
 
 =head1 NAME

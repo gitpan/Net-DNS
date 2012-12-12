@@ -1,9 +1,9 @@
-# $Id: 07-zonefile.t 1068 2012-12-06 10:38:51Z willem $	-*-perl-*-
+# $Id: 07-zonefile.t 1072 2012-12-09 21:39:00Z willem $	-*-perl-*-
 
 use strict;
 use FileHandle;
 
-use Test::More tests => 46;
+use Test::More tests => 51;
 
 use constant UTF8 => eval {
 	require Encode;						# expect this to fail pre-5.8.0
@@ -176,6 +176,26 @@ EOF
 	is( $zonefile->read->preference, 30, 'generate MX preference with step -10' );
 	is( $zonefile->read->preference, 20, 'generate MX preference with step -10' );
 	is( $zonefile->read->preference, 10, 'generate MX preference with step -10' );
+}
+
+
+{
+	my $zonefile = source <<'EOF';
+$TTL 1234
+$ORIGIN example.
+hosta	A	192.0.2.1
+	MX	10 hosta
+	TXT	( multiline
+		resource
+		record )
+	TXT	string
+EOF
+	is( $zonefile->read->name, 'hosta.example', 'name of simple RR as expected' );
+	is( $zonefile->read->name, 'hosta.example', 'name of simple RR propagated from previous RR' );
+	my $multilineRR = $zonefile->read;
+	is( $multilineRR->name, 'hosta.example', 'name of multiline RR propagated from previous RR' );
+	is( $multilineRR->txtdata, 'multiline resource record', 'multiline RR correctly reassembled' );
+	is( $zonefile->read->name, 'hosta.example', 'name of following RR as expected' );
 }
 
 
