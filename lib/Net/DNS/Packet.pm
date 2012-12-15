@@ -1,10 +1,10 @@
 package Net::DNS::Packet;
 
 #
-# $Id: Packet.pm 1051 2012-11-19 11:58:34Z willem $
+# $Id: Packet.pm 1078 2012-12-14 09:45:20Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1051 $)[1];
+$VERSION = (qw$LastChangedRevision: 1078 $)[1];
 
 
 =head1 NAME
@@ -803,6 +803,24 @@ sub truncate {
 		}
 	}
 	return $self;
+}
+
+
+########################################
+
+use vars qw($AUTOLOAD);
+
+sub AUTOLOAD {				## Default method
+	no strict;
+	@_ = ("method $AUTOLOAD undefined");
+	goto &{'Carp::confess'};
+}
+
+sub DESTROY {				## object destructor
+	my $self = shift;
+	my $header = $self->header;				# invalidate Header object
+	%$header = ();
+	undef $self->{header};					# unlink defunct header
 }
 
 

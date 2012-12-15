@@ -1,11 +1,32 @@
-$Id: Changes 1075 2012-12-12 09:54:19Z willem $                       -*-text-*-
+$Id: Changes 1081 2012-12-15 11:14:41Z willem $                       -*-text-*-
 
-**** 0.71
+**** 0.71 Dec 15, 2012
+
+Temporary workaround rt.cpan.org #81760
+
+	The rdatastr method for TXT RRs will return unconditionally 
+	quoted rdata fields to work around an issue with updating 
+	SpamAssassin rules.  This workaround will be reverted after
+	release of a version of SpamAssassin which resolves the issue.
+
+Fix rt.cpan.org #81942
+
+	Fix memory leak on packet cleanup. The back-reference via the
+	header attribute (with xbody) caused the garbage collector not 
+	to clean a packet. Header is now explicitly cleaned via
+	Net::DNS::Packet::DESTROY.
+
+Fix TSIG initialization
+
+	Uninitialised algorithm attribute caused signature generation
+	to fail silently when creating a TSIG signed packet.
 
 Fix rt.cpan.org #81869
 
-	Disambiguate ANY in rr_del auxilliary function, as suggested
-	by Mark Andrews
+	The rr_del auxilliary function broken by a conflicting change
+	in the RR.pm string parser. Note the ambiguous use of ANY,
+	which may stand for CLASS255 or TYPE255 depending upon the
+	argument string presented.
 
 Fix rt.cpan.org #81756
 
