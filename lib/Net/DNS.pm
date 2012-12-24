@@ -1,12 +1,12 @@
 package Net::DNS;
 
 #
-# $Id: DNS.pm 1079 2012-12-14 21:30:38Z willem $
+# $Id: DNS.pm 1089 2012-12-21 09:56:30Z willem $
 #
 use vars qw($SVNVERSION $VERSION);
 BEGIN {
-	$SVNVERSION = (qw$LastChangedRevision: 1079 $)[1];
-	$VERSION = '0.71';
+	$SVNVERSION = (qw$LastChangedRevision: 1089 $)[1];
+	$VERSION = '0.71_01';
 }
 
 
@@ -386,14 +386,18 @@ sub mx {
 
 sub yxrrset {
 	my $rr = new Net::DNS::RR(shift);
+	$rr->ttl(0);
 	$rr->class('ANY') unless $rr->rdata;
 	return $rr;
 }
 
 sub nxrrset {
 	my $rr = new Net::DNS::RR(shift);
-	$rr->class('NONE');
-	return $rr;
+	return new Net::DNS::RR(
+		name  => $rr->name,
+		type  => $rr->type,
+		class => 'NONE'
+		);
 }
 
 sub yxdomain {
@@ -415,6 +419,7 @@ sub rr_add {
 sub rr_del {
 	my ( $head, @tail ) = split /\s+/, shift;
 	my $rr = new Net::DNS::RR( scalar @tail > 1 ? "$head @tail": "$head ANY @tail" );
+	$rr->ttl(0);
 	$rr->class( $rr->rdata ? 'NONE' : 'ANY' );
 	return $rr;
 }

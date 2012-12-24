@@ -1,10 +1,10 @@
 package Net::DNS::RR::TSIG;
 
 #
-# $Id: TSIG.pm 1077 2012-12-13 19:47:53Z willem $
+# $Id: TSIG.pm 1090 2012-12-21 22:11:31Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1077 $)[1];
+$VERSION = (qw$LastChangedRevision: 1090 $)[1];
 
 use base Net::DNS::RR;
 
@@ -32,9 +32,9 @@ use constant TSIG_DEFAULT_FUDGE	    => 300;
 
 sub decode_rdata {			## decode rdata from wire-format octet string
 	my $self = shift;
-	my ( $data, $offset ) = @_;
+	my ( $data, $offset, @opaque ) = @_;
 
-	( $self->{algorithm}, $offset ) = decode Net::DNS::DomainName(@_);
+	( $self->{algorithm}, $offset ) = decode Net::DNS::DomainName2535(@_);
 
 	# Design decision: Use 32 bits, which will work until the end of time()!
 	@{$self}{qw(time_signed fudge)} = unpack "\@$offset xxN n", $$data;
@@ -54,8 +54,14 @@ sub decode_rdata {			## decode rdata from wire-format octet string
 
 sub encode_rdata {			## encode rdata as wire-format octet string
 	my $self = shift;
+	my ( $offset, @opaque ) = @_;
 
-	my ( $offset, $hash, $packet ) = @_;
+	my ( $hash, $packet ) = @opaque;
+
+	my @additional = grep { $_->type ne 'TSIG' } @{$packet->{additional}};
+	$packet->{additional} = \@additional;
+
+	$self->class('ANY');
 
 	my $macbin = $self->macbin;
 	unless ($macbin) {
@@ -77,6 +83,8 @@ sub encode_rdata {			## encode rdata as wire-format octet string
 
 	my $other = $self->other || '';
 	$rdata .= pack 'na*', length($other), $other;
+
+	push @{$packet->{additional}}, $self;
 	return $rdata;
 }
 
@@ -84,7 +92,11 @@ sub encode_rdata {			## encode rdata as wire-format octet string
 sub format_rdata {			## format rdata portion of RR string.
 	my $self = shift;
 
-	join ' ', $self->algorithm, $self->error, $self->other || '';
+	my $fixed = join( ' ', ';', $self->algorithm, $self->error, $self->other || '' );
+	my @other = (
+		join( ' ', '; time signed', $self->time_signed, 'fudge', $self->fudge ),
+		join( ' ', '; original id', $self->original_id ) );
+	join "\n", $fixed, @other;
 }
 
 
@@ -131,7 +143,7 @@ sub encode {				## overide RR method
 sub algorithm {
 	my $self = shift;
 
-	$self->{algorithm} = new Net::DNS::DomainName(shift) if scalar @_;
+	$self->{algorithm} = new Net::DNS::DomainName2535(shift) if scalar @_;
 	$self->{algorithm}->name if defined wantarray;
 }
 
@@ -167,6 +179,20 @@ sub macbin {
 	$self->{macbin} || "";
 }
 
+sub request_mac {
+	my $self = shift;
+
+	$self->{request_mac} = shift if scalar @_;
+	$self->{request_mac} || '';
+}
+
+sub continuation {
+	my $self = shift;
+
+	$self->{continuation} = shift if scalar @_;
+	$self->{continuation} || 0;
+}
+
 sub original_id {
 	my $self = shift;
 
@@ -199,23 +225,23 @@ sub sign_func {
 sub sig_data {
 	my ( $self, $packet ) = @_;
 
-	my @additional = grep { $_->type ne 'TSIG' } @{$packet->{additional}};
-	$packet->{additional} = [@additional];
-
 	# Add the request MAC if present (used to validate responses).
 	my $sigdata = '';
 	$sigdata = pack 'H*', $self->{request_mac} if $self->{request_mac};
 
 	$sigdata .= $packet->data;
-	push @{$packet->{additional}}, $self;
-
-	my $kname = $self->{owner}->encode(0);			# uncompressed key name
-	$sigdata .= pack 'a* n N', $kname, ANY, 0;
-
-	$sigdata .= $self->{algorithm}->encode();		# uncompressed algorithm name
 
 	# Design decision: Use 32 bits, which will work until the end of time()!
-	$sigdata .= pack 'xxN n', $self->time_signed, $self->fudge;
+	my $time = pack 'xxN n', $self->time_signed, $self->fudge;
+
+	return $sigdata . $time if $self->continuation;
+
+	my $kname = new Net::DNS::DomainName2535($self->{owner}->name );
+	$sigdata .= pack 'a* n N', $kname->encode(0), ANY, 0;	# canonical key name
+
+	$sigdata .= $self->{algorithm}->encode(0);		# canonical algorithm name
+
+	$sigdata .= $time;
 
 	$sigdata .= pack 'n', $self->{error} || 0;
 
@@ -287,6 +313,20 @@ object method before this will return anything meaningful.
     $macbin = $rr->macbin;
 
 Binary message authentication code (MAC).
+
+=head2 request_mac
+
+     $tsig->request_mac( $request->macbin );
+
+Request message authentication code (MAC).
+
+
+=head2 continuation
+
+     $tsig->continuation(1);
+
+Flag which indicates continuation of a multi-message response.
+
 
 =head2 original_id
 

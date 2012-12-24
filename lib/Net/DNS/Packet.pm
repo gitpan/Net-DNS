@@ -1,10 +1,10 @@
 package Net::DNS::Packet;
 
 #
-# $Id: Packet.pm 1078 2012-12-14 09:45:20Z willem $
+# $Id: Packet.pm 1086 2012-12-18 15:13:35Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1078 $)[1];
+$VERSION = (qw$LastChangedRevision: 1086 $)[1];
 
 
 =head1 NAME
@@ -95,6 +95,10 @@ are collected in the $@ ($EVAL_ERROR) variable.
 
 If called in array context, returns a packet object and the
 number of octets successfully decoded.
+
+Note that the number of RRs in each section of the packet may
+differ from the corresponding header value if the data has been
+truncated or corrupted.
 
 =cut
 

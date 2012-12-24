@@ -1,10 +1,10 @@
 package Net::DNS::Resolver;
 
 #
-# $Id: Resolver.pm 1046 2012-11-09 12:21:41Z willem $
+# $Id: Resolver.pm 1088 2012-12-19 10:36:16Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1046 $)[1];
+$VERSION = (qw$LastChangedRevision: 1088 $)[1];
 
 =head1 NAME
 
@@ -430,11 +430,19 @@ $res->bgisready >> or C<IO::Select> to find out if the socket is ready
 before reading it.
 
 bgsend does not support persistent sockets.
-bgsend does not support the usevc option (TCP).
+
+B<BEWARE>:
+bgsend does not support the usevc option (TCP) and operates on UDP only;
+Answers may not fit in an UDP packet and might be truncated. Truncated 
+packets will B<not> be retried over TCP automatically and should be handled
+by the caller.
 
 =head2 bgread
 
     $packet = $res->bgread($socket);
+    if ($packet->header->tc) { 
+    	# Retry over TCP (blocking).
+    }
     undef $socket;
 
 Reads the answer from a background query (see L</bgsend>).  The argument
@@ -451,6 +459,9 @@ The programmer should close or destroy the socket object after reading it.
         # do some other processing
     }
     $packet = $res->bgread($socket);
+    if ($packet->header->tc) { 
+    	# Retry over TCP (blocking).
+    }
     $socket = undef;
 
 Determines whether a socket is ready for reading.  The argument is
