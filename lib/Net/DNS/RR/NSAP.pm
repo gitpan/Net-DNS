@@ -1,6 +1,6 @@
 package Net::DNS::RR::NSAP;
 #
-# $Id: NSAP.pm 1037 2012-10-24 21:50:15Z willem $
+# $Id: NSAP.pm 1096 2012-12-28 13:35:15Z willem $
 #
 use strict;
 BEGIN {
@@ -9,7 +9,7 @@ BEGIN {
 use vars qw(@ISA $VERSION);
 
 @ISA     = qw(Net::DNS::RR);
-$VERSION = (qw$LastChangedRevision: 1037 $)[1];
+$VERSION = (qw$LastChangedRevision: 1096 $)[1]; # Unchanged since 1037
 
 sub new {
 	my ($class, $self, $data, $offset) = @_;

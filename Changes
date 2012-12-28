@@ -1,6 +1,6 @@
-$Id: Changes 1089 2012-12-21 09:56:30Z willem $                       -*-text-*-
+$Id: Changes 1095 2012-12-28 13:28:31Z willem $                       -*-text-*-
 
-**** 0.72 
+**** 0.72 Dec 28, 2012
 
 Fix rt.cpan.org #82148
 

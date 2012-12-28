@@ -2,10 +2,10 @@ package Net::DNS::Resolver::MSWin32;
 use base Net::DNS::Resolver::Base;
 
 #
-# $Id: MSWin32.pm 1045 2012-11-09 11:03:03Z willem $
+# $Id: MSWin32.pm 1096 2012-12-28 13:35:15Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1045 $)[1];
+$VERSION = (qw$LastChangedRevision: 1096 $)[1]; # Unchanged since 1045
 
 =head1 NAME
 

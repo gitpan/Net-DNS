@@ -1,10 +1,10 @@
 package Net::DNS::RR::HIP;
 
 #
-# $Id: HIP.pm 1063 2012-12-03 22:13:02Z willem $
+# $Id: HIP.pm 1096 2012-12-28 13:35:15Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1063 $)[1];
+$VERSION = (qw$LastChangedRevision: 1096 $)[1]; # Unchanged since 1063
 
 use base Net::DNS::RR;
 

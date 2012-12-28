@@ -1,6 +1,6 @@
 package Net::DNS::Resolver::Base;
 #
-# $Id: Base.pm 1074 2012-12-10 20:46:01Z willem $
+# $Id: Base.pm 1094 2012-12-27 21:35:09Z willem $
 #
 
 use strict;
@@ -24,7 +24,7 @@ use IO::Select;
 use Net::DNS;
 use Net::DNS::Packet;
 
-$VERSION = (qw$LastChangedRevision: 1074 $)[1];
+$VERSION = (qw$LastChangedRevision: 1094 $)[1];
 
 
 #
@@ -218,7 +218,7 @@ sub read_env {
 
 	if (exists $ENV{'RES_OPTIONS'}) {
 		foreach ($ENV{'RES_OPTIONS'} =~ m/(\S+)/g) {
-			my ($name, $val) = split(m/:/);
+			my ($name, $val) = split(m/:/,$_,2);
 			$val = 1 unless defined $val;
 			$config->{$name} = $val if exists $config->{$name};
 		}
