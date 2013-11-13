@@ -1,4 +1,4 @@
-# $Id: 00-version.t 1068 2012-12-06 10:38:51Z willem $ -*-perl-*-
+# $Id: 00-version.t 1101 2013-08-14 14:40:00Z willem $ -*-perl-*-
 
 use Test::More;
 use File::Spec;
@@ -8,14 +8,14 @@ use strict;
 
 my @files;
 my $blib = File::Spec->catfile(qw(blib lib));
-	
-find( sub { push(@files, $File::Find::name) if /\.pm$/ && !/Template/}, $blib);
+
+find( sub { push( @files, $File::Find::name ) if /\.pm$/ && !/Template/ }, $blib );
 
 my %manifest;
 open MANIFEST, 'MANIFEST' or plan skip_all => "MANIFEST: $!";
 while (<MANIFEST>) {
 	chomp;
-	$manifest{lc "blib/$_"}++
+	$manifest{lc "$1"}++ if /([^\/]+)$/;
 }
 close MANIFEST;
 
@@ -29,6 +29,7 @@ foreach my $file ( sort @files ) {
 	my $version = MM->parse_version($file);
 	diag("$file\t=>\t$version") if $ENV{'NET_DNS_DEBUG'};
 	ok( $version =~ /[\d.]{3}/, "file version: $version\t$file" );
-	diag("File not in MANIFEST: $file") unless $manifest{lc $file};
+	my ( $volume, $directory, $name ) = File::Spec->splitpath($file);
+	diag("File not in MANIFEST: $file") unless $manifest{lc $name};
 }
 

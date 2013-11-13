@@ -1,7 +1,6 @@
-# $Id: 02-text.t 1006 2012-08-24 14:18:12Z willem $	-*-perl-*-
+# $Id: 02-text.t 1101 2013-08-14 14:40:00Z willem $	-*-perl-*-
 
 use strict;
-use diagnostics;
 use Test::More tests => 27;
 
 

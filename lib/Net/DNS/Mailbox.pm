@@ -2,10 +2,10 @@ package Net::DNS::Mailbox;
 use base qw(Net::DNS::DomainName);
 
 #
-# $Id: Mailbox.pm 1096 2012-12-28 13:35:15Z willem $
+# $Id: Mailbox.pm 1099 2013-03-20 13:27:08Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1096 $)[1]; # Unchanged since 1055
+$VERSION = (qw$LastChangedRevision: 1099 $)[1]; # Unchanged since 1055
 
 
 =head1 NAME
@@ -59,8 +59,6 @@ sub new {
 
 	my ( $mbox, @host ) = split /\@/;			# split on @ if present
 	for ( $mbox ||= '' ) {
-		s/\\\s/\\032/g;					# disguise escaped white space
-		s/^(".*)\s+(.*")/$1\\032$2/g;			# disguise quoted white space
 		s/^"(.*)"/$1/;					# strip quotes
 		s/\\\./\\046/g;					# disguise escaped dot
 		s/\./\\046/g if @host;				# escape dots in local part

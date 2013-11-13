@@ -1,7 +1,6 @@
-# $Id: 00-load.t 1027 2012-10-23 20:00:28Z willem $	-*-perl-*-
+# $Id: 00-load.t 1101 2013-08-14 14:40:00Z willem $	-*-perl-*-
 
 use strict;
-use diagnostics;
 use Test::More "no_plan";
 
 
@@ -27,10 +26,7 @@ sub is_rr_loaded {
 
 #
 # Check on-demand loading using this (incomplete) list of RR packages
-my @rrs = qw( CNAME HINFO MINFO MX NULL NS PTR SOA TXT A
-		AFSDB DNAME KX NAPTR PX RP RT SRV
-		AAAA APL CERT DHCID HIP IPSECKEY ISDN LOC
-		OPT SPF SSHFP TKEY TSIG X25 );
+my @rrs = qw( A AAAA CNAME MX NS NULL PTR SOA TXT );
 
 
 #

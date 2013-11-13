@@ -1,7 +1,6 @@
-# $Id: 02-domainname.t 895 2011-09-19 14:48:24Z willem $	-*-perl-*-
+# $Id: 02-domainname.t 1101 2013-08-14 14:40:00Z willem $	-*-perl-*-
 
 use strict;
-use diagnostics;
 use Test::More tests => 45;
 
 

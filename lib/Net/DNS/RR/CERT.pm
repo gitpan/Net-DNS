@@ -1,10 +1,10 @@
 package Net::DNS::RR::CERT;
 
 #
-# $Id: CERT.pm 1073 2012-12-09 21:48:01Z willem $
+# $Id: CERT.pm 1101 2013-08-14 14:40:00Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1073 $)[1];
+$VERSION = (qw$LastChangedRevision: 1101 $)[1];
 
 use base Net::DNS::RR;
 
@@ -15,7 +15,6 @@ Net::DNS::RR::CERT - DNS CERT resource record
 =cut
 
 
-use strict;
 use integer;
 
 use MIME::Base64;
@@ -78,7 +77,7 @@ sub format_rdata {			## format rdata portion of RR string.
 	my $base64    = MIME::Base64::encode $self->{certbin};
 	chomp $base64;
 	return "$format $self->{tag} $algorithm $base64" if length($base64) < 40;
-	return "$format $self->{tag} $algorithm(\n$base64 )";
+	return "$format $self->{tag} $algorithm (\n$base64 )";
 }
 
 
@@ -105,8 +104,8 @@ sub format {
 sub tag {
 	my $self = shift;
 
-	$self->{tag} = shift if scalar @_;
-	return 0 + ( $self->{tag} || 0 );
+	$self->{tag} = 0 + shift if scalar @_;
+	return $self->{tag} || 0;
 }
 
 sub algorithm {

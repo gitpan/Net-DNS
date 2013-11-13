@@ -1,6 +1,6 @@
 package Net::DNS::Resolver::Base;
 #
-# $Id: Base.pm 1094 2012-12-27 21:35:09Z willem $
+# $Id: Base.pm 1116 2013-09-23 10:03:32Z willem $
 #
 
 use strict;
@@ -24,7 +24,7 @@ use IO::Select;
 use Net::DNS;
 use Net::DNS::Packet;
 
-$VERSION = (qw$LastChangedRevision: 1094 $)[1];
+$VERSION = (qw$LastChangedRevision: 1116 $)[1];
 
 
 #
@@ -619,18 +619,21 @@ sub send_tcp {
 			}
 
 			my $ans = Net::DNS::Packet->new(\$buf, $self->{debug});
-			$self->errorstring($@);
+			my $error = $@;
 
-			if (defined $ans) {
+			unless ( defined $ans ) {
+			      $self->errorstring($error);
+			} else {
+				my $rcode = $ans->header->rcode;
+				$self->errorstring( $error || $rcode );
+
 				$ans->answerfrom($self->answerfrom);
 
-				if ($ans->header->rcode ne "NOERROR" &&
-				    $ans->header->rcode ne "NXDOMAIN"){
+				if ( $rcode ne "NOERROR" && $rcode ne "NXDOMAIN" ) {
 					# Remove this one from the stack
-					print "RCODE: ".$ans->header->rcode ."; trying next nameserver\n" if $self->{'debug'};
+					print "RCODE: $rcode; trying next nameserver\n" if $self->{debug};
 					$lastanswer=$ans;
 					next NAMESERVER ;
-
 				}
 
 			}
@@ -882,14 +885,16 @@ sub send_udp {
 				      if $self->{'debug'};
 
 				  my $ans = Net::DNS::Packet->new(\$buf, $self->{debug});
-				  $self->errorstring($@);
+				  my $error = $@;
 
-				  if (defined $ans) {
+				  unless ( defined $ans ) {
+				      $self->errorstring($error);
+				  } else {
 				      my $header = $ans->header;
 				      next SELECTOR unless ( $header->qr || $self->{'ignqrid'});
 				      next SELECTOR unless  ( ($header->id == $packet->header->id) || $self->{'ignqrid'} );
 				      my $rcode = $header->rcode;
-				      $self->errorstring($rcode) unless $@;
+				      $self->errorstring( $error || $rcode);
 
 				      $ans->answerfrom($self->answerfrom);
 				      if ($rcode ne "NOERROR" && $rcode ne "NXDOMAIN"){

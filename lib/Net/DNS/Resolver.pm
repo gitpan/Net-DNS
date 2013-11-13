@@ -1,10 +1,10 @@
 package Net::DNS::Resolver;
 
 #
-# $Id: Resolver.pm 1088 2012-12-19 10:36:16Z willem $
+# $Id: Resolver.pm 1115 2013-09-20 09:26:13Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1088 $)[1];
+$VERSION = (qw$LastChangedRevision: 1115 $)[1];
 
 =head1 NAME
 
@@ -21,23 +21,19 @@ BEGIN {
 	for ($^O) {				## Perl OS identifier
 
 		/cygwin/ && do {
-			eval { require Net::DNS::Resolver::MSWin32; };
-
-			unless ($@) {
+			if ( eval { require Net::DNS::Resolver::MSWin32; } ) {
 				@ISA = qw(Net::DNS::Resolver::MSWin32);
 				last;
 			}
 		};
 
-
-		eval "require Net::DNS::Resolver::$_;";
-
-		unless ($@) {
+		if ( eval "require Net::DNS::Resolver::$_;" ) {
 			@ISA = ("Net::DNS::Resolver::$_");
-		} else {
-			require Net::DNS::Resolver::UNIX;
-			@ISA = qw(Net::DNS::Resolver::UNIX);
+			last;
 		}
+
+		require Net::DNS::Resolver::UNIX;
+		@ISA = qw(Net::DNS::Resolver::UNIX);
 	}
 }
 

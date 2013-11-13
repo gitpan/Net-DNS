@@ -83,8 +83,9 @@ available.
      Test::More       
      IO::Socket      
      MIME::Base64     
+     Digest::HMAC
      Digest::MD5  
-     Digest::HMAC_MD5
+     Digest::SHA  
 
 
 For IPv6 support you will need Socket6 and IO::Socket::INET6.  The availability
@@ -356,4 +357,4 @@ I've always developed Net::DNS using open-source systems and I'm
 proud to make Net::DNS freely available to the world.
 
 ----
-$Id: README 935 2011-10-27 12:41:31Z willem $
+$Id: README 1120 2013-10-23 13:55:45Z willem $

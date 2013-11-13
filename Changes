@@ -1,4 +1,57 @@
-$Id: Changes 1095 2012-12-28 13:28:31Z willem $                       -*-text-*-
+$Id: Changes 1120 2013-10-23 13:55:45Z willem $                       -*-text-*-
+
+**** 0.73 [unreleased]
+
+Fix rt.cpan.org #88778
+
+	$update->unique_push() does not work as advertised.
+
+Fix rt.cpan.org #88744
+
+	Nameserver crashes on malformed TCP query.
+
+Fix rt.cpan.org #84601/#81942
+
+	Fix memory leak on packet cleanup. Indirect self-reference via
+	header prevented garbage collector from deallocating packet.
+
+Feature rt.cpan.org #84468
+
+	TSIG: add support for HMAC-SHA1 .. HMAC-SHA512
+
+Fix rt.cpan.org #84110
+
+	Incorrect parsing of PTR records in zonefile.
+
+Fix rt.cpan.org #83755
+
+	Erroneous attempt to invoke Net::LibIDN package in Domain.pm.
+
+Fix rt.cpan.org #83078
+
+	Can't locate Net/DNS/Resolver/linux.pm in @INC
+	Conjecture:  eval{ ... };  if ($@) { ... };  broken by threads.
+
+Fix rt.cpan.org #83075
+
+	ZoneFile.pm wrongly rejects $TTL 0 directive.
+
+Fix rt.cpan.org #82621
+
+	Error string empty after failed TCP query.
+
+Fix rt.cpan.org #82296
+
+	IPv6 with embedded IPv4 address not mapped to ip6.arpa.
+
+Fix rt.cpan.org #82294
+
+	Perl taint inadvertently removed in Domain and Text objects.
+
+Feature rt.cpan.org #53610
+
+	add TSIG validation support
+
 
 **** 0.72 Dec 28, 2012
 
@@ -22,8 +75,9 @@ Fix rt.cpan.org #82047
 
 Fix rt.cpan.org #81941
 
-	Clarify documentation to make clear that bgread will not switch to
-	TCP when a truncated packet is received.
+	Clarify documentation to make users aware that bgread will not
+	switch to TCP when a truncated packet is received.
+
 
 **** 0.71 Dec 15, 2012
 
@@ -33,13 +87,6 @@ Temporary workaround rt.cpan.org #81760
 	quoted rdata fields to work around an issue with updating 
 	SpamAssassin rules.  This workaround will be reverted after
 	release of a version of SpamAssassin which resolves the issue.
-
-Fix rt.cpan.org #81942
-
-	Fix memory leak on packet cleanup. The back-reference via the
-	header attribute (with xbody) caused the garbage collector not 
-	to clean a packet. Header is now explicitly cleaned via
-	Net::DNS::Packet::DESTROY.
 
 Fix TSIG initialization
 
@@ -1516,78 +1563,6 @@ Fix: Bug report by Bernhard Schmidt (concerning a bug on the IPv6 branch).
 
 *** 0.48_01 March 7, 2005 (Version 0.49 release candidate 1)
 
-
-Fix: rt.cpan.org  #8882  
-      No redundant lookups on SERVFAIL response 
-      and #6149 	 
-      Does not search multiple DNS servers
- 
-      Net::DNS::Resolver will now use the other nameservers in the
-      list if the RCODE of the answer is not NO ERROR (0) or NAME
-      ERROR (3). When send() exhausted the last nameserver from the it
-      will return the answer that was received from the last
-      nameserver that responded with an RCODE.
-
-      The error string will be set to "RCODE: <rcode from last packet>"
-
-
-Fix: rt.cpan.org #8803  
-
-      TXT records don't work with semicolons 
-
-      Since we are expecting presentation format at input a comment
-      will need to be escaped ( \; ).
-
-      It could be argued that this is a to strict interpretation of 
-      1035 section 5.1.
-
-      While working on this I discovered there are more problems with
-      TXT RRs. e.g.; '0100' (a character string content represented in
-      hex) is a perfectly legal and should be represented as "\000" in
-      presentation format. Net::DNS does pass character strings with
-      "non-ASCII" chars from the wire to the char_str_lst array but
-      the print functions do not properly escape them when printing.
-
-      Some tests with TXT RRs added to 07-misc.t
-
-      Properly dealing with zone file presentation format and binary 
-      data is still to be done.
-
-
-Fix: rt.cpan.org Ticket #8483 
-	eval tests for DNS::RR::SIG fail when using a die handler 
-	(Thanks Sebastiaan Hoogeveen)
-	
-      Patch applied.
-
-Fix: rt.cpan.org: Ticket #8608 
-	Net::DNS::Packet->data makes incorrect assumptions
-
-      Implemented the "pop" method for the question.
-      Since having a qcount that is not 1 is somewhat rare (it appears
-      in TCP AXFR streams) the ability to pop the answer from a question
-      has not been documented in the "pod"
-
-      Also fixed the incorrect assumption.
-
-      (Thanks Bruce Campbell.)
-
-
-Fix: Ticket #11106 
-      Incorrect instructions in README 
-
-      Corrected in the README and in Makefile.PL
-
-
-Olaf Kolkman took over maintenance responsibility from Chris
-Reinardt. This involved importing the code into another subversion
-repository. I made sure the numbers jumped, but I did not have access
-to the "original" subversion repository so I lost some of the history.
-
-
-*** 0.48_01 March 2005 (Version 0.49 release candidate 1)
-
-
 Fix: rt.cpan.org  #8882  
       No redundant lookups on SERVFAIL response 
      and #6149 	 
@@ -1648,12 +1623,11 @@ Fix: Ticket #11106
 
 
 Olaf Kolkman took over maintenance responsibility from Chris
-Reinardt. This involved importing the code into another subversion
+Reinhardt. This involved importing the code into another subversion
 repository. I made sure the numbers jumped, but I did not have access
 to the "original" subversion repository so I lost some of the history.
 
 
->>>>>>> .merge-right.r260
 *** 0.48 Aug 12, 2004
 
 

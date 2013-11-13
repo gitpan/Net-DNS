@@ -1,7 +1,6 @@
-# $Id: 03-rr.t 1024 2012-10-19 10:13:54Z willem $	-*-perl-*-
+# $Id: 03-rr.t 1101 2013-08-14 14:40:00Z willem $	-*-perl-*-
 
 use strict;
-use diagnostics;
 use Test::More tests => 52;
 
 

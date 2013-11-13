@@ -1,9 +1,12 @@
-# $Id: 04-packet.t 1005 2012-08-23 13:44:16Z willem $	-*-perl-*-
+# $Id: 04-packet.t 1120 2013-10-23 13:55:45Z willem $	-*-perl-*-
 
-use Test::More tests => 78;
 use strict;
 
-use Net::DNS;
+BEGIN {
+	use Test::More tests => 78;
+
+	use_ok('Net::DNS');
+}
 
 
 #	new() class constructor method must return object of appropriate class
@@ -114,9 +117,9 @@ foreach my $section ( qw(question answer authority additional) ) {
 }
 
 
-#	check that pop() removes RR from section
-foreach my $section ( qw(question answer authority additional) ) {
-	my $c1 = $update->push($section);
+#	check that pop() removes RR from section	Memo to self: no RR in question section!
+foreach my $section ( qw(answer authority additional) ) {
+	my $c1 = $update->push( $section, Net::DNS::RR->new('X TXT ""') );
 	my $rr = $update->pop($section);
 	my $c2 = $update->push($section);
 	is($c2,	$c1-1,	"pop() RR from $section section");

@@ -1,10 +1,10 @@
 package Net::DNS::RR::AAAA;
 
 #
-# $Id: AAAA.pm 1096 2012-12-28 13:35:15Z willem $
+# $Id: AAAA.pm 1098 2013-01-03 20:57:25Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1096 $)[1]; # Unchanged since 1043
+$VERSION = (qw$LastChangedRevision: 1098 $)[1];
 
 use base Net::DNS::RR;
 
@@ -53,7 +53,7 @@ sub parse_rdata {			## populate RR from rdata in argument list
 sub address {
 	my $self = shift;
 
-	return $self->address_long unless @_;
+	return $self->address_long unless scalar @_;
 
 	my $argument = shift;
 	my @parse = split /:/, "0$argument";
@@ -77,9 +77,9 @@ sub address_long {
 sub address_short {
 	for ( sprintf ':%x:%x:%x:%x:%x:%x:%x:%x:', unpack 'n8', shift->{address} ) {
 		s/(:0[:0]+:)(?!.+:0\1)/::/;			# squash longest zero sequence
-		return $1 if /^(::.*):$/;			# leading ::
-		return $1 if /^:(.*::)$/;			# trailing ::
-		return /^:(.+):$/ ? $1 : $_;			# strip outer :s
+		s/^:// unless /^::/;				# prune LH :
+		s/:$// unless /::$/;				# prune RH :
+		return $_;
 	}
 }
 

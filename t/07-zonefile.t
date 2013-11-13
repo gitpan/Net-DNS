@@ -1,9 +1,9 @@
-# $Id: 07-zonefile.t 1072 2012-12-09 21:39:00Z willem $	-*-perl-*-
+# $Id: 07-zonefile.t 1118 2013-09-24 20:27:18Z willem $	-*-perl-*-
 
 use strict;
 use FileHandle;
 
-use Test::More tests => 51;
+use Test::More tests => 56;
 
 use constant UTF8 => eval {
 	require Encode;						# expect this to fail pre-5.8.0
@@ -26,6 +26,7 @@ my $seq;
 
 sub source {				## zone file builder
 	my $text = shift;
+	my @args = @_;
 
 	my $tag	 = ++$seq;
 	my $file = "zone$tag.txt";
@@ -36,7 +37,7 @@ sub source {				## zone file builder
 	print $handle $text;
 	close $handle;
 
-	return new Net::DNS::ZoneFile($file);
+	return new Net::DNS::ZoneFile( $file, @args );
 }
 
 
@@ -51,6 +52,15 @@ sub source {				## zone file builder
 	my @rr = $zonefile->read;
 	is( scalar @rr,	     0, 'zonefile->read to end of file' );
 	is( $zonefile->line, 0, 'zonefile->line zero if file empty' );
+
+	is( $zonefile->origin, '.', 'new ZoneFile origin defaults to DNS root' );
+
+	my $tld = 'test';
+	my $absolute = source( '', "$tld." );
+	is( $absolute->origin, "$tld.", 'new ZoneFile with absolute origin' );
+
+	my $relative = source( '', "$tld" );
+	is( $relative->origin, "$tld.", 'new ZoneFile->origin always absolute' );
 }
 
 
@@ -132,26 +142,31 @@ EOF
 }
 
 
+my $zonefile;
 {				## $ORIGIN directive
 	my $nested = source <<'EOF';
 nested	NULL
 EOF
 
+	my $origin = 'example.com';
+	my $ORIGIN = '$ORIGIN';
 	my $inner = join ' ', '$INCLUDE', $nested->name;
 	my $include = source <<"EOF";
+$ORIGIN $origin
 @	NS	host
 $inner 
 @	NULL
+$ORIGIN relative
+@	NULL
 EOF
 
-	my $outer = join ' ', '$INCLUDE', $include->name, 'example.com';
-	my $zonefile = source <<"EOF";
+	my $outer  = join ' ', '$INCLUDE', $include->name;
+	$zonefile = source <<"EOF";
 $outer 
 outer	NULL
 EOF
 
-	my $ns	   = $zonefile->read;
-	my $origin = $zonefile->origin;
+	my $ns = $zonefile->read;
 	is( $ns->name,	  $origin,	  '@	NS	has expected name' );
 	is( $ns->nsdname, "host.$origin", '@	NS	has expected rdata' );
 
@@ -160,6 +175,8 @@ EOF
 	is( $rr->name, $expect, 'scope of $ORIGIN encompasses nested $INCLUDE' );
 
 	is( $zonefile->read->name, $origin, 'scope of $ORIGIN continues after $INCLUDE' );
+
+	is( $zonefile->read->name, "relative.$origin", '$ORIGIN can be relative to current $ORIGIN' );
 
 	is( $zonefile->read->name, 'outer', 'scope of $ORIGIN curtailed by end of file' );
 }
@@ -185,9 +202,9 @@ $TTL 1234
 $ORIGIN example.
 hosta	A	192.0.2.1
 	MX	10 hosta
-	TXT	( multiline
-		resource
-		record )
+	TXT	( multiline	; interspersed ( mischievously )
+		resource	; with	( confusing )
+		record	)	; comments
 	TXT	string
 EOF
 	is( $zonefile->read->name, 'hosta.example', 'name of simple RR as expected' );
@@ -200,13 +217,13 @@ EOF
 
 
 {				## compatibility with defunct Net::DNS::ZoneFile 1.04 distro
-	my $listref = Net::DNS::ZoneFile->read('zone8.txt');
+	my $listref = Net::DNS::ZoneFile->read( $zonefile->name );
 	ok( scalar(@$listref), 'read entire zone file' );
 }
 
 
 {
-	my $listref = Net::DNS::ZoneFile->read( 'zone8.txt', '.' );
+	my $listref = Net::DNS::ZoneFile->read( $zonefile->name, '.' );
 	ok( scalar(@$listref), 'read zone file via path' );
 }
 
@@ -226,19 +243,29 @@ EOF
 
 
 SKIP: {				## Non-ASCII zone content
-	skip( 'Non-ASCII content - Unicode/UTF-8 not supported', 2 ) unless UTF8;
+	skip( 'Non-ASCII content - Unicode/UTF-8 not supported', 3 ) unless UTF8;
 
-	my $line1 = <DATA>;					# presume default encoding
-	my $zone1 = source($line1);				# avoid string concatenation
-	my $txtrr = $zone1->read;
-	is( length( $txtrr->txtdata ), 12, 'Non-ASCII TXT argument' );
+	my $greek = pack 'C*', 103, 114, 9, 84, 88, 84, 9, 229, 224, 241, 231, 234, 225, 10;
+	my $file1 = source($greek);
+	my $fh1   = new FileHandle( $file1->name, '<:encoding(ISO8859-7)' );	# Greek
+	my $zone1 = new Net::DNS::ZoneFile($fh1);
+	my $txtgr = $zone1->read;
+	my $text  = pack 'U*', 949, 944, 961, 951, 954, 945;
+	is( $txtgr->txtdata, $text , 'ISO8859-7 TXT argument' );
+
+	my $jptxt = <DATA>;
+	my $file2 = source($jptxt);
+	my $fh2   = new FileHandle( $file2->name, '<:utf8' );	# UTF-8 character encoding
+	my $zone2 = new Net::DNS::ZoneFile($fh2);
+	my $txtrr = $zone2->read;
+	is( length( $txtrr->txtdata ), 12, 'Unicode/UTF-8 TXT argument' );
 
 	skip( 'Non-ASCII domain - Net::LibIDN not available', 1 ) unless LIBIDN;
 
-	my $line2 = <DATA>;					# presume default encoding
-	my $zone2 = source($line2);				# avoid string concatenation
-	my $nextr = $zone2->read;
-	is( $nextr->name, 'xn--wgv71a', 'Non-ASCII domain name' );
+	my $uname = <DATA>;
+	my $zone3 = source($uname);
+	my $nextr = $zone3->read;
+	is( $nextr->name, 'xn--wgv71a', 'Unicode/UTF-8 domain name' );
 }
 
 

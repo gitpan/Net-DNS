@@ -1,5 +1,5 @@
 
-# $Id: Makefile.PL 1061 2012-12-03 14:43:09Z willem $ -*-perl-*-
+# $Id: Makefile.PL 1120 2013-10-23 13:55:45Z willem $ -*-perl-*-
 
 use strict;
 $^W = 1;
@@ -136,12 +136,12 @@ my %Makefile = (
 	AUTHOR	     => 'Olaf Kolkman <olaf@net-dns.org>',
 	LICENSE	     => 'perl',
 	PREREQ_PM    => {
-		'Test::More'	   => 0.18,
-		'IO::Socket'	   => 0,
-		'MIME::Base64'	   => 2.11,
-		'Digest::MD5'	   => 2.12,
-		'Digest::SHA'	   => 5.23,
-		'Digest::HMAC_MD5' => 1.00,
+		'Test::More'	=> 0.18,
+		'IO::Socket'	=> 0,
+		'MIME::Base64'	=> 2.11,
+		'Digest::HMAC'	=> 1.00,
+		'Digest::MD5'	=> 2.12,
+		'Digest::SHA'	=> 5.23,
 		},
 	XS    => {},
 	C     => [],

@@ -1,10 +1,10 @@
 package Net::DNS::Text;
 
 #
-# $Id: Text.pm 1070 2012-12-09 21:18:09Z willem $
+# $Id: Text.pm 1111 2013-09-04 12:03:10Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1070 $)[1];
+$VERSION = (qw$LastChangedRevision: 1111 $)[1];
 
 
 =head1 NAME
@@ -69,7 +69,7 @@ interpretation.
 
 =cut
 
-my %unescape;				## precalculated numeric escape table
+my %unescape;			## precalculated numeric escape table
 
 sub new {
 	my $self = bless [], shift;
@@ -77,18 +77,16 @@ sub new {
 
 	local $_ = &_encode_utf8;
 
-	s/^([\042\047])(.*)\1$/$2/;				# strip paired quotes
+	s/^\042([^\042]*)\042/$1/;				# strip paired quotes
+	s/^\047([^\047]*)\047/$1/;				# strip paired quotes
 
-	s/\134\134/\134\066\066\066/g;				# disguise escaped escape
-
-	s/\134([\060-\062][\060-\071]{2})/$unescape{$1}/eg;	# numeric escape
-
-	s/\134\066\066\066/\134\134/g;				# reveal escaped escape
+	s/\134\134/\134\060\071\062/g;				# disguise escaped escape
+	s/\134([\060-\071]{3})/$unescape{$1}/eg;		# numeric escape
 	s/\134(.)/$1/g;						# character escape
 
 	while ( length $_ > 255 ) {
 		my $chunk = substr( $_, 0, 255 );		# carve into chunks
-		substr( $chunk, -length($1) ) = '' if $chunk =~ /.([\300-\377][\200-\277]+)$/;
+		substr( $chunk, -length($1) ) = '' if $chunk =~ /.([\300-\377][\200-\277]*)$/;
 		push @$self, $chunk;
 		substr( $_, 0, length $chunk ) = '';
 	}
@@ -124,7 +122,7 @@ sub decode {
 	my $next = ++$offset + $size;
 	croak 'corrupt wire-format data' if $next > length $$buffer;
 
-	my $self = bless [ unpack( "\@$offset a$size", $$buffer ) ], $class;
+	my $self = bless [unpack( "\@$offset a$size", $$buffer )], $class;
 
 	return wantarray ? ( $self, $next ) : $self;
 }
@@ -141,7 +139,7 @@ suitable for inclusion in a DNS packet buffer.
 
 sub encode {
 	my $self = shift;
-	join '', map { pack 'C a*', length $_, $_ } @$self;
+	join '', map pack( 'C a*', length $_, $_ ), @$self;
 }
 
 
@@ -152,8 +150,6 @@ sub encode {
 Character string representation of the text object.
 
 =cut
-
-my %escape;							# precalculated ASCII/UTF-8 escape table
 
 sub value {
 	my $self = shift;
@@ -169,13 +165,15 @@ Conditionally quoted zone file representation of the text object.
 
 =cut
 
+my %escape;			## precalculated ASCII/UTF-8 escape table
+
 my $QQ = _decode_utf8( pack 'C', 34 );
 
 sub string {
 	my $self = shift;
 
-	my @utf8 = map { s/([^\040\060-\132\141-\172])/$escape{$1}/eg; $_ } @$self;
-	my $string = _decode_utf8( join '', @utf8 );
+	my @s = map split( '', $_ ), @$self;			# escape non-printable
+	my $string = _decode_utf8( join '', map $escape{$_}, @s );
 
 	# Note: Script-specific rules determine which Unicode characters match \s
 	return $string unless $string =~ /^$|\s|["\$'();@]/;	# unquoted contiguous
@@ -188,83 +186,79 @@ sub string {
 
 use vars qw($AUTOLOAD);
 
-sub AUTOLOAD {				## Default method
+sub AUTOLOAD {			## Default method
 	no strict;
 	@_ = ("method $AUTOLOAD undefined");
 	goto &{'Carp::confess'};
 }
 
 
-sub DESTROY { }				## Avoid tickling AUTOLOAD (in cleanup)
+sub DESTROY { }			## Avoid tickling AUTOLOAD (in cleanup)
 
 
 sub _decode_utf8 {
+	my $s = shift;
 
-	return UTF8->decode(shift) if UTF8;
+	return pack 'a0 a*', $s, UTF8->decode($s) if UTF8;	# preserve taint
 
-	return ASCII->decode(shift) if ASCII && not UTF8;
+	return pack 'a0 a*', $s, ASCII->decode($s) if ASCII && not UTF8;
 
-	unless (ASCII) {
-		my $s = shift;
+	# partial transliteration for non-ASCII character encodings
+	$s =~ tr
+	[\040-\176\000-\377]
+	[ !"#$%&'()*+,-./0-9:;<=>?@A-Z\[\\\]^_`a-z{|}~?] unless ASCII;
 
-		# partial transliteration for non-ASCII character encodings
-		$s =~ tr
-		[\055\040-\054\056-\176\000-\377]
-		[- !"#$%&'()*+,./0-9:;<=>?@A-Z\[\\\]^_`a-z{|}~?];
-
-		return $s;					# native 8-bit code
-	}
+	return $s;						# native 8-bit code
 }
 
 
 sub _encode_utf8 {
+	my $s = shift;
+	my $z = substr $s, 0, 0;
 
-	return UTF8->encode(shift) if UTF8;
+	return pack 'a0 a*', $z, UTF8->encode($s) if UTF8;	# preserve taint
 
-	return ASCII->encode(shift) if ASCII && not UTF8;
+	return pack 'a0 a*', $z, ASCII->encode($s) if ASCII && not UTF8;
 
-	unless (ASCII) {
-		my $s = shift;
+	# partial transliteration for non-ASCII character encodings
+	$s = pack 'C*', unpack 'U0 C*', $s unless ASCII;	# repackage pre-5.8 Unicode
+	$s =~ tr
+	[ !"#$%&'()*+,-./0-9:;<=>?@A-Z\[\\\]^_`a-z{|}~]
+	[\040-\176] unless ASCII;
 
-		# partial transliteration for non-ASCII character encodings
-		$s =~ tr
-		[- !"#$%&'()*+,./0-9:;<=>?@A-Z\[\\\]^_`a-z{|}~\000-\377]
-		[\055\040-\054\056-\176\077];
-
-		return $s;					# ASCII
-	}
+	return $s;						# ASCII
 }
 
 
-%escape = eval {				## precalculated ASCII/UTF-8 escape table
+%escape = eval {			## precalculated ASCII/UTF-8 escape table
 	my %table;
 	my @C0 = ( 0 .. 31 );					# control characters
-	my @NA = UTF8 ? ( 192, 193, 245 .. 255 ) : ( 128 .. 255 );
+	my @NA = UTF8 ? ( 192, 193, 216 .. 223, 245 .. 255 ) : ( 128 .. 255 );
 
 	foreach ( 0 .. 255 ) {					# transparent
 		$table{pack( 'C', $_ )} = pack 'C', $_;
 	}
 
 	foreach ( 34, 92 ) {					# escape character
-		$table{pack( 'C', $_ )} = pack 'C*', 92, $_;
+		$table{pack( 'C', $_ )} = pack 'C2', 92, $_;
 	}
 
 	foreach ( @C0, 127, @NA ) {				# \ddd
-		$table{pack( 'C', $_ )} = _encode_utf8 sprintf( '\\%03u', $_ );
+		$table{pack( 'C', $_ )} = pack 'C a3', 92, _encode_utf8( sprintf '%03u', $_ );
 	}
 
 	return %table;
 };
 
 
-%unescape = eval {				## precalculated numeric escape table
+%unescape = eval {			## precalculated numeric escape table
 	my %table;
 
 	foreach ( 0 .. 255 ) {
 		$table{_encode_utf8 sprintf( '%03u', $_ )} = pack 'C', $_;
 	}
 
-	$table{_encode_utf8('092')} = pack 'Ca*', 92, _encode_utf8 '666';
+	$table{_encode_utf8('092')} = pack 'C2', 92, 92;
 
 	return %table;
 };
