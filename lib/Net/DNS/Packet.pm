@@ -1,10 +1,10 @@
 package Net::DNS::Packet;
 
 #
-# $Id: Packet.pm 1120 2013-10-23 13:55:45Z willem $
+# $Id: Packet.pm 1127 2013-11-18 10:43:03Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1120 $)[1];
+$VERSION = (qw$LastChangedRevision: 1127 $)[1];
 
 
 =head1 NAME
@@ -718,24 +718,26 @@ found.
 
 =cut
 
+use constant DNSSIG0 => eval { require Net::DNS::RR::SIG; } || 0;
+
 sub sign_sig0 {
 	my $self = shift;
 	my $karg = shift || return undef;
 
+	croak 'SIG0: prerequisite Net::DNS::SEC not available' unless DNSSIG0;
+
 	my $sig0;
-	unless ( ref($karg) ) {
-		require Net::DNS::RR::SIG;
+	unless ( my $kref = ref($karg) ) {
 		$sig0 = Net::DNS::RR::SIG->create( '', $karg );
 
-	} elsif ( $karg->isa('Net::DNS::RR::SIG') ) {
+	} elsif ( $kref eq 'Net::DNS::RR::SIG' ) {
 		$sig0 = $karg;
 
-	} elsif ( $karg->isa('Net::DNS::SEC::Private') ) {
-		require Net::DNS::RR::SIG;
+	} elsif ( $kref eq 'Net::DNS::SEC::Private' ) {
 		$sig0 = Net::DNS::RR::SIG->create( '', $karg );
 
 	} else {
-		croak join ' ', 'Incompatible', ref($karg), 'argument to sign_sig0';
+		croak "unexpected $kref argument passed to sign_sig0";
 	}
 
 	CORE::push( @{$self->{additional}}, $sig0 ) if $sig0;
