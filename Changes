@@ -1,6 +1,6 @@
-$Id: Changes 1120 2013-10-23 13:55:45Z willem $                       -*-text-*-
+$Id: Changes 1134 2013-11-29 13:23:19Z willem $                       -*-text-*-
 
-**** 0.73 [unreleased]
+**** 0.73 Nov 29, 2013
 
 Fix rt.cpan.org #88778
 
