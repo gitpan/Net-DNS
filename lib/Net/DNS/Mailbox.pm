@@ -2,10 +2,10 @@ package Net::DNS::Mailbox;
 use base qw(Net::DNS::DomainName);
 
 #
-# $Id: Mailbox.pm 1099 2013-03-20 13:27:08Z willem $
+# $Id: Mailbox.pm 1146 2013-12-24 15:11:30Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1099 $)[1]; # Unchanged since 1055
+$VERSION = (qw$LastChangedRevision: 1146 $)[1];
 
 
 =head1 NAME
@@ -99,7 +99,10 @@ canonicalisation.
 =cut
 
 package Net::DNS::Mailbox1035;
-use base qw(Net::DNS::DomainName1035);
+BEGIN {
+	our @ISA;
+	push @ISA, qw(Net::DNS::DomainName1035);
+}
 
 sub new { &Net::DNS::Mailbox::new; }
 
@@ -107,7 +110,10 @@ sub address { &Net::DNS::Mailbox::address; }
 
 
 package Net::DNS::Mailbox2535;
-use base qw(Net::DNS::DomainName2535);
+BEGIN {
+	our @ISA;
+	push @ISA, qw(Net::DNS::DomainName2535);
+}
 
 sub new { &Net::DNS::Mailbox::new; }
 

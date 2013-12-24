@@ -1,12 +1,14 @@
 package Net::DNS::RR::NULL;
 
 #
-# $Id: NULL.pm 1096 2012-12-28 13:35:15Z willem $
+# $Id: NULL.pm 1144 2013-12-17 11:26:33Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1096 $)[1]; # Unchanged since 1037
+$VERSION = (qw$LastChangedRevision: 1144 $)[1];
 
-use base Net::DNS::RR;
+
+use strict;
+use base qw(Net::DNS::RR);
 
 =head1 NAME
 
@@ -42,12 +44,14 @@ other unpredictable behaviour.
 =head2 rdlength
 
     $rdlength = $rr->rdlength;
+    $rr->rdlength( $rdlength );
 
 Returns the length of the record data section.
 
 =head2 rdata
 
     $rdata = $rr->rdata;
+    $rr->rdata( $rdata );
 
 Returns the record data section as binary data.
 
@@ -56,12 +60,12 @@ Returns the record data section as binary data.
 
 Copyright (c)1997 Michael Fuhr.
 
-Package template (c)2009,2012 O.M.Kolkman and R.W.Franks.
-
 All rights reserved.
 
 This program is free software; you may redistribute it and/or
 modify it under the same terms as Perl itself.
+
+Package template (c)2009,2012 O.M.Kolkman and R.W.Franks.
 
 
 =head1 SEE ALSO

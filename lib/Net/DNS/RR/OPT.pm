@@ -1,12 +1,14 @@
 package Net::DNS::RR::OPT;
 
 #
-# $Id: OPT.pm 1101 2013-08-14 14:40:00Z willem $
+# $Id: OPT.pm 1144 2013-12-17 11:26:33Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1101 $)[1]; # Unchanged since 1037
+$VERSION = (qw$LastChangedRevision: 1144 $)[1];
 
-use base Net::DNS::RR;
+
+use strict;
+use base qw(Net::DNS::RR);
 
 =head1 NAME
 
@@ -14,9 +16,7 @@ Net::DNS::RR::OPT - DNS OPT resource record
 
 =cut
 
-
 use integer;
-
 use Carp;
 
 use Net::DNS::Parameters;
@@ -256,6 +256,7 @@ other unpredictable behaviour.
 =head2 version
 
     $version = $rr->version;
+    $rr->version( $version );
 
 The version of EDNS used by this OPT record.
 
@@ -269,7 +270,7 @@ reassembled in the network stack of the originating host.
 
 =head2 rcode
 
-	$extended_rcode   = $packet->header->rcode;
+	$extended_rcode	  = $packet->header->rcode;
 	$incomplete_rcode = $packet->edns->rcode;
 
 The 12 bit extended RCODE. The most significant 8 bits reside in
@@ -310,10 +311,6 @@ changes is cumulative. An option is deleted if the value is undefined.
 
 Copyright (c)2001,2002	RIPE NCC.  Author Olaf M. Kolkman.
 
-Portions Copyright (c)2012 Dick Franks.
-
-Package template (c)2009,2012 O.M.Kolkman and R.W.Franks.
-
 All Rights Reserved
 
 Permission to use, copy, modify, and distribute this software and its
@@ -331,6 +328,10 @@ DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR
 PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS
 ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF
 THIS SOFTWARE.
+
+Portions Copyright (c)2012 Dick Franks.
+
+Package template (c)2009,2012 O.M.Kolkman and R.W.Franks.
 
 
 =head1 SEE ALSO

@@ -1,12 +1,14 @@
 package Net::DNS::RR::CERT;
 
 #
-# $Id: CERT.pm 1101 2013-08-14 14:40:00Z willem $
+# $Id: CERT.pm 1140 2013-12-16 14:24:15Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1101 $)[1];
+$VERSION = (qw$LastChangedRevision: 1140 $)[1];
 
-use base Net::DNS::RR;
+
+use strict;
+use base qw(Net::DNS::RR);
 
 =head1 NAME
 
@@ -14,11 +16,8 @@ Net::DNS::RR::CERT - DNS CERT resource record
 
 =cut
 
-
 use integer;
-
 use MIME::Base64;
-
 my %formats = (
 	PKIX	=> 1,						# X.509 as per PKIX
 	SPKI	=> 2,						# SPKI certificate
@@ -123,8 +122,8 @@ sub algorithm {
 sub cert {
 	my $self = shift;
 
-	$self->{certbin} = MIME::Base64::decode( join "", @_ ) if scalar @_;
-	return MIME::Base64::encode( $self->certbin, "" ) if defined wantarray;
+	$self->certbin( MIME::Base64::decode( join "", @_ ) ) if scalar @_;
+	return MIME::Base64::encode( $self->certbin(), "" ) if defined wantarray;
 }
 
 sub certbin {
@@ -134,7 +133,7 @@ sub certbin {
 	$self->{certbin} || "";
 }
 
-sub certificate { &certbin; }			## historical
+sub certificate { &certbin; }		## historical
 
 1;
 __END__
@@ -168,6 +167,7 @@ Returns the format code for the certificate (in numeric form)
 =head2 tag
 
     $tag = $rr->tag;
+    $rr->tag( $tag );
 
 Returns the key tag for the public key in the certificate
 
@@ -180,12 +180,14 @@ Returns the algorithm used by the certificate (in numeric form).
 =head2 cert
 
     $cert = $rr->cert;
+    $rr->cert( $cert );
 
 Base64 representation of the certificate.
 
 =head2 certbin
 
     $certbin = $rr->certbin;
+    $rr->certbin( $certbin );
 
 Binary representation of the certificate.
 
@@ -194,12 +196,12 @@ Binary representation of the certificate.
 
 Copyright (c)2002 VeriSign, Mike Schiraldi
 
-Package template (c)2009,2012 O.M.Kolkman and R.W.Franks.
-
 All rights reserved.
 
 This program is free software; you may redistribute it and/or
 modify it under the same terms as Perl itself.
+
+Package template (c)2009,2012 O.M.Kolkman and R.W.Franks.
 
 
 =head1 SEE ALSO

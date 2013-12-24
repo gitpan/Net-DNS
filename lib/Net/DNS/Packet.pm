@@ -1,10 +1,10 @@
 package Net::DNS::Packet;
 
 #
-# $Id: Packet.pm 1127 2013-11-18 10:43:03Z willem $
+# $Id: Packet.pm 1143 2013-12-16 15:19:51Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1127 $)[1];
+$VERSION = (qw$LastChangedRevision: 1143 $)[1];
 
 
 =head1 NAME
@@ -27,11 +27,13 @@ A Net::DNS::Packet object represents a DNS protocol packet.
 =cut
 
 
-use base Exporter;
-@EXPORT_OK = qw(dn_expand);
-
+use strict;
 use integer;
 use Carp;
+
+use base qw(Exporter);
+use vars qw(@EXPORT_OK);
+@EXPORT_OK = qw(dn_expand);
 
 require Net::DNS::Header;
 require Net::DNS::Question;
@@ -173,15 +175,22 @@ sub decode {
 =head2 data
 
     $data = $packet->data;
+    $data = $packet->data( $size );
 
 Returns the packet data in binary format, suitable for sending as a
 query or update request to a nameserver.
 
+Truncation may be specified using a non-zero optional size argument.
+
 =cut
 
-sub encode {&data}
-
 sub data {
+	my ( $self, $size ) = @_;
+	$self->truncate($size) if $size;			# temp fix for RT#91306
+	&encode;
+}
+
+sub encode {
 	my $self = shift;
 
 	my $ident = $self->header->id;				# packet header
@@ -217,7 +226,7 @@ represents the header section of the packet.
 
 sub header {
 	my $self = shift;
-	return bless \$self, Net::DNS::Header;
+	return bless \$self, qw(Net::DNS::Header);
 }
 
 
@@ -811,9 +820,9 @@ sub truncate {
 
 	print "Truncating to $max_len\n" if $debug;
 
-	if (length $self->data() > $max_len) {
+	if (length $self->encode() > $max_len) {
 		# first remove data from the additional section
-		while (length $self->data() > $max_len){
+		while (length $self->encode() > $max_len){
 			# first remove _complete_ RRstes from the additonal section.
 			my $popped= CORE::pop(@{$self->{'additional'}});
 			last unless defined($popped);
@@ -835,7 +844,7 @@ sub truncate {
 			$self->{'additional'}=\@stripped_additonal;
 		}
 
-		return $self if length $self->data <= $max_len;
+		return $self if length $self->encode <= $max_len;
 
       		my @sections = qw<authority answer question>;
 		while (@sections) {
@@ -843,7 +852,7 @@ sub truncate {
 				last unless defined($popped);
 				print "Popped ".$popped->string." from the $sections[0] section\n" if $debug;
 				$self->header->tc(1);
-				return $self if length $self->data <= $max_len;
+				return $self if length $self->encode <= $max_len;
 				next;
 			}
 			shift @sections;

@@ -1,4 +1,21 @@
-$Id: Changes 1134 2013-11-29 13:23:19Z willem $                       -*-text-*-
+$Id: Changes 1147 2013-12-24 15:13:31Z willem $                       -*-text-*-
+
+
+
+**** 0.74 [unreleased]
+
+Fix rt.cpan.org #91306
+
+	Nameserver crashes on malformed UDP query.
+
+Fix rt.cpan.org #91241
+
+	TSIG: Fix incorrectly generated %algbyval table.
+
+Feature
+
+	Add CAA, EUI48 and EUI64 RR implementation.
+
 
 **** 0.73 Nov 29, 2013
 
