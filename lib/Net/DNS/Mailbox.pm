@@ -1,11 +1,10 @@
 package Net::DNS::Mailbox;
-use base qw(Net::DNS::DomainName);
 
 #
-# $Id: Mailbox.pm 1146 2013-12-24 15:11:30Z willem $
+# $Id: Mailbox.pm 1150 2014-01-02 20:17:17Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1146 $)[1];
+$VERSION = (qw$LastChangedRevision: 1150 $)[1];
 
 
 =head1 NAME
@@ -28,7 +27,10 @@ objects representing the DNS coded form of RFC822 mailbox address.
 
 
 use strict;
+use integer;
 use Carp;
+
+use base qw(Net::DNS::DomainName);
 
 
 =head1 METHODS
@@ -99,25 +101,19 @@ canonicalisation.
 =cut
 
 package Net::DNS::Mailbox1035;
-BEGIN {
-	our @ISA;
-	push @ISA, qw(Net::DNS::DomainName1035);
-}
+
+use Net::DNS::DomainName;
+use base qw(Net::DNS::DomainName1035 Net::DNS::Mailbox);
 
 sub new { &Net::DNS::Mailbox::new; }
-
-sub address { &Net::DNS::Mailbox::address; }
 
 
 package Net::DNS::Mailbox2535;
-BEGIN {
-	our @ISA;
-	push @ISA, qw(Net::DNS::DomainName2535);
-}
+
+use Net::DNS::DomainName;
+use base qw(Net::DNS::DomainName2535 Net::DNS::Mailbox);
 
 sub new { &Net::DNS::Mailbox::new; }
-
-sub address { &Net::DNS::Mailbox::address; }
 
 
 1;

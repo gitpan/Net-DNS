@@ -1,27 +1,27 @@
---- #YAML:1.0
-name:               Net-DNS
-version:            0.73_1
-abstract:           Perl DNS resolver module
+---
+abstract: 'Perl DNS resolver module'
 author:
-    - Olaf Kolkman <olaf@net-dns.org>
-license:            perl
-distribution_type:  module
-configure_requires:
-    ExtUtils::MakeMaker:  0
+  - 'Olaf Kolkman <olaf@net-dns.org>'
 build_requires:
-    ExtUtils::MakeMaker:  0
-requires:
-    Digest::HMAC:  1.01
-    Digest::MD5:   2.13
-    Digest::SHA:   5.23
-    IO::Socket:    1.24
-    MIME::Base64:  2.11
-    Test::More:    0.52
-no_index:
-    directory:
-        - t
-        - inc
-generated_by:       ExtUtils::MakeMaker version 6.57_05
+  ExtUtils::MakeMaker: 0
+configure_requires:
+  ExtUtils::MakeMaker: 0
+dynamic_config: 1
+generated_by: 'ExtUtils::MakeMaker version 6.84, CPAN::Meta::Converter version 2.133380'
+license: perl
 meta-spec:
-    url:      http://module-build.sourceforge.net/META-spec-v1.4.html
-    version:  1.4
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: 1.4
+name: Net-DNS
+no_index:
+  directory:
+    - t
+    - inc
+requires:
+  Digest::HMAC: 1.01
+  Digest::MD5: 2.13
+  Digest::SHA: 5.23
+  IO::Socket: 1.24
+  MIME::Base64: 2.11
+  Test::More: 0.52
+version: 0.73_2

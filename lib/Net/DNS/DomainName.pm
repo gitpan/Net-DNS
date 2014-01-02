@@ -1,11 +1,10 @@
 package Net::DNS::DomainName;
-use base qw(Net::DNS::Domain);
 
 #
-# $Id: DomainName.pm 1145 2013-12-17 11:39:45Z willem $
+# $Id: DomainName.pm 1150 2014-01-02 20:17:17Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1145 $)[1];
+$VERSION = (qw$LastChangedRevision: 1150 $)[1];
 
 
 =head1 NAME
@@ -40,10 +39,13 @@ introduced by RFC3597.
 =cut
 
 
-use integer;
-use Carp;
+use strict;
+use base qw(Net::DNS::Domain);
 
 use constant OKlc => eval { require 5.8.9; } || 0;
+
+use integer;
+use Carp;
 
 
 =head1 METHODS

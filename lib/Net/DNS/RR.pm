@@ -1,10 +1,10 @@
 package Net::DNS::RR;
 
 #
-# $Id: RR.pm 1120 2013-10-23 13:55:45Z willem $
+# $Id: RR.pm 1152 2014-01-02 20:23:54Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1120 $)[1];
+$VERSION = (qw$LastChangedRevision: 1152 $)[1];
 
 
 =head1 NAME
@@ -39,6 +39,7 @@ use Carp;
 
 use Net::DNS::Parameters;
 use Net::DNS::DomainName;
+use Net::DNS::Mailbox;
 
 
 =head1 METHODS
