@@ -1,12 +1,12 @@
 package Net::DNS;
 
 #
-# $Id: DNS.pm 1156 2014-01-05 20:24:40Z willem $
+# $Id: DNS.pm 1159 2014-01-10 22:35:47Z willem $
 #
 use vars qw($SVNVERSION $VERSION);
 BEGIN {
-	$SVNVERSION = (qw$LastChangedRevision: 1156 $)[1];
-	$VERSION = '0.73_3';
+	$SVNVERSION = (qw$LastChangedRevision: 1159 $)[1];
+	$VERSION = '0.73_4';
 }
 
 
@@ -32,6 +32,10 @@ I<DNS and BIND> (Albitz & Liu) for details.
 =cut
 
 
+use 5.004_05;
+use strict;
+use integer;
+use Carp;
 
 
 
@@ -111,8 +115,6 @@ BEGIN {
 }
 
 
-use strict;
-use Carp;
 use Net::DNS::RR;
 use Net::DNS::Packet;
 use Net::DNS::Update;

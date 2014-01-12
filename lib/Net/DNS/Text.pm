@@ -1,10 +1,10 @@
 package Net::DNS::Text;
 
 #
-# $Id: Text.pm 1111 2013-09-04 12:03:10Z willem $
+# $Id: Text.pm 1158 2014-01-10 22:30:40Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1111 $)[1];
+$VERSION = (qw$LastChangedRevision: 1158 $)[1];
 
 
 =head1 NAME
@@ -221,7 +221,6 @@ sub _encode_utf8 {
 	return pack 'a0 a*', $z, ASCII->encode($s) if ASCII && not UTF8;
 
 	# partial transliteration for non-ASCII character encodings
-	$s = pack 'C*', unpack 'U0 C*', $s unless ASCII;	# repackage pre-5.8 Unicode
 	$s =~ tr
 	[ !"#$%&'()*+,-./0-9:;<=>?@A-Z\[\\\]^_`a-z{|}~]
 	[\040-\176] unless ASCII;

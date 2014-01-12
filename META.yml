@@ -24,4 +24,4 @@ requires:
   IO::Socket: 1.24
   MIME::Base64: 2.11
   Test::More: 0.52
-version: 0.73_3
+version: 0.73_4

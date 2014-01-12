@@ -1,6 +1,6 @@
 package Net::DNS::Resolver::Base;
 #
-# $Id: Base.pm 1116 2013-09-23 10:03:32Z willem $
+# $Id: Base.pm 1158 2014-01-10 22:30:40Z willem $
 #
 
 use strict;
@@ -24,7 +24,7 @@ use IO::Select;
 use Net::DNS;
 use Net::DNS::Packet;
 
-$VERSION = (qw$LastChangedRevision: 1116 $)[1];
+$VERSION = (qw$LastChangedRevision: 1158 $)[1];
 
 
 #
@@ -238,7 +238,7 @@ sub read_config_file {
 
 	local *FILE;
 
-	open(FILE, "<", $file) or return;
+	open(FILE, $file) or return;
 	local $/ = "\n";
 	local $_;
 
@@ -393,7 +393,7 @@ sub nameserver { &nameservers }
 
 sub cname_addr {
 	# TODO 20081217
-	# This code does not follow CNAME chanes, it only looks inside the packet. Out of bailiwick will fail.
+	# This code does not follow CNAME chains, it only looks inside the packet. Out of bailiwick will fail.
 	# Also it is not IP agnostic
 	my $names  = shift;
 	my $packet = shift;

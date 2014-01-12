@@ -1,10 +1,10 @@
 package Net::DNS::ZoneFile;
 
 #
-# $Id: ZoneFile.pm 1140 2013-12-16 14:24:15Z willem $
+# $Id: ZoneFile.pm 1158 2014-01-10 22:30:40Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1140 $)[1];
+$VERSION = (qw$LastChangedRevision: 1158 $)[1];
 
 
 =head1 NAME
@@ -415,7 +415,7 @@ sub _generate {				## expand $GENERATE into input stream
 }
 
 
-my $LEX_REGEX = qw/("[^"]*")|("[^"]*)$|;[^\n]*|(^\s)|\s/;
+my $LEX_REGEX = q/("[^"]*")|("[^"]*)$|;[^\n]*|(^\s)|\s/;
 
 sub _getline {				## get line from current source
 	my $self = shift;
