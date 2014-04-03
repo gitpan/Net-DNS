@@ -1,7 +1,18 @@
-$Id: Changes 1171 2014-02-26 08:56:52Z willem $                       -*-text-*-
+$Id: Changes 1182 2014-04-03 08:52:00Z willem $                       -*-text-*-
 
 
 **** 0.75 [unreleased]
+
+Fix rt.cpan.org #94069
+
+	Compile-time constant in Domain.pm/Text.pm cannot be used to
+	store pointer to encoding object when using perlcc compiler.
+	Thanks are due to Reini Urban for testing the revised code.
+
+Fix rt.cpan.org #93764
+
+	Resolver gives unhelpful errorstring when attempting to use
+	IPv6-only nameserver without INET6 and Socket6 installed.
 
 Fix rt.cpan.org #92626
 
@@ -9,7 +20,7 @@ Fix rt.cpan.org #92626
 
 Feature
 
-	Implement TSIG verified AXFR.
+	Implement TSIG verified zone transfer.
 
 Fix rt.cpan.org #92433 & #91241
 

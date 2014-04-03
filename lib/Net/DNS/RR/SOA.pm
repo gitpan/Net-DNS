@@ -1,10 +1,10 @@
 package Net::DNS::RR::SOA;
 
 #
-# $Id: SOA.pm 1171 2014-02-26 08:56:52Z willem $
+# $Id: SOA.pm 1188 2014-04-03 18:54:34Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1171 $)[1];
+$VERSION = (qw$LastChangedRevision: 1188 $)[1];
 
 
 use strict;
@@ -63,11 +63,13 @@ sub format_rdata {			## format rdata portion of RR string.
 sub parse_rdata {			## populate RR from rdata in argument list
 	my $self = shift;
 
-	$self->$_( scalar @_ ? shift : () ) for qw(mname rname serial);
-
-	for (qw(refresh retry expire minimum)) {
-		$self->$_( Net::DNS::RR::ttl( {}, shift ) ) if scalar @_;
-	}
+	$self->mname(shift);
+	$self->rname(shift);
+	$self->serial(shift);
+	$self->refresh( Net::DNS::RR::ttl( {}, shift || return ) );
+	$self->retry( Net::DNS::RR::ttl( {}, shift || return ) );
+	$self->expire( Net::DNS::RR::ttl( {}, shift || return ) );
+	$self->minimum( Net::DNS::RR::ttl( {}, shift || return ) );
 }
 
 

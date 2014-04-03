@@ -1,10 +1,10 @@
 package Net::DNS::RR::NULL;
 
 #
-# $Id: NULL.pm 1144 2013-12-17 11:26:33Z willem $
+# $Id: NULL.pm 1188 2014-04-03 18:54:34Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1144 $)[1];
+$VERSION = (qw$LastChangedRevision: 1188 $)[1];
 
 
 use strict;
@@ -15,7 +15,6 @@ use base qw(Net::DNS::RR);
 Net::DNS::RR::NULL - DNS NULL resource record
 
 =cut
-
 
 
 1;

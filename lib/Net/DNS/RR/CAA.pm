@@ -1,10 +1,10 @@
 package Net::DNS::RR::CAA;
 
 #
-# $Id: CAA.pm 1139 2013-12-11 09:57:34Z willem $
+# $Id: CAA.pm 1188 2014-04-03 18:54:34Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1139 $)[1];
+$VERSION = (qw$LastChangedRevision: 1188 $)[1];
 
 
 use strict;
@@ -15,6 +15,7 @@ use base qw(Net::DNS::RR);
 Net::DNS::RR::CAA - DNS CAA resource record
 
 =cut
+
 
 use integer;
 
@@ -48,7 +49,10 @@ sub format_rdata {			## format rdata portion of RR string.
 sub parse_rdata {			## populate RR from rdata in argument list
 	my $self = shift;
 
-	$self->$_(shift) for qw(flags tag value);
+	foreach my $attr (qw(flags tag value)) {
+		$self->$attr(shift) if scalar @_;
+	}
+
 }
 
 
@@ -59,6 +63,7 @@ sub tag {
 	$self->{tag} || "";
 }
 
+
 sub value {
 	my $self = shift;
 
@@ -66,12 +71,14 @@ sub value {
 	$self->{value} || "";
 }
 
+
 sub flags {
 	my $self = shift;
 
 	$self->{flags} = 0 + shift if scalar @_;
 	return $self->{flags} || 0;
 }
+
 
 sub critical {
 	my $bit = 0x0080;

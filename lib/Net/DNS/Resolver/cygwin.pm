@@ -1,11 +1,10 @@
 package Net::DNS::Resolver::cygwin;
-use base Net::DNS::Resolver::Base;
 
 #
-# $Id: cygwin.pm 1096 2012-12-28 13:35:15Z willem $
+# $Id: cygwin.pm 1185 2014-04-03 09:21:21Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1096 $)[1]; # Unchanged since 1021
+$VERSION = (qw$LastChangedRevision: 1185 $)[1];
 
 =head1 NAME
 
@@ -15,6 +14,7 @@ Net::DNS::Resolver::cygwin - Cygwin Resolver Class
 
 
 use strict;
+use base qw(Net::DNS::Resolver::Base);
 
 
 sub getregkey {

@@ -1,10 +1,10 @@
 package Net::DNS::RR::CERT;
 
 #
-# $Id: CERT.pm 1140 2013-12-16 14:24:15Z willem $
+# $Id: CERT.pm 1188 2014-04-03 18:54:34Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1140 $)[1];
+$VERSION = (qw$LastChangedRevision: 1188 $)[1];
 
 
 use strict;
@@ -16,8 +16,11 @@ Net::DNS::RR::CERT - DNS CERT resource record
 
 =cut
 
+
 use integer;
+
 use MIME::Base64;
+
 my %formats = (
 	PKIX	=> 1,						# X.509 as per PKIX
 	SPKI	=> 2,						# SPKI certificate
@@ -100,12 +103,14 @@ sub format {
 	$self->{format} = $format;
 }
 
+
 sub tag {
 	my $self = shift;
 
 	$self->{tag} = 0 + shift if scalar @_;
 	return $self->{tag} || 0;
 }
+
 
 sub algorithm {
 	my $self = shift;
@@ -119,6 +124,7 @@ sub algorithm {
 	$self->{algorithm} = $algorithm;
 }
 
+
 sub cert {
 	my $self = shift;
 
@@ -126,12 +132,14 @@ sub cert {
 	return MIME::Base64::encode( $self->certbin(), "" ) if defined wantarray;
 }
 
+
 sub certbin {
 	my $self = shift;
 
 	$self->{certbin} = shift if scalar @_;
 	$self->{certbin} || "";
 }
+
 
 sub certificate { &certbin; }		## historical
 

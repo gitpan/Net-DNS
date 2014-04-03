@@ -1,10 +1,10 @@
 package Net::DNS::RR::EUI64;
 
 #
-# $Id: EUI64.pm 1139 2013-12-11 09:57:34Z willem $
+# $Id: EUI64.pm 1188 2014-04-03 18:54:34Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1139 $)[1];
+$VERSION = (qw$LastChangedRevision: 1188 $)[1];
 
 
 use strict;
@@ -15,6 +15,7 @@ use base qw(Net::DNS::RR);
 Net::DNS::RR::EUI64 - DNS EUI64 resource record
 
 =cut
+
 
 use integer;
 

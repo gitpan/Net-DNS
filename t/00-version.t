@@ -1,4 +1,4 @@
-# $Id: 00-version.t 1101 2013-08-14 14:40:00Z willem $ -*-perl-*-
+# $Id: 00-version.t 1187 2014-04-03 10:50:23Z willem $ -*-perl-*-
 
 use Test::More;
 use File::Spec;
@@ -15,7 +15,8 @@ my %manifest;
 open MANIFEST, 'MANIFEST' or plan skip_all => "MANIFEST: $!";
 while (<MANIFEST>) {
 	chomp;
-	$manifest{lc "$1"}++ if /([^\/]+)$/;
+	my ( $volume, $directory, $name ) = File::Spec->splitpath($_);
+	$manifest{lc $name}++ if $name;
 }
 close MANIFEST;
 

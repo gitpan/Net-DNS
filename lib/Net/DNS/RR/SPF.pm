@@ -1,10 +1,10 @@
 package Net::DNS::RR::SPF;
 
 #
-# $Id: SPF.pm 1145 2013-12-17 11:39:45Z willem $
+# $Id: SPF.pm 1188 2014-04-03 18:54:34Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1145 $)[1];
+$VERSION = (qw$LastChangedRevision: 1188 $)[1];
 
 
 use strict;
@@ -15,6 +15,7 @@ use base qw(Net::DNS::RR::TXT);
 Net::DNS::RR::SPF - DNS SPF resource record
 
 =cut
+
 
 use integer;
 

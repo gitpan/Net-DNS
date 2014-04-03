@@ -1,10 +1,12 @@
-# $Id: 00-load.t 1101 2013-08-14 14:40:00Z willem $	-*-perl-*-
+# $Id: 00-load.t 1187 2014-04-03 10:50:23Z willem $	-*-perl-*-
 
 use strict;
 use Test::More "no_plan";
 
 
 BEGIN {
+	use constant DNSSEC => eval { require Net::DNS::SEC; } || 0;
+
 	use_ok('Net::DNS');
 	use_ok('Net::DNS::Resolver::Recurse');
 	use_ok('Net::DNS::Nameserver');
@@ -12,8 +14,8 @@ BEGIN {
 
 
 diag("\nThese tests were run using:\n");
-diag("Net::DNS::VERSION:\t$Net::DNS::VERSION");
-diag("Net::DNS::SEC seems to be available") if $Net::DNS::DNSSEC;
+diag("Net::DNS\t$Net::DNS::VERSION");
+diag("Net::DNS::SEC\t$Net::DNS::SEC::VERSION seems to be available") if DNSSEC;
 diag("set environment variable NET_DNS_DEBUG to get all versions");
 
 
