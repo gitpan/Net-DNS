@@ -1,5 +1,5 @@
 
-# $Id: Makefile.PL 1187 2014-04-03 10:50:23Z willem $ -*-perl-*-
+# $Id: Makefile.PL 1191 2014-04-09 09:06:32Z willem $ -*-perl-*-
 
 use strict;
 $^W = 1;
@@ -157,7 +157,7 @@ my %Makefile = (
 	ABSTRACT	 => 'Perl DNS resolver module',
 	AUTHOR		 => 'Olaf Kolkman <olaf@net-dns.org>',
 	LICENSE		 => 'perl',
-	MIN_PERL_VERSION => 5.004005,
+	MIN_PERL_VERSION => 5.004_04,
 	PREREQ_PM	 => {
 		'Digest::HMAC' => 1.01,
 		'Digest::MD5'  => 2.13,

@@ -1,10 +1,10 @@
 package Net::DNS::RR;
 
 #
-# $Id: RR.pm 1186 2014-04-03 10:18:38Z willem $
+# $Id: RR.pm 1195 2014-04-29 12:43:50Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1186 $)[1];
+$VERSION = (qw$LastChangedRevision: 1195 $)[1];
 
 
 =head1 NAME
@@ -87,7 +87,7 @@ The trailing dot (.) is optional.
 
 =cut
 
-my $PARSE_REGEX = q/("[^"]*"|'[^']*')|;[^\n]*|\s|\)$/;
+my $PARSE_REGEX = q/("[^"]*"|'[^']*')|;[^\n]*|[\s()]/;
 
 sub _new_string {
 	my $base;
@@ -99,10 +99,11 @@ sub _new_string {
 	s/\\\\/\\092/g;						# disguise escaped escape
 	s/\\"/\\034/g;						# disguise escaped double quote
 	s/\\'/\\039/g;						# disguise escaped single quote
+	s/\\\(/\\040/g;						# disguise escaped bracket
+	s/\\\)/\\041/g;						# disguise escaped bracket
 	s/\\;/\\059/g;						# disguise escaped semicolon
 	s/\n(\S)/$1/g if COMPATIBLE;				# gloss over syntax errors in Net::DNS::SEC test data
-	my @parse = grep defined && length, split /$PARSE_REGEX/o;
-	my ( $name, @token ) = grep !/^[()]$/, @parse;		# discard brackets
+	my ( $name, @token ) = grep defined && length, split /$PARSE_REGEX/o;
 
 	my ( $t1, $t2, $t3 ) = @token;
 	croak 'unable to parse RR string' unless defined $t1;

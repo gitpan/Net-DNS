@@ -1,10 +1,10 @@
 package Net::DNS::RR::OPT;
 
 #
-# $Id: OPT.pm 1188 2014-04-03 18:54:34Z willem $
+# $Id: OPT.pm 1194 2014-04-28 07:15:12Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1188 $)[1];
+$VERSION = (qw$LastChangedRevision: 1194 $)[1];
 
 
 use strict;
@@ -18,7 +18,6 @@ Net::DNS::RR::OPT - DNS OPT resource record
 
 
 use integer;
-
 use Carp;
 
 use Net::DNS::Parameters;
@@ -346,6 +345,6 @@ Package template (c)2009,2012 O.M.Kolkman and R.W.Franks.
 
 =head1 SEE ALSO
 
-L<perl>, L<Net::DNS>, L<Net::DNS::RR>, RFC2671 Section 4
+L<perl>, L<Net::DNS>, L<Net::DNS::RR>, RFC6891, RFC3225
 
 =cut

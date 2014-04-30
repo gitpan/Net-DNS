@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:               Net-DNS
-version:            0.74_3
+version:            0.74_4
 abstract:           Perl DNS resolver module
 author:
     - Olaf Kolkman <olaf@net-dns.org>
@@ -16,7 +16,7 @@ requires:
     Digest::SHA:   5.23
     IO::Socket:    1.24
     MIME::Base64:  2.11
-    perl:          5.004005
+    perl:          5.00404
     Test::More:    0.52
 no_index:
     directory:

@@ -1,4 +1,4 @@
-$Id: Changes 1182 2014-04-03 08:52:00Z willem $                       -*-text-*-
+$Id: Changes 1194 2014-04-28 07:15:12Z willem $                       -*-text-*-
 
 
 **** 0.75 [unreleased]
@@ -25,6 +25,10 @@ Feature
 Fix rt.cpan.org #92433 & #91241
 
 	TSIG: implement sign/verify for multi-packet message.
+
+Fix rt.cpan.org #79569
+
+	Iterate nameservers in AXFR
 
 
 **** 0.74 Jan 16, 2014
