@@ -1,17 +1,10 @@
 package Net::DNS::Resolver::Base;
 
 #
-# $Id: Base.pm 1197 2014-04-30 11:16:08Z willem $
+# $Id: Base.pm 1198 2014-05-05 06:03:58Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1197 $)[1];
-
-
-=head1 NAME
-
-Net::DNS::Resolver - DNS resolver class
-
-=cut
+$VERSION = (qw$LastChangedRevision: 1198 $)[1];
 
 
 use strict;
@@ -1533,6 +1526,10 @@ sub DESTROY {}
 __END__
 
 
+=head1 NAME
+
+Net::DNS::Resolver - DNS resolver class
+
 =head1 SYNOPSIS
 
     use base qw(Net::DNS::Resolver::Base);
@@ -1540,9 +1537,9 @@ __END__
 =head1 DESCRIPTION
 
 This class is the common base class for the different platform
-sub-classes of L<Net::DNS::Resolver|Net::DNS::Resolver>.
+sub-classes of L<Net::DNS::Resolver>.
 
-No user serviceable parts inside, see L<Net::DNS::Resolver|Net::DNS::Resolver>
+No user serviceable parts inside, see L<Net::DNS::Resolver>
 for all your resolving needs.
 
 =head1 COPYRIGHT
