@@ -1,10 +1,10 @@
 package Net::DNS::Resolver::Base;
 
 #
-# $Id: Base.pm 1198 2014-05-05 06:03:58Z willem $
+# $Id: Base.pm 1199 2014-05-06 09:16:52Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1198 $)[1];
+$VERSION = (qw$LastChangedRevision: 1199 $)[1];
 
 
 use strict;
@@ -1485,11 +1485,11 @@ sub _ip_is_ipv6 {
 }
 
 
-
+sub DESTROY { }				## Avoid tickling AUTOLOAD (in cleanup)
 
 use vars qw($AUTOLOAD);
 
-sub AUTOLOAD {
+sub AUTOLOAD {				## Default method
 	my ($self) = @_;
 
 	my $name = $AUTOLOAD;
@@ -1513,12 +1513,6 @@ sub AUTOLOAD {
 
 	goto &{$AUTOLOAD};
 }
-
-#
-# Some people have reported that Net::DNS dies because AUTOLOAD picks up
-# calls to DESTROY.
-#
-sub DESTROY {}
 
 
 1;
