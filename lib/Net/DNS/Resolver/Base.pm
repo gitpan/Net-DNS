@@ -1,10 +1,10 @@
 package Net::DNS::Resolver::Base;
 
 #
-# $Id: Base.pm 1199 2014-05-06 09:16:52Z willem $
+# $Id: Base.pm 1200 2014-05-08 08:11:57Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1199 $)[1];
+$VERSION = (qw$LastChangedRevision: 1200 $)[1];
 
 
 use strict;
@@ -1522,7 +1522,7 @@ __END__
 
 =head1 NAME
 
-Net::DNS::Resolver - DNS resolver class
+Net::DNS::Resolver::Base - Common Resolver Class
 
 =head1 SYNOPSIS
 
