@@ -1,10 +1,10 @@
 package Net::DNS::Resolver::MSWin32;
 
 #
-# $Id: MSWin32.pm 1185 2014-04-03 09:21:21Z willem $
+# $Id: MSWin32.pm 1202 2014-05-19 08:34:16Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1185 $)[1];
+$VERSION = (qw$LastChangedRevision: 1202 $)[1];
 
 =head1 NAME
 
@@ -56,9 +56,7 @@ sub init {
 
 
 	my @nameservers = map { $_->{IpAddress} } @{$FIXED_INFO->{DnsServersList}};
-
-	my %h;							# remove blanks and dupes
-	$defaults->{nameservers} = [grep { $_ && !$h{$_}++ } @nameservers] if scalar @nameservers;
+	$defaults->nameservers(@nameservers) if scalar @nameservers;
 
 	my $domain = $FIXED_INFO->{DomainName} || '';
 	my $searchlist = $domain;

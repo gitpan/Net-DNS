@@ -1,4 +1,30 @@
-$Id: Changes 1200 2014-05-08 08:11:57Z willem $                       -*-text-*-
+$Id: Changes 1204 2014-05-20 20:52:47Z willem $                       -*-text-*-
+
+
+**** 0.76 [unreleased]
+
+Fix rt.cpan.org #95738
+
+	Test failure with IPv6 address in resolver.conf but without
+	prerequisite IO::Socket::INET6 package installed.
+
+Fix rt.cpan.org #95596
+
+	Incorrect parsing of nameserver lines in resolv.conf
+
+Fix rt.cpan.org #81760
+
+	Reverted workaround for TXT issue preventing propagation of
+	rule updates for SpamAssassin versions earlier than 3.4.0
+
+Feature rt.cpan.org #79568
+
+	Implement prefer_v6 resolver configuration attribute.
+
+Fix rt.cpan.org #67602
+
+	Set resolver configuration defaults at first instantiation
+	instead of module load time.
 
 
 **** 0.75 May 8, 2014

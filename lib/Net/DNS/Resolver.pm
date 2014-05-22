@@ -1,10 +1,10 @@
 package Net::DNS::Resolver;
 
 #
-# $Id: Resolver.pm 1185 2014-04-03 09:21:21Z willem $
+# $Id: Resolver.pm 1202 2014-05-19 08:34:16Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1185 $)[1];
+$VERSION = (qw$LastChangedRevision: 1202 $)[1];
 
 =head1 NAME
 
@@ -36,8 +36,6 @@ BEGIN {
 		@ISA = qw(Net::DNS::Resolver::UNIX);
 	}
 }
-
-__PACKAGE__->init();
 
 
 1;
