@@ -1,10 +1,10 @@
 package Net::DNS::RR::TXT;
 
 #
-# $Id: TXT.pm 1201 2014-05-19 08:26:04Z willem $
+# $Id: TXT.pm 1206 2014-05-23 19:53:28Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1201 $)[1];
+$VERSION = (qw$LastChangedRevision: 1206 $)[1];
 
 
 use strict;
@@ -77,6 +77,19 @@ sub txtdata {
 
 
 sub char_str_list { return (&txtdata); }
+
+sub rdatastr {			## SpamAssassin workaround, per CPAN RT#81760
+	my $txtdata = shift->{txtdata} || [];
+	join ' ', map $_->quoted_string, @$txtdata;
+}
+
+package Net::DNS::Text;
+
+sub quoted_string {
+	my $string = shift->string;
+	return $string if $string =~ /^$|\s|["\$'();@]/;	# should already be quoted
+	join '', '"', $string, '"';				# quote previously unquoted string
+}
 
 1;
 __END__

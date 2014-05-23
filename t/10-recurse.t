@@ -1,4 +1,4 @@
-# $Id: 10-recurse.t 1198 2014-05-05 06:03:58Z willem $ -*-perl-*-
+# $Id: 10-recurse.t 1205 2014-05-23 19:49:33Z willem $ -*-perl-*-
 
 use strict;
 use Test::More;
@@ -25,7 +25,7 @@ my @HINTS = qw(
 
 
 exit( plan skip_all => 'Online tests disabled.' ) if -e 't/online.disabled';
-exit( plan skip_all => 'Online tests not enabled.' ) unless -e 't/online.enabled';
+exit( plan skip_all => 'Online tests disabled.' ) unless -e 't/online.enabled';
 
 
 eval {
@@ -62,7 +62,6 @@ eval {
 }
 
 
-plan tests => 12;
 NonFatalBegin();
 
 use_ok('Net::DNS::Resolver::Recurse');

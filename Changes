@@ -1,4 +1,4 @@
-$Id: Changes 1204 2014-05-20 20:52:47Z willem $                       -*-text-*-
+$Id: Changes 1206 2014-05-23 19:53:28Z willem $                       -*-text-*-
 
 
 **** 0.76 [unreleased]
@@ -11,11 +11,6 @@ Fix rt.cpan.org #95738
 Fix rt.cpan.org #95596
 
 	Incorrect parsing of nameserver lines in resolv.conf
-
-Fix rt.cpan.org #81760
-
-	Reverted workaround for TXT issue preventing propagation of
-	rule updates for SpamAssassin versions earlier than 3.4.0
 
 Feature rt.cpan.org #79568
 
