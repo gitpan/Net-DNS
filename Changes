@@ -1,7 +1,16 @@
-$Id: Changes 1206 2014-05-23 19:53:28Z willem $                       -*-text-*-
+$Id: Changes 1210 2014-05-29 10:26:18Z willem $                       -*-text-*-
 
 
-**** 0.76 [unreleased]
+**** 0.77 [unreleased]
+
+Fix rt.cpan.org #96035
+ 
+ 	Insert missing plan 'no-plan' in 10-recurse.t
+
+Fix inefficient Net::DNS::SEC compatibility code
+
+
+**** 0.76 May 23, 2014
 
 Fix rt.cpan.org #95738
 

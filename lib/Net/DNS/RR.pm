@@ -1,10 +1,10 @@
 package Net::DNS::RR;
 
 #
-# $Id: RR.pm 1203 2014-05-20 12:25:01Z willem $
+# $Id: RR.pm 1210 2014-05-29 10:26:18Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1203 $)[1];
+$VERSION = (qw$LastChangedRevision: 1210 $)[1];
 
 
 =head1 NAME
@@ -33,8 +33,9 @@ See also the manual pages for each specific RR type.
 
 
 use constant COMPATIBLE => eval {	## enable architecture transition code
+	return 0 if $] < 5.006;
 	require Net::DNS::RR::DS;	## Net::DNS::SEC 0.17 compatible
-	$Net::DNS::RR::DS::VERSION < 1179;
+	( $Net::DNS::RR::DS::VERSION || 0 ) < 1133;
 } || 0;
 
 

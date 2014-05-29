@@ -1,10 +1,10 @@
 package Net::DNS::Packet;
 
 #
-# $Id: Packet.pm 1204 2014-05-20 20:52:47Z willem $
+# $Id: Packet.pm 1210 2014-05-29 10:26:18Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1204 $)[1];
+$VERSION = (qw$LastChangedRevision: 1210 $)[1];
 
 
 =head1 NAME
@@ -37,12 +37,7 @@ require Net::DNS::Header;
 require Net::DNS::Question;
 require Net::DNS::RR;
 
-use constant DNSSEC17 => eval {
-	require Net::DNS::RR::DS;	## Net::DNS::SEC 0.17 compatible
-	$Net::DNS::RR::DS::VERSION < 1179;
-} || 0;
-
-my @dummy_header = (header => {}) if DNSSEC17;
+my @dummy_header = ( header => {} ) if Net::DNS::RR->COMPATIBLE;
 
 
 =head1 METHODS

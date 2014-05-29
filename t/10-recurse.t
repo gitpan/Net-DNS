@@ -1,4 +1,4 @@
-# $Id: 10-recurse.t 1205 2014-05-23 19:49:33Z willem $ -*-perl-*-
+# $Id: 10-recurse.t 1210 2014-05-29 10:26:18Z willem $ -*-perl-*-
 
 use strict;
 use Test::More;
@@ -61,6 +61,8 @@ eval {
 			if $ip =~ /^(10|172\.(1[6-9]|2.|30|31)|192.168)\./;
 }
 
+
+plan 'no_plan';
 
 NonFatalBegin();
 
