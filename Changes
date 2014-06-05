@@ -1,11 +1,23 @@
-$Id: Changes 1210 2014-05-29 10:26:18Z willem $                       -*-text-*-
+$Id: Changes 1215 2014-06-05 16:01:16Z willem $                       -*-text-*-
 
 
 **** 0.77 [unreleased]
 
+Fix rt.cpan.org #96151
+
+	Unlocalised $_ modified when reading config file
+
+Fix rt.cpan.org #96135
+
+	Deep recursion problem on Cygwin
+
+Fix rt.cpan.org #96119
+
+	"Too late to run INIT block" warning for require Net::DNS
+ 
 Fix rt.cpan.org #96035
  
- 	Insert missing plan 'no-plan' in 10-recurse.t
+	Insert missing plan 'no-plan' in 10-recurse.t
 
 Fix inefficient Net::DNS::SEC compatibility code
 

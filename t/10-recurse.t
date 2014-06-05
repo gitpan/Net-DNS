@@ -1,4 +1,4 @@
-# $Id: 10-recurse.t 1210 2014-05-29 10:26:18Z willem $ -*-perl-*-
+# $Id: 10-recurse.t 1212 2014-06-02 08:31:26Z willem $ -*-perl-*-
 
 use strict;
 use Test::More;
@@ -71,7 +71,7 @@ use_ok('Net::DNS::Resolver::Recurse');
 {
 	my $res = Net::DNS::Resolver::Recurse->new( debug => 0 );
 
-	isa_ok( $res, 'Net::DNS::Resolver::Recurse' );
+	isa_ok( $res, 'new() created object' );
 
 	$res->udp_timeout(20);
 

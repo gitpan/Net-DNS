@@ -1,10 +1,10 @@
 package Net::DNS::Resolver::cygwin;
 
 #
-# $Id: cygwin.pm 1202 2014-05-19 08:34:16Z willem $
+# $Id: cygwin.pm 1215 2014-06-05 16:01:16Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1202 $)[1];
+$VERSION = (qw$LastChangedRevision: 1215 $)[1];
 
 =head1 NAME
 
@@ -103,7 +103,7 @@ sub init {
 					|| ''
 					unless !$ip || ( $ip =~ /0\.0\.0\.0/ );
 
-				push @nameservers, $ns if $ns;
+				push @nameservers, split $ns if $ns;
 			}
 		}
 	}

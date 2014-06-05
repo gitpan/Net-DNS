@@ -1,11 +1,11 @@
 package Net::DNS;
 
 #
-# $Id: DNS.pm 1211 2014-05-29 11:21:53Z willem $
+# $Id: DNS.pm 1216 2014-06-05 16:02:11Z willem $
 #
 use vars qw($VERSION $SVNVERSION);
-$VERSION    = '0.76_1';
-$SVNVERSION = (qw$LastChangedRevision: 1211 $)[1];
+$VERSION    = '0.76_2';
+$SVNVERSION = (qw$LastChangedRevision: 1216 $)[1];
 
 
 =head1 NAME
@@ -196,17 +196,19 @@ if (OLDDNSSEC) {
 	foreach my $type (qw(SIG DS DLV DNSKEY KEY NXT NSEC)) {
 		new Net::DNS::RR( type => $type );
 	}
-}
 
-sub INIT {				## safe to ignore "Too late to run" warning
-					## only needed to satisfy DNSSEC t/00-load.t
+	eval {
+		no warnings 'void';	## suppress "Too late to run INIT block ..."
 
-	# attempt to pre-load RRs which have circular dependence problems
-	if (OLDDNSSEC) {
-		foreach my $type (qw(NSEC3 NSEC3PARAM)) {
-			new Net::DNS::RR( type => $type );
+		sub INIT {		## only needed to satisfy DNSSEC t/00-load.t
+			return unless OLDDNSSEC;
+
+			# attempt to pre-load RRs which have circular dependence problems
+			foreach my $type (qw(NSEC3 NSEC3PARAM)) {
+				new Net::DNS::RR( type => $type );
+			}
 		}
-	}
+	};
 }
 
 
