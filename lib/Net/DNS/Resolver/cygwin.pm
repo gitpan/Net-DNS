@@ -1,10 +1,10 @@
 package Net::DNS::Resolver::cygwin;
 
 #
-# $Id: cygwin.pm 1215 2014-06-05 16:01:16Z willem $
+# $Id: cygwin.pm 1225 2014-07-01 19:38:51Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1215 $)[1];
+$VERSION = (qw$LastChangedRevision: 1225 $)[1];
 
 =head1 NAME
 
@@ -136,13 +136,6 @@ sub init {
 
 
 	$class->read_env;
-
-
-	if ( !$defaults->{domain} && @{$defaults->{searchlist}} ) {
-		$defaults->{domain} = $defaults->{searchlist}[0];
-	} elsif ( !@{$defaults->{searchlist}} && $defaults->{domain} ) {
-		$defaults->{searchlist} = [$defaults->{domain}];
-	}
 }
 
 1;

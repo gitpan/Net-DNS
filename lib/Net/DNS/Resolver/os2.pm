@@ -1,10 +1,10 @@
 package Net::DNS::Resolver::os2;
 
 #
-# $Id: os2.pm 1185 2014-04-03 09:21:21Z willem $
+# $Id: os2.pm 1225 2014-07-01 19:38:51Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1185 $)[1];
+$VERSION = (qw$LastChangedRevision: 1225 $)[1];
 
 =head1 NAME
 
@@ -37,14 +37,6 @@ sub init {
 	}
 
 	$class->read_env;
-
-	my $defaults = $class->defaults;
-
-	if ( !$defaults->{domain} && @{$defaults->{searchlist}} ) {
-		$defaults->{domain} = $defaults->{searchlist}[0];
-	} elsif ( !@{$defaults->{searchlist}} && $defaults->{domain} ) {
-		$defaults->{searchlist} = [$defaults->{domain}];
-	}
 }
 
 

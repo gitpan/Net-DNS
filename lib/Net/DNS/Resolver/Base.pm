@@ -1,10 +1,10 @@
 package Net::DNS::Resolver::Base;
 
 #
-# $Id: Base.pm 1219 2014-06-11 11:43:55Z willem $
+# $Id: Base.pm 1224 2014-07-01 07:57:42Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1219 $)[1];
+$VERSION = (qw$LastChangedRevision: 1224 $)[1];
 
 
 use strict;
@@ -15,8 +15,8 @@ use Socket;
 use IO::Socket;
 use IO::Select;
 
-require Net::DNS::Packet;
-require Net::DNS::RR;
+use Net::DNS::RR;
+use Net::DNS::Packet;
 
 use constant DNSSEC => eval { require Net::DNS::RR::DS; } || 0;
 use constant INT16SZ  => 2;
@@ -159,8 +159,8 @@ sub new {
 	if ( my $file = $args{'config_file'} ) {
 		$self = bless {%$initial}, $class;
 		$self->read_config_file($file);			# user specified config
-		%$base = %$self unless $init;
-
+		$self->$_( map /^(.+)$/ ? $1 : (), $self->$_ )	# untaint config values
+				for (qw(nameservers domain searchlist));
 	} else {
 		$class->init() unless $init;			# system-wide config
 		$self = bless {%$base}, $class;
@@ -182,6 +182,11 @@ sub new {
 		}
 	}
 
+	return $self if $init;
+								# define default configuration
+	$self->searchlist( $self->domain || () ) unless @{$self->{searchlist}};
+	$self->domain( $self->searchlist ) unless $self->{domain};
+	%$base = %$self;
 	return $self;
 }
 
@@ -234,14 +239,16 @@ sub read_config_file {
 	local $_;
 
 	while (<FILE>) {
+		s/[;#].*$//;					# strip comments
+
 		/^nameserver/ && do {
-			my ( $keyword, @ip ) = split;
-			push @ns, map { $_ eq '0' ? '0.0.0.0' : $_ } @ip;
+			my ( $keyword, @ip ) = grep defined, split;
+			push @ns, map $_ eq '0' ? '0.0.0.0' : $_, @ip;
 			next;
 		};
 
 		/^option/ && do {
-			my ( $keyword, $option ) = split;
+			my ( $keyword, $option ) = grep defined, split;
 			my ( $name, $val ) = split( m/:/, $option, 2 );
 			my $attribute = $resolv_conf{$name};
 			$val = 1 unless defined $val;
@@ -250,13 +257,13 @@ sub read_config_file {
 		};
 
 		/^domain/ && do {
-			my ( $keyword, $domain ) = split;
+			my ( $keyword, $domain ) = grep defined, split;
 			$config->domain($domain);
 			next;
 		};
 
 		/^search/ && do {
-			my ( $keyword, @searchlist ) = split;
+			my ( $keyword, @searchlist ) = grep defined, split;
 			$config->searchlist(@searchlist);
 			next;
 		};
@@ -312,12 +319,13 @@ sub empty_searchlist {
 
 sub nameservers {
 	my $self = shift;
+	$self = $self->defaults unless ref($self);
 
 	my ( @ipv4, @ipv6 );
 	foreach my $ns (@_) {
-		next unless length($ns);
-		push( @ipv6, $ns ) && next if _ip_is_ipv6($ns);
-		push( @ipv4, $ns ) && next if _ip_is_ipv4($ns);
+		croak 'nameservers: invalid argument' unless $ns;
+		do { push @ipv6, $ns; next } if _ip_is_ipv6($ns);
+		do { push @ipv4, $ns; next } if _ip_is_ipv4($ns);
 
 		my $defres = Net::DNS::Resolver->new(
 			udp_timeout => $self->udp_timeout,
@@ -344,8 +352,8 @@ sub nameservers {
 			push @address, cname_addr( [@names], $packet ) if defined $packet;
 		}
 
-		my %address = map { $_ => 1 } @address;
-		my @unique = keys %address;
+		my %address = map { $_ => $_ } @address;	# tainted
+		my @unique = values %address;
 		push @ipv4, grep _ip_is_ipv4($_), @unique;
 		push @ipv6, grep _ip_is_ipv6($_), @unique;
 	}
@@ -356,11 +364,13 @@ sub nameservers {
 		return unless defined wantarray;
 	}
 
-	my @returnval = @{$self->{nameserver6}} if $has_inet6 && !$self->force_v4();
-	if ( $self->prefer_v6() ) {
-		push @returnval, @{$self->{nameserver4}};
+	my @returnval;
+	if ( $self->force_v4() ) {
+		@returnval = @{$self->{nameserver4}};
+	} elsif ( $self->prefer_v6() ) {
+		@returnval = ( @{$self->{nameserver6}}, @{$self->{nameserver4}} );
 	} else {
-		unshift @returnval, @{$self->{nameserver4}};
+		@returnval = ( @{$self->{nameserver4}}, @{$self->{nameserver6}} );
 	}
 
 	return @returnval if scalar @returnval;
@@ -1448,44 +1458,21 @@ sub _create_tcp_socket {
 }
 
 
-# Lightweight versions of subroutines from Net::IP module, recoded to fix rt#28198
+# Lightweight versions of subroutines from Net::IP module, recoded to fix RT#96812
 
 sub _ip_is_ipv4 {
-	my @field = split /\./, shift;
-
-	return 0 if @field > 4;					# too many fields
-	return 0 if @field == 0;				# no fields at all
-
-	foreach (@field) {
-		return 0 unless /./;				# reject if empty
-		return 0 if /[^0-9]/;				# reject non-digit
-		return 0 if $_ > 255;				# reject bad value
-	}
-
-	return 1;
+	return shift =~ /^[0-9.]+\.[0-9]+$/;			# dotted digits
 }
 
 
 sub _ip_is_ipv6 {
 
 	for (shift) {
-		my @field = split /:/;				# split into fields
-		return 0 if ( @field < 3 ) or ( @field > 8 );
-
-		return 0 if /::.*::/;				# reject multiple ::
-
-		if (/\./) {					# IPv6:IPv4
-			return 0 unless _ip_is_ipv4( pop @field );
-		}
-
-		foreach (@field) {
-			next unless /./;			# skip ::
-			return 0 if /[^0-9a-f]/i;		# reject non-hexdigit
-			return 0 if length $_ > 4;		# reject bad value
-		}
+		return 1 if /^[:0-9a-f]+:[0-9a-f]*$/i;		# mixed : and hexdigits
+		return 1 if /^[:0-9a-f]+:[0-9.]+$/i;		# prefix + dotted digits
 	}
 
-	return 1;
+	return 0;
 }
 
 

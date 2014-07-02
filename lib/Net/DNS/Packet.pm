@@ -1,10 +1,10 @@
 package Net::DNS::Packet;
 
 #
-# $Id: Packet.pm 1210 2014-05-29 10:26:18Z willem $
+# $Id: Packet.pm 1225 2014-07-01 19:38:51Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1210 $)[1];
+$VERSION = (qw$LastChangedRevision: 1225 $)[1];
 
 
 =head1 NAME
@@ -33,9 +33,11 @@ use Carp;
 
 use constant UDPSZ => 512;
 
-require Net::DNS::Header;
-require Net::DNS::Question;
-require Net::DNS::RR;
+BEGIN {
+	require Net::DNS::Header;
+	require Net::DNS::Question;
+	require Net::DNS::RR;
+}
 
 my @dummy_header = ( header => {} ) if Net::DNS::RR->COMPATIBLE;
 
@@ -115,6 +117,7 @@ sub decode {
 	my $offset = 0;
 	my $self;
 	eval {
+		local $SIG{__WARN__} = sub { die @_ };
 		die 'corrupt wire-format data' if length($$data) < HEADER_LENGTH;
 
 		# header section
@@ -159,8 +162,6 @@ sub decode {
 		}
 
 		return $self;
-	} or do {
-		die 'eval{} aborted without setting $@, contrary to Perl specification' unless $@;
 	};
 
 	if ( $debug && $self ) {

@@ -1,10 +1,10 @@
 package Net::DNS::ZoneFile;
 
 #
-# $Id: ZoneFile.pm 1218 2014-06-11 08:26:33Z willem $
+# $Id: ZoneFile.pm 1224 2014-07-01 07:57:42Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1218 $)[1];
+$VERSION = (qw$LastChangedRevision: 1224 $)[1];
 
 
 =head1 NAME
@@ -437,7 +437,7 @@ sub _generate {				## expand $GENERATE into input stream
 }
 
 
-my $LEX_REGEX = q/("[^"]*"|"[^"]*$)|;[^\n]*|([()])|(^\s)|\s/;
+my $LEX_REGEX = q/("[^"]*"|"[^"]*$)|;[^\n]*|([()])|(^\s)|[ \t\n\r\f]/;
 
 sub _getline {				## get line from current source
 	my $self = shift;
@@ -463,7 +463,7 @@ sub _getline {				## get line from current source
 					s/\\;/\\059/g;		# disguise escaped semicolon
 					substr( $_, 0, 0 ) = pop @token || '';	  # splice multi-line token
 					push @token, grep defined && length, split /$LEX_REGEX/o;
-					last if grep $_ eq ')', @token;
+					last if $token[$#token] eq ')';
 				}
 				$_ = join ' ', @token;		# reconstitute RR string
 			}

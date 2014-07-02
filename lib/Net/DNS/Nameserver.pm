@@ -1,10 +1,10 @@
 package Net::DNS::Nameserver;
 
 #
-# $Id: Nameserver.pm 1186 2014-04-03 10:18:38Z willem $
+# $Id: Nameserver.pm 1222 2014-06-24 12:30:08Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1186 $)[1];
+$VERSION = (qw$LastChangedRevision: 1222 $)[1];
 
 
 =head1 NAME
@@ -89,7 +89,7 @@ sub new {
 			: ( $self{LocalAddr} || DEFAULT_ADDR );
 	my $resolver = new Net::DNS::Resolver;
 	$resolver->force_v4(1) unless $has_inet6;
-	$resolver->nameservers(undef);
+	$resolver->empty_nameservers;
 	my @localaddresses = $resolver->nameservers(@LocalAddr);
 
 	my $port = $self{LocalPort} || DEFAULT_PORT;

@@ -1,10 +1,10 @@
 package Net::DNS::DomainName;
 
 #
-# $Id: DomainName.pm 1177 2014-03-10 08:33:21Z willem $
+# $Id: DomainName.pm 1222 2014-06-24 12:30:08Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1177 $)[1];
+$VERSION = (qw$LastChangedRevision: 1222 $)[1];
 
 
 =head1 NAME
@@ -42,7 +42,8 @@ introduced by RFC3597.
 use strict;
 use base qw(Net::DNS::Domain);
 
-use constant OKlc => eval { require 5.010; } || 0;
+use constant FIXlc => eval { $] < 5.010; } || 0;
+
 
 use integer;
 use Carp;
@@ -68,7 +69,7 @@ as defined in RFC2535(8.1).
 =cut
 
 sub canonical {
-	join '', map pack( 'C a*', length($_), OKlc ? lc($_) : _lc($_) ), shift->_wire, '';
+	join '', map pack( 'C a*', length($_), FIXlc ? _lc($_) : lc($_) ), shift->_wire, '';
 }
 
 

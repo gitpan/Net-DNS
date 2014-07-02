@@ -1,10 +1,10 @@
 package Net::DNS::Resolver::UNIX;
 
 #
-# $Id: UNIX.pm 1185 2014-04-03 09:21:21Z willem $
+# $Id: UNIX.pm 1224 2014-07-01 07:57:42Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1185 $)[1];
+$VERSION = (qw$LastChangedRevision: 1224 $)[1];
 
 
 =head1 NAME
@@ -27,24 +27,18 @@ push( @config_path, '.' );
 
 
 sub init {
-	my ($class) = @_;
+	my $self = shift->defaults;
 
-	$class->read_config_file($resolv_conf) if -f $resolv_conf && -r _;
+	$self->read_config_file($resolv_conf) if -f $resolv_conf && -r _;
+	$self->$_( map /^(.+)$/ ? $1 : (), $self->$_ )		# untaint config values
+			for (qw(nameservers domain searchlist));
 
 	foreach my $dir (@config_path) {
 		my $file = "$dir/$dotfile";
-		$class->read_config_file($file) if -f $file && -r _ && -o _;
+		$self->read_config_file($file) if -f $file && -r _ && -o _;
 	}
 
-	$class->read_env;
-
-	my $defaults = $class->defaults;
-
-	if ( !$defaults->{domain} && @{$defaults->{searchlist}} ) {
-		( $defaults->{domain} ) = @{$defaults->{searchlist}};
-	} elsif ( !@{$defaults->{searchlist}} && $defaults->{domain} ) {
-		$defaults->{searchlist} = [$defaults->{domain}];
-	}
+	$self->read_env;
 }
 
 

@@ -1,11 +1,11 @@
 package Net::DNS;
 
 #
-# $Id: DNS.pm 1221 2014-06-13 21:02:16Z willem $
+# $Id: DNS.pm 1227 2014-07-02 09:42:03Z willem $
 #
 use vars qw($VERSION $SVNVERSION);
-$VERSION    = '0.77';
-$SVNVERSION = (qw$LastChangedRevision: 1221 $)[1];
+$VERSION    = '0.77_1';
+$SVNVERSION = (qw$LastChangedRevision: 1227 $)[1];
 
 
 =head1 NAME
@@ -32,7 +32,6 @@ details.
 use 5.004_04;
 use strict;
 use integer;
-use Carp;
 
 use base qw(Exporter);
 use vars qw(@EXPORT);
@@ -212,14 +211,14 @@ if (OLDDNSSEC) {
 }
 
 
+require Carp;
+require Net::DNS::Parameters;
+
 my $warned;
 
 sub deprecated {
-	carp "deprecated @_" unless $warned++;
+	Carp::carp "deprecated @_" unless $warned++;
 }
-
-
-require Net::DNS::Parameters;
 
 sub typesbyname {
 	deprecated('typesbyname; use Net::DNS::Parameters::typebyname') unless OLDDNSSEC;

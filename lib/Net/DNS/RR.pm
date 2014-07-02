@@ -1,10 +1,10 @@
 package Net::DNS::RR;
 
 #
-# $Id: RR.pm 1212 2014-06-02 08:31:26Z willem $
+# $Id: RR.pm 1225 2014-07-01 19:38:51Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1212 $)[1];
+$VERSION = (qw$LastChangedRevision: 1225 $)[1];
 
 
 =head1 NAME
@@ -32,19 +32,20 @@ See also the manual pages for each specific RR type.
 =cut
 
 
-use constant COMPATIBLE => eval {	## enable architecture transition code
-	return 0 if $] < 5.006;
-	require Net::DNS::RR::DS;	## Net::DNS::SEC 0.17 compatible
-	( $Net::DNS::RR::DS::VERSION || 0 ) < 1133;
-} || 0;
-
-
 use strict;
 use integer;
 use Carp;
 
 use Net::DNS::Parameters;
+use Net::DNS::Domain;
 use Net::DNS::DomainName;
+
+
+use constant COMPATIBLE => eval {	## enable architecture transition code
+	return 0 if $] < 5.006;
+	require Net::DNS::RR::DS;	## Net::DNS::SEC 0.17 compatible
+	( $Net::DNS::RR::DS::VERSION || 0 ) < 1133;
+} || 0;
 
 
 =head1 METHODS
@@ -59,12 +60,14 @@ you will get an error message and execution will be terminated.
 sub new {
 	return &_new_from_rdata if COMPATIBLE && ref $_[1];	# resolve new() usage conflict
 
-	return eval { scalar @_ > 2 ? &_new_hash : &_new_string; } || do {
-		my $error = $@	  || 'eval{} aborted without setting $@, contrary to Perl specification' . "\n";
+	return eval {
+		local $SIG{__WARN__} = sub { die @_ };
+		scalar @_ > 2 ? &_new_hash : &_new_string;
+	} || do {
 		my $class = shift || __PACKAGE__;
 		my @parse = split /\s+/, shift || '';
-		croak join ' ', "${error}in new $class(", substr( "@parse @_", 0, 50 ), '... )';
-			}
+		croak join ' ', "$@in new $class(", substr( "@parse @_", 0, 50 ), '... )';
+	};
 }
 
 
@@ -92,7 +95,7 @@ The trailing dot (.) is optional.
 
 =cut
 
-my $PARSE_REGEX = q/("[^"]*"|'[^']*')|;[^\n]*|[\s()]/;
+my $PARSE_REGEX = q/("[^"]*"|'[^']*')|;[^\n]*|[ \t\n\r\f()]/;
 
 sub _new_string {
 	my $base;
@@ -137,7 +140,7 @@ sub _new_string {
 
 	return $self unless $populated;				# empty RR
 
-	if ( $token[0] =~ /^[\\]?#$/ ) {
+	if ( $#token && $token[0] =~ /^[\\]?#$/ ) {
 		shift @token;					# RFC3597 hexadecimal format
 		my $count = shift(@token) || 0;
 		my $rdata = pack 'H*', join '', @token;
@@ -351,9 +354,9 @@ sub canonical {
 }
 
 
-=head2 name
+=head2 owner name
 
-    $name = $rr->name;
+    $owner = $rr->name;
 
 Returns the owner name of the record.
 
@@ -371,6 +374,8 @@ sub name {
 	$self->{owner} = new Net::DNS::DomainName1035(shift) if scalar @_;
 	$self->{owner}->name if defined wantarray;
 }
+
+sub owner { &name; }			## compatibility with RFC1034
 
 
 =head2 type
@@ -517,10 +522,10 @@ sub rdstring {
 	my $rdata = eval {
 		return $self->rdatastr if COMPATIBLE;
 		return $self->format_rdata;
-	} || '';
+	};
 	carp $@ if $@;
 
-	return $rdata;
+	return defined $rdata ? $rdata : '';
 }
 
 

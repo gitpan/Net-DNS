@@ -1,10 +1,10 @@
 package Net::DNS::Resolver::MSWin32;
 
 #
-# $Id: MSWin32.pm 1202 2014-05-19 08:34:16Z willem $
+# $Id: MSWin32.pm 1225 2014-07-01 19:38:51Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1202 $)[1];
+$VERSION = (qw$LastChangedRevision: 1225 $)[1];
 
 =head1 NAME
 
@@ -112,16 +112,6 @@ sub init {
 
 
 	$class->read_env;
-
-
-	if ( !$defaults->{domain} && @{$defaults->{searchlist}} ) {
-		$defaults->{domain} = $defaults->{searchlist}[0];
-	} elsif ( !@{$defaults->{searchlist}} && $defaults->{domain} ) {
-		$defaults->{searchlist} = [$defaults->{domain}];
-	}
-
-	print Dumper $defaults if $debug;
-
 }
 
 1;

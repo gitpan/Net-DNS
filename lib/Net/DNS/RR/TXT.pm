@@ -1,10 +1,10 @@
 package Net::DNS::RR::TXT;
 
 #
-# $Id: TXT.pm 1206 2014-05-23 19:53:28Z willem $
+# $Id: TXT.pm 1223 2014-06-26 22:04:29Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1206 $)[1];
+$VERSION = (qw$LastChangedRevision: 1223 $)[1];
 
 
 use strict;
@@ -52,7 +52,21 @@ sub format_rdata {			## format rdata portion of RR string.
 	my $self = shift;
 
 	my $txtdata = $self->{txtdata} || [];
-	join ' ', map $_->string, @$txtdata;
+	my @txtdata = map $_->string, @$txtdata;
+	my @line;
+	my $size = 32;
+	while (@txtdata) {
+		my @group;
+		while ( $size > 0 && scalar @txtdata ) {
+			my $string = shift @txtdata;
+			push @group, $string;
+			$size -= 1 + length($string);
+		}
+		push @line, join ' ', @group;
+		$size = 64;
+	}
+	my $rdata = join "\n", @line;
+	return $rdata =~ /\n/ ? "( $rdata )" : $rdata;
 }
 
 
@@ -87,7 +101,7 @@ package Net::DNS::Text;
 
 sub quoted_string {
 	my $string = shift->string;
-	return $string if $string =~ /^$|\s|["\$'();@]/;	# should already be quoted
+	return $string if $string =~ /^"/;			# string already quoted
 	join '', '"', $string, '"';				# quote previously unquoted string
 }
 

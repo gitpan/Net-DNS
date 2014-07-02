@@ -1,10 +1,10 @@
 package Net::DNS::Question;
 
 #
-# $Id: Question.pm 1098 2013-01-03 20:57:25Z willem $
+# $Id: Question.pm 1222 2014-06-24 12:30:08Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1098 $)[1];
+$VERSION = (qw$LastChangedRevision: 1222 $)[1];
 
 
 =head1 NAME
@@ -30,8 +30,8 @@ use integer;
 use Carp;
 
 use Net::DNS::Parameters;
-
-require Net::DNS::DomainName;
+use Net::DNS::Domain;
+use Net::DNS::DomainName;
 
 
 =head1 METHODS
