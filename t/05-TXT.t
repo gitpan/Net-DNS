@@ -1,4 +1,4 @@
-# $Id: 05-TXT.t 1223 2014-06-26 22:04:29Z willem $	-*-perl-*-
+# $Id: 05-TXT.t 1229 2014-07-09 07:07:42Z willem $	-*-perl-*-
 
 use strict;
 use Test::More tests => 50;
@@ -63,17 +63,17 @@ my $wire = '0e6172626974726172795f74657874';
 		q|contiguous|,	q|three unquoted strings|,
 		q|"in quotes"|, q|"two separate" "quoted strings"|,
 		q|"" empty|,	q|" " space|,
-		q|!|,		q|"\""|,
-		q|#|,		q|"$"|,
+		q|!|,		q|\"|,
+		q|#|,		q|\$|,
 		q|%|,		q|&|,
-		q|"'"|,		q|"("|,
-		q|")"|,		q|*|,
+		q|'|,		q|\(|,
+		q|\)|,		q|*|,
 		q|+|,		q|,|,
 		q|-|,		q|.|,
 		q|/|,		q|:|,
-		q|";"|,		q|<|,
+		q|\;|,		q|<|,
 		q|=|,		q|>|,
-		q|?|,		q|"@"|,
+		q|?|,		q|\@|,
 		q|[|,		q|\\\\|,
 		q|]|,		q|^|,
 		q|_|,		q|`|,

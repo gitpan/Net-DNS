@@ -1,4 +1,4 @@
-# $Id: 03-rr.t 1101 2013-08-14 14:40:00Z willem $	-*-perl-*-
+# $Id: 03-rr.t 1229 2014-07-09 07:07:42Z willem $	-*-perl-*-
 
 use strict;
 use Test::More tests => 52;
@@ -119,7 +119,7 @@ BEGIN {
 	my $expect  = $A->string;
 	is( $rr->string, $expect, "encode/decode $example" );
 
-	isa_ok( $rr, 'Net::DNS::RR::A', 'check decoded object' );
+	is( ref($rr), 'Net::DNS::RR::A', 'type of decoded object' );
 
 	my $uncompressed = new Net::DNS::Packet('example.net');
 	$uncompressed->push( 'answer', $A );

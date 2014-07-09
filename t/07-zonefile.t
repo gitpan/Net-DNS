@@ -1,4 +1,4 @@
-# $Id: 07-zonefile.t 1222 2014-06-24 12:30:08Z willem $	-*-perl-*-
+# $Id: 07-zonefile.t 1228 2014-07-03 12:27:52Z willem $	-*-perl-*-
 
 use strict;
 use FileHandle;
@@ -247,8 +247,7 @@ EOF
 
 
 SKIP: {				## Non-ASCII zone content
-	skip( 'Unicode/UTF-8 not supported', 3 ) unless UTF8;
-	skip( 'Non-ASCII file encoding not supported', 3 ) if eval{ $] < 5.010 };
+	skip( 'Unicode/UTF-8 not supported', 4 ) unless UTF8;
 
 	my $greek = pack 'C*', 103, 114, 9, 84, 88, 84, 9, 229, 224, 241, 231, 234, 225, 10;
 	my $file1 = source($greek);

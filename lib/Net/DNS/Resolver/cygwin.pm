@@ -1,10 +1,10 @@
 package Net::DNS::Resolver::cygwin;
 
 #
-# $Id: cygwin.pm 1225 2014-07-01 19:38:51Z willem $
+# $Id: cygwin.pm 1229 2014-07-09 07:07:42Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1225 $)[1];
+$VERSION = (qw$LastChangedRevision: 1229 $)[1];
 
 =head1 NAME
 
@@ -88,22 +88,25 @@ sub init {
 
 	my $interfaces = $root . 'Interfaces/';
 	if ( opendir( LM, $interfaces ) ) {
-		my @ifacelist = grep( $_ ne '.' && $_ ne '..', readdir(LM) );
+		my @ifacelist = grep !/^\./, readdir(LM);
 		closedir(LM);
 		foreach my $iface (@ifacelist) {
 			my $regiface = $interfaces . $iface . '/';
-			if ( opendir( LM, $regiface ) ) {
-				closedir(LM);
+			opendir( LM, $regiface ) || next;
+			closedir(LM);
 
-				my $ns;
-				my $ip;
-				$ip = getregkey( $regiface, 'DhcpIPAddress' ) || getregkey( $regiface, 'IPAddress' );
-				$ns = getregkey( $regiface, 'NameServer' )
-					|| getregkey( $regiface, 'DhcpNameServer' )
-					|| ''
-					unless !$ip || ( $ip =~ /0\.0\.0\.0/ );
+			my $ip = getregkey( $regiface, 'DhcpIPAddress' )
+					|| getregkey( $regiface, 'IPAddress' );
+			next unless $ip;
+			next if $ip eq '0.0.0.0';
 
-				push @nameservers, split $ns if $ns;
+			foreach (
+				grep defined,
+				getregkey( $regiface, 'NameServer' ),
+				getregkey( $regiface, 'DhcpNameServer' )
+				) {
+				push @nameservers, split;
+				last;
 			}
 		}
 	}
@@ -111,7 +114,7 @@ sub init {
 	@nameservers = @nt4nameservers unless @nameservers;
 	$defaults->nameservers(@nameservers);
 
-	$defaults->{domain} = $domain if $domain;
+	$defaults->domain($domain) if $domain;
 
 	my $usedevolution = getregkey( $root, 'UseDomainNameDevolution' );
 	if ($searchlist) {
@@ -131,9 +134,8 @@ sub init {
 				}
 			}
 		}
-		$defaults->{searchlist} = [@a];
+		$defaults->searchlist(@a);
 	}
-
 
 	$class->read_env;
 }

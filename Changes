@@ -1,7 +1,11 @@
-$Id: Changes 1226 2014-07-02 09:38:19Z willem $                       -*-text-*-
+$Id: Changes 1229 2014-07-09 07:07:42Z willem $                       -*-text-*-
 
 
 **** 0.78 [unreleased]
+
+Fix rt.cpan.org #97036
+
+	Nameserver identification on Cygwin
 
 Fix rt.cpan.org #96814
 
