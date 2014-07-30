@@ -1,10 +1,10 @@
 package Net::DNS::Resolver::cygwin;
 
 #
-# $Id: cygwin.pm 1233 2014-07-10 13:58:03Z willem $
+# $Id: cygwin.pm 1235 2014-07-29 07:58:19Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1233 $)[1];
+$VERSION = (qw$LastChangedRevision: 1235 $)[1];
 
 =head1 NAME
 
@@ -33,9 +33,11 @@ sub getregkey {
 }
 
 
+sub _untaint { map defined && /^(.+)$/ ? $1 : (), @_; }
+
+
 sub init {
-	my ($class) = @_;
-	my $defaults = $class->defaults;
+	my $defaults = shift->defaults;
 
 	local *LM;
 
@@ -144,8 +146,13 @@ sub init {
 		$defaults->searchlist(@a);
 	}
 
-	$class->read_env;
+	$defaults->domain( _untaint $default->domain );		# untaint config values
+	$defaults->searchlist( _untaint $default->searchlist );
+	$defaults->nameservers( _untaint $default->nameservers );
+
+	$defaults->read_env;
 }
+
 
 1;
 __END__

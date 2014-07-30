@@ -1,10 +1,10 @@
 package Net::DNS::RR::AAAA;
 
 #
-# $Id: AAAA.pm 1188 2014-04-03 18:54:34Z willem $
+# $Id: AAAA.pm 1235 2014-07-29 07:58:19Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1188 $)[1];
+$VERSION = (qw$LastChangedRevision: 1235 $)[1];
 
 
 use strict;
@@ -71,7 +71,7 @@ sub address {
 
 	return $self->address_long unless scalar @_;
 
-	my $argument = shift;
+	my $argument = shift || '';
 	my @parse = split /:/, "0$argument";
 
 	if ( (@parse)[$#parse] =~ /\./ ) {			# embedded IPv4

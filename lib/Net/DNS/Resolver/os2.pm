@@ -1,10 +1,10 @@
 package Net::DNS::Resolver::os2;
 
 #
-# $Id: os2.pm 1225 2014-07-01 19:38:51Z willem $
+# $Id: os2.pm 1235 2014-07-29 07:58:19Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1225 $)[1];
+$VERSION = (qw$LastChangedRevision: 1235 $)[1];
 
 =head1 NAME
 
@@ -26,17 +26,24 @@ push( @config_path, $ENV{HOME} ) if exists $ENV{HOME};
 push( @config_path, '.' );
 
 
-sub init {
-	my ($class) = @_;
+sub _untaint { map defined && /^(.+)$/ ? $1 : (), @_; }
 
-	$class->read_config_file($resolv_conf) if -f $resolv_conf && -r _;
+
+sub init {
+	my $defaults = shift->defaults;
+
+	$defaults->read_config_file($resolv_conf) if -f $resolv_conf && -r _;
+
+	$defaults->domain( _untaint $defaults->domain );	# untaint config values
+	$defaults->searchlist( _untaint $defaults->searchlist );
+	$defaults->nameservers( _untaint $defaults->nameservers );
 
 	foreach my $dir (@config_path) {
 		my $file = "$dir/$dotfile";
-		$class->read_config_file($file) if -f $file && -r _ && -o _;
+		$defaults->read_config_file($file) if -f $file && -r _ && -o _;
 	}
 
-	$class->read_env;
+	$defaults->read_env;
 }
 
 

@@ -1,10 +1,10 @@
 package Net::DNS::RR::MX;
 
 #
-# $Id: MX.pm 1188 2014-04-03 18:54:34Z willem $
+# $Id: MX.pm 1235 2014-07-29 07:58:19Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1188 $)[1];
+$VERSION = (qw$LastChangedRevision: 1235 $)[1];
 
 
 use strict;
@@ -35,25 +35,25 @@ sub encode_rdata {			## encode rdata as wire-format octet string
 	my $self = shift;
 	my ( $offset, @opaque ) = @_;
 
-	return '' unless $self->{exchange};
+	my $exchange = $self->{exchange} || return '';
 	my $rdata = pack 'n', $self->preference;
-	$rdata .= $self->{exchange}->encode( $offset + length($rdata), @opaque );
+	$rdata .= $exchange->encode( $offset + length($rdata), @opaque );
 }
 
 
 sub format_rdata {			## format rdata portion of RR string.
 	my $self = shift;
 
-	return '' unless $self->{exchange};
-	join ' ', $self->preference, $self->{exchange}->string;
+	my $exchange = $self->{exchange} || return '';
+	join ' ', $self->preference, $exchange->string;
 }
 
 
 sub parse_rdata {			## populate RR from rdata in argument list
 	my $self = shift;
 
-	$self->preference( shift || return );
-	$self->exchange( shift	 || return );
+	$self->preference(shift) if @_;
+	$self->exchange( shift || return );
 }
 
 

@@ -1,10 +1,10 @@
 package Net::DNS::Text;
 
 #
-# $Id: Text.pm 1229 2014-07-09 07:07:42Z willem $
+# $Id: Text.pm 1235 2014-07-29 07:58:19Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1229 $)[1];
+$VERSION = (qw$LastChangedRevision: 1235 $)[1];
 
 
 =head1 NAME
@@ -84,8 +84,7 @@ sub new {
 
 	local $_ = &_encode_utf8;
 
-	s/^\042(.*)\042$/$1/;					# strip paired quotes
-	s/^\047(.*)\047$/$1/;					# strip paired quotes
+	s/^\042(.*)\042$/$1/s;					# strip paired quotes
 
 	s/\134\134/\134\060\071\062/g;				# disguise escaped escape
 	s/\134([\060-\071]{3})/$unescape{$1}/eg;		# numeric escape

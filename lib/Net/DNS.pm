@@ -1,11 +1,11 @@
 package Net::DNS;
 
 #
-# $Id: DNS.pm 1231 2014-07-10 09:12:57Z willem $
+# $Id: DNS.pm 1235 2014-07-29 07:58:19Z willem $
 #
 use vars qw($VERSION $SVNVERSION);
-$VERSION    = '0.78';
-$SVNVERSION = (qw$LastChangedRevision: 1231 $)[1];
+$VERSION    = '0.78_1';
+$SVNVERSION = (qw$LastChangedRevision: 1235 $)[1];
 
 
 =head1 NAME
