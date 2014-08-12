@@ -1,10 +1,10 @@
 package Net::DNS::Header;
 
 #
-# $Id: Header.pm 1101 2013-08-14 14:40:00Z willem $
+# $Id: Header.pm 1241 2014-08-11 13:13:59Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1101 $)[1];
+$VERSION = (qw$LastChangedRevision: 1241 $)[1];
 
 
 =head1 NAME
@@ -125,7 +125,8 @@ A random value is assigned if the argument value is undefined.
 sub id {
 	my $self = shift;
 	$$self->{id} = shift if scalar @_;
-	$$self->{id} ||= int rand(0xffff);
+	return $$self->{id} if defined $$self->{id};
+	$$self->{id} = int rand(0xffff);
 }
 
 

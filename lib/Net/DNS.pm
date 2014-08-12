@@ -1,11 +1,11 @@
 package Net::DNS;
 
 #
-# $Id: DNS.pm 1235 2014-07-29 07:58:19Z willem $
+# $Id: DNS.pm 1245 2014-08-12 22:12:23Z willem $
 #
 use vars qw($VERSION $SVNVERSION);
-$VERSION    = '0.78_1';
-$SVNVERSION = (qw$LastChangedRevision: 1235 $)[1];
+$VERSION    = '0.78_2';
+$SVNVERSION = (qw$LastChangedRevision: 1245 $)[1];
 
 
 =head1 NAME
@@ -197,7 +197,7 @@ if (OLDDNSSEC) {
 	}
 
 	eval {
-		no warnings 'void';	## suppress "Too late to run INIT block ..."
+		#no warnings 'void';	## DIY patch to suppress "Too late to run INIT block ..."
 
 		sub INIT {		## only needed to satisfy DNSSEC t/00-load.t
 			return unless OLDDNSSEC;

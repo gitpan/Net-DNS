@@ -1,10 +1,10 @@
 package Net::DNS::Resolver::MSWin32;
 
 #
-# $Id: MSWin32.pm 1235 2014-07-29 07:58:19Z willem $
+# $Id: MSWin32.pm 1244 2014-08-12 22:10:45Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1235 $)[1];
+$VERSION = (qw$LastChangedRevision: 1244 $)[1];
 
 =head1 NAME
 
@@ -17,7 +17,6 @@ use strict;
 use base qw(Net::DNS::Resolver::Base);
 
 use Carp;
-use Data::Dumper;
 
 BEGIN {
 	use vars qw($Registry);
@@ -46,10 +45,11 @@ sub init {
 
 	my $FIXED_INFO = {};
 
-	unless ( my $ret = Win32::IPHelper::GetNetworkParams($FIXED_INFO) ) {
-		print Dumper $FIXED_INFO if $debug;
-	} else {
+	if ( my $ret = Win32::IPHelper::GetNetworkParams($FIXED_INFO) ) {
 		Carp::croak "GetNetworkParams() error %u: %s\n", $ret, Win32::FormatMessage($ret);
+	} elsif ($debug) {
+		require Data::Dumper;
+		print Data::Dumper::Dumper $FIXED_INFO;
 	}
 
 

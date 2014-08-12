@@ -1,7 +1,12 @@
-$Id: Changes 1235 2014-07-29 07:58:19Z willem $                       -*-text-*-
+$Id: Changes 1242 2014-08-11 15:32:09Z willem $                       -*-text-*-
 
 
 **** 0.79 [unreleased]
+
+Fix rt.cpan.org #97736
+
+	Net::DNS::Resolver->new mistakenly copies supplied arguments
+	into default configuration on first instantiation.
 
 Fix rt.cpan.org #97502
 
@@ -11,6 +16,10 @@ Fix rt.cpan.org #81760
 
 	Reverted workaround for TXT issue preventing propagation of
 	rule updates for SpamAssassin versions earlier than 3.4.0
+
+Fix rt.cpan.org #16630
+
+	Net::DNS::Resolver::Recurse issues lots of IMHO unnecessary DNS requests.
 
 
 **** 0.78 Jul 10, 2014

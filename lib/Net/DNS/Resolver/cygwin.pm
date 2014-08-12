@@ -1,10 +1,10 @@
 package Net::DNS::Resolver::cygwin;
 
 #
-# $Id: cygwin.pm 1235 2014-07-29 07:58:19Z willem $
+# $Id: cygwin.pm 1244 2014-08-12 22:10:45Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1235 $)[1];
+$VERSION = (qw$LastChangedRevision: 1244 $)[1];
 
 =head1 NAME
 
@@ -146,9 +146,9 @@ sub init {
 		$defaults->searchlist(@a);
 	}
 
-	$defaults->domain( _untaint $default->domain );		# untaint config values
-	$defaults->searchlist( _untaint $default->searchlist );
-	$defaults->nameservers( _untaint $default->nameservers );
+	$defaults->domain( _untaint $defaults->domain );	# untaint config values
+	$defaults->searchlist( _untaint $defaults->searchlist );
+	$defaults->nameservers( _untaint $defaults->nameservers );
 
 	$defaults->read_env;
 }

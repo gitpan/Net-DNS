@@ -1,4 +1,4 @@
-# $Id: 10-recurse.t 1218 2014-06-11 08:26:33Z willem $ -*-perl-*-
+# $Id: 10-recurse.t 1240 2014-08-11 12:06:47Z willem $ -*-perl-*-
 
 use strict;
 use Test::More;
@@ -77,8 +77,6 @@ use_ok('Net::DNS::Resolver::Recurse');
 
 	ok( $res->hints(@HINTS), "hints() set" );
 
-	ok( %{$res->{'hints'}}, 'sanity check worked' );
-
 	my $packet;
 
 	# Try a domain that is a CNAME
@@ -100,7 +98,7 @@ use_ok('Net::DNS::Resolver::Recurse');
 
 	$res->hints(@HINTS);
 
-	my $count;
+	my $count = 0;
 
 	$res->recursion_callback(
 		sub {
@@ -115,3 +113,5 @@ use_ok('Net::DNS::Resolver::Recurse');
 
 
 NonFatalEnd();
+
+exit;
