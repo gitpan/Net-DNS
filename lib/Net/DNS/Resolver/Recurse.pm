@@ -1,10 +1,10 @@
 package Net::DNS::Resolver::Recurse;
 
 #
-# $Id: Recurse.pm 1244 2014-08-12 22:10:45Z willem $
+# $Id: Recurse.pm 1247 2014-08-14 19:41:20Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1244 $)[1];
+$VERSION = (qw$LastChangedRevision: 1247 $)[1];
 
 
 =head1 NAME
@@ -159,11 +159,10 @@ sub send {
 	my @a = grep ref($_), @$nslist;
 	splice @a, 0, 0, splice( @a, int( rand scalar @a ) );	# cut deck
 
-	while ( scalar @a ) {
+	foreach (@a) {
 		$res->nameservers( map @$_, @a );
 		my $reply = $res->send($query) || last;
 		$res->{callback}->($reply) if $res->{callback};
-		last unless $reply->header->rcode eq 'NOERROR';
 		return $reply;
 	}
 
@@ -175,7 +174,6 @@ sub send {
 		$ns = [@ip];					# substitute IP list in situ
 		my $reply = $res->send($query) || next;
 		$res->{callback}->($reply) if $res->{callback};
-		next unless $reply->header->rcode eq 'NOERROR';
 		return $reply;
 	}
 	return;

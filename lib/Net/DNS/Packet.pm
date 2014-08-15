@@ -1,10 +1,10 @@
 package Net::DNS::Packet;
 
 #
-# $Id: Packet.pm 1225 2014-07-01 19:38:51Z willem $
+# $Id: Packet.pm 1246 2014-08-14 19:39:22Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1225 $)[1];
+$VERSION = (qw$LastChangedRevision: 1246 $)[1];
 
 
 =head1 NAME
@@ -655,9 +655,10 @@ sub dn_expand_PP {
 
     $query = Net::DNS::Packet->new( 'www.example.com', 'A' );
 
-    $query->sign_tsig( 'Khmac-sha512.example.+165+01018.private',
-			fudge => 60
-			);
+    $query->sign_tsig(
+		'Khmac-sha512.example.+165+01018.private',
+		fudge => 60
+		);
 
     $reply = $res->send( $query );
 
@@ -675,15 +676,18 @@ must uniquely identify the key shared between the parties, and the
 algorithm name must identify the signing function to be used with the
 specified key.
 
-    $tsig = Net::DNS::RR->new(	name		=> 'tsig.example',
-				type		=> 'TSIG',
-				algorithm	=> 'custom-algorithm',
-				sig_function	=> sub { ... },
-				key		=> '<base64 key text>'
-				);
+    $tsig = Net::DNS::RR->new(
+		name		=> 'tsig.example',
+		type		=> 'TSIG',
+		algorithm	=> 'custom-algorithm',
+		key		=> '<base64 key text>',
+		sig_function	=> sub {
+					  my ($key, $data) = @_;
+						...
+					}
+		);
 
-    $packet = Net::DNS::Packet->new( 'www.example.com', 'A' );
-    $packet->sign_tsig( $tsig );
+    $query->sign_tsig( $tsig );
 
 
 The historical simplified syntax is still available, but additional
@@ -694,6 +698,7 @@ options can not be specified.
 
 The response to an inbound request is signed by presenting the request
 in place of the key parameter.
+
     $response = $request->reply;
     $response->sign_tsig( $request, @options );
 
@@ -709,7 +714,7 @@ The opaque intermediate object references returned during multi-packet
 signing are not intended to be accessed by the end-user application.
 Any such access is expressly forbidden.
 
-Note that a TSIG record is added to every packet; the implementation
+Note that a TSIG record is added to every packet; this implementation
 does not support the suppressed signature scheme described in RFC2845.
 
 =cut
