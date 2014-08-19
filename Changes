@@ -1,7 +1,11 @@
-$Id: Changes 1242 2014-08-11 15:32:09Z willem $                       -*-text-*-
+$Id: Changes 1253 2014-08-19 13:18:09Z willem $                       -*-text-*-
 
 
 **** 0.79 [unreleased]
+
+Feature rt.cpan.org #98149
+
+	Add support for Android platform.
 
 Fix rt.cpan.org #97736
 
@@ -11,6 +15,10 @@ Fix rt.cpan.org #97736
 Fix rt.cpan.org #97502
 
 	Net::DNS::Resolver->retrans does not accept a value of 1 (uses 2 instead)
+
+Fix rt.cpan.org #83642
+
+	Configure CD flag in Net::DNS::Resolver->new
 
 Fix rt.cpan.org #81760
 

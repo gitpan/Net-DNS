@@ -2,6 +2,7 @@ Changes
 contrib/check_soa
 contrib/check_zone
 contrib/dnswalk.README
+contrib/find_zonecut
 contrib/loc2earth.fcgi
 contrib/loclist.pl
 contrib/README
@@ -26,6 +27,7 @@ lib/Net/DNS/Packet.pm
 lib/Net/DNS/Parameters.pm
 lib/Net/DNS/Question.pm
 lib/Net/DNS/Resolver.pm
+lib/Net/DNS/Resolver/android.pm
 lib/Net/DNS/Resolver/Base.pm
 lib/Net/DNS/Resolver/cygwin.pm
 lib/Net/DNS/Resolver/MSWin32.pm
@@ -63,6 +65,7 @@ lib/Net/DNS/RR/NAPTR.pm
 lib/Net/DNS/RR/NID.pm
 lib/Net/DNS/RR/NS.pm
 lib/Net/DNS/RR/NULL.pm
+lib/Net/DNS/RR/OPENPGPKEY.pm
 lib/Net/DNS/RR/OPT.pm
 lib/Net/DNS/RR/PTR.pm
 lib/Net/DNS/RR/PX.pm
