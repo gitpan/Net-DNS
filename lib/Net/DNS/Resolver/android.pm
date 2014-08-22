@@ -1,10 +1,10 @@
 package Net::DNS::Resolver::android;
 
 #
-# $Id: android.pm 1253 2014-08-19 13:18:09Z willem $
+# $Id: android.pm 1255 2014-08-20 09:05:00Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1253 $)[1];
+$VERSION = (qw$LastChangedRevision: 1255 $)[1];
 
 
 =head1 NAME
@@ -18,8 +18,8 @@ use strict;
 use base qw(Net::DNS::Resolver::Base);
 
 
-my $origin	= $ENV{ANDROID_ROOT} || '/system';
-my $resolv_conf = "$origin/etc/resolv.conf";
+my $config_dir	= $ENV{ANDROID_ROOT} || '/system';
+my $resolv_conf = "$config_dir/etc/resolv.conf";
 my $dotfile	= '.resolv.conf';
 
 my @config_path;
@@ -39,12 +39,11 @@ sub init {
 	}
 
 	my $defaults = shift->defaults;
-
 	$defaults->read_config_file($resolv_conf) if -f $resolv_conf && -r _;
 
 	$defaults->domain( _untaint $defaults->domain );	# untaint config values
 	$defaults->searchlist( _untaint $defaults->searchlist );
-	$defaults->nameservers( _untaint @nameservers, $defaults->nameservers );
+	$defaults->nameservers( _untaint $defaults->nameservers(@nameservers) );
 
 	foreach my $dir (@config_path) {
 		my $file = "$dir/$dotfile";
