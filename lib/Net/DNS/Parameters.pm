@@ -1,16 +1,16 @@
 package Net::DNS::Parameters;
 
 #
-# $Id: Parameters.pm 1246 2014-08-14 19:39:22Z willem $
+# $Id: Parameters.pm 1261 2014-09-11 10:14:45Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1246 $)[1];
+$VERSION = (qw$LastChangedRevision: 1261 $)[1];
 
 
 ################################################
 ##
 ##	Domain Name System (DNS) Parameters
-##	(last updated 2014-08-12)
+##	(last updated 2014-09-04)
 ##
 ################################################
 
@@ -102,8 +102,8 @@ use vars qw( %typebyname %typebyval );
 	NINFO	   => 56,					#
 	RKEY	   => 57,					#
 	TALINK	   => 58,					#
-	CDS	   => 59,					# RFC-ietf-dnsop-delegation-trust-maintainance-14
-	CDNSKEY	   => 60,					# RFC-ietf-dnsop-delegation-trust-maintainance-14
+	CDS	   => 59,					# RFC7344
+	CDNSKEY	   => 60,					# RFC7344
 	OPENPGPKEY => 61,					# draft-ietf-dane-openpgpkey
 	SPF	   => 99,					# RFC7208
 	UINFO	   => 100,					# IANA-Reserved

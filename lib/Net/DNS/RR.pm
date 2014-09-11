@@ -1,10 +1,10 @@
 package Net::DNS::RR;
 
 #
-# $Id: RR.pm 1235 2014-07-29 07:58:19Z willem $
+# $Id: RR.pm 1260 2014-09-09 09:12:28Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1235 $)[1];
+$VERSION = (qw$LastChangedRevision: 1260 $)[1];
 
 
 =head1 NAME
@@ -65,7 +65,7 @@ sub new {
 		scalar @_ > 2 ? &_new_hash : &_new_string;
 	} || do {
 		my $class = shift || __PACKAGE__;
-		my @param = map { !defined($_) ? 'undef': split; } @_;
+		my @param = map { !defined($_) ? 'undef' : split; } @_;
 		croak join ' ', "$@in new $class(", substr( "@param", 0, 50 ), '... )';
 	};
 }
@@ -118,15 +118,12 @@ sub _new_string {
 	my ( $ttl, $class );
 	unless ( defined $t2 ) {				# <name> <type>
 		@token = ('ANY') if $classbyname{$t1};		# <name> <class>
-	} elsif ( defined $t3 && $classbyname{$t2} ) {
-		$ttl   = shift @token;				# <name> <ttl> <class> <type>
-		$class = shift @token;
-	} elsif ( $t1 =~ /^\d/ ) {
-		$ttl = shift @token;				# <name> <ttl> [<class>] <type>
-		$class = shift @token if $t2 =~ /^CLASS\d/;
 	} elsif ( $classbyname{$t1} || $t1 =~ /^CLASS\d/ ) {
 		$class = shift @token;				# <name> <class> [<ttl>] <type>
 		$ttl = shift @token if $t2 =~ /^\d/;
+	} elsif ( $t1 =~ /^\d/ ) {
+		$ttl = shift @token;				# <name> <ttl> [<class>] <type>
+		$class = shift @token if $classbyname{$t2} || $t2 =~ /^CLASS\d/;
 	}
 
 	my $type      = shift(@token);
@@ -655,9 +652,9 @@ sub encode_rdata {			## encode rdata as wire-format octet string
 
 sub format_rdata {			## format rdata portion of RR string
 	my $self = shift;
-	my $data = $self->{'rdata'} || $self->encode_rdata;	# unknown RR, per RFC3597
-	my $size = length $data;
-	join ' ', '\\#', $size, $size ? unpack( 'H*', $data ) : ();
+	my $data = $self->{'rdata'} || $self->encode_rdata;
+	my $size = length($data) || return '';
+	join ' ', '\\#', $size, unpack 'H*', $data;		# RFC3597 unknown RR format
 }
 
 

@@ -1,10 +1,10 @@
 package Net::DNS::Resolver::Base;
 
 #
-# $Id: Base.pm 1252 2014-08-19 13:14:41Z willem $
+# $Id: Base.pm 1260 2014-09-09 09:12:28Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1252 $)[1];
+$VERSION = (qw$LastChangedRevision: 1260 $)[1];
 
 
 use strict;
@@ -30,7 +30,7 @@ sub _untaint { map defined && /^(.+)$/ ? $1 : (), @_; }
 #
 #  A few implementation notes wrt IPv6 support.
 #
-#  In general we try to be gracious to those stacks that do not have ipv6 support.
+#  In general we try to be gracious to those stacks that do not have IPv6 support.
 #  We test that by means of the availability of Socket6 and IO::Socket::INET6
 #
 
@@ -47,8 +47,8 @@ sub _untaint { map defined && /^(.+)$/ ? $1 : (), @_; }
 #  call to translate IP addresses to socketaddress
 
 
-#  Two configuration flags, force_v4 and prefer_v6, are provided to
-#  control IPv6 behaviour for test purposes.
+#  Three configuration flags, force_v4, prefer_v6 and force_v6,
+#  are provided to control IPv6 behaviour for test purposes.
 
 
 # Olaf Kolkman, RIPE NCC, December 2003.
@@ -89,17 +89,16 @@ BEGIN {
 		errorstring	=> 'unknown error or no error',
 		tsig_rr		=> undef,
 		answerfrom	=> '',
-		querytime	=> undef,
 		tcp_timeout	=> 120,
 		udp_timeout	=> undef,
-		axfr_sel	=> undef,
 		persistent_tcp	=> 0,
 		persistent_udp	=> 0,
 		dnssec		=> 0,
+		adflag		=> 0,	# this is only used when {dnssec} == 1
 		cdflag		=> 0,	# this is only used when {dnssec} == 1
-		adflag		=> 1,	# this is only used when {dnssec} == 1
 		udppacketsize	=> 0,	# value bounded below by PACKETSZ
-		force_v4	=> 0,	# only relevant when we have v6 support
+		force_v4	=> 0,	# only relevant if IPv6 is supported
+		force_v6	=> 0,	#
 		prefer_v6	=> 0,	# prefer v6, otherwise prefer v4
 		ignqrid		=> 0,	# normally packets with non-matching ID
 					# or with the qr bit on are thrown away,
@@ -110,7 +109,7 @@ BEGIN {
 					# This may be a temporary feature
 		);
 
-	# If we're running under a SOCKSified Perl, use TCP instead of UDP
+	# If running under a SOCKSified Perl, use TCP instead of UDP
 	# and keep the sockets open.
 	if ( $Config::Config{'usesocks'} ) {
 		$defaults{'usevc'}	    = 1;
@@ -122,8 +121,7 @@ BEGIN {
 	sub defaults { return $defaults; }
 }
 
-# These are the attributes that we let the user specify in the new().
-# We also deprecate access to these with AUTOLOAD (some may be useful).
+# These are the attributes that the user may specify in the new() constructor.
 my %public_attr = map { $_ => 1 } qw(
 		nameservers
 		port
@@ -145,6 +143,7 @@ my %public_attr = map { $_ => 1 } qw(
 		persistent_tcp
 		persistent_udp
 		dnssec
+		adflag
 		cdflag
 		prefer_v6
 		ignqrid
@@ -288,10 +287,11 @@ sub print { print shift->string; }
 sub string {
 	my $self = shift;
 
-	my $timeout   = $self->{'tcp_timeout'} ? $self->{'tcp_timeout'}		   : 'indefinite';
-	my $INET6line = $has_inet6	       ? "prefer_v6 = $self->{prefer_v6}"  : '(no IPv6 transport)';
-	my $ignqrid   = $self->{'ignqrid'}     ? 'ACCEPTING ALL PACKETS (IGNQRID)' : '';
-	my @nslist    = $self->nameservers();
+	my $timeout = $self->{'tcp_timeout'} || 'indefinite';
+	my $IP6line = "prefer_v6\t= $self->{prefer_v6}\tforce_v6 = $self->{force_v6}";
+	my $IP6conf = $has_inet6 ? $IP6line : '(no IPv6 transport)';
+	my @nslist  = $self->nameservers();
+	my $ignqrid = $self->{'ignqrid'} ? 'ACCEPTING ALL PACKETS (IGNQRID)' : '';
 	return <<END;
 ;; RESOLVER state:
 ;;  domain	= $self->{domain}
@@ -301,12 +301,12 @@ sub string {
 ;;  srcport	= $self->{srcport}
 ;;  srcaddr	= $self->{srcaddr}
 ;;  tcp_timeout = $timeout
-;;  retrans	= $self->{retrans}	retry     = $self->{retry}
-;;  usevc	= $self->{usevc}	stayopen  = $self->{stayopen}
-;;  defnames	= $self->{defnames}	dnsrch    = $self->{dnsrch}
-;;  recurse	= $self->{recurse}	igntc     = $self->{igntc}
-;;  force_v4	= $self->{force_v4}	$INET6line
-;;  debug	= $self->{debug}	$ignqrid
+;;  retrans	= $self->{retrans}	retry    = $self->{retry}
+;;  usevc	= $self->{usevc}	stayopen = $self->{stayopen}
+;;  defnames	= $self->{defnames}	dnsrch   = $self->{dnsrch}
+;;  recurse	= $self->{recurse}	igntc    = $self->{igntc}
+;;  debug	= $self->{debug}	force_v4 = $self->{force_v4}	$ignqrid
+;;  $IP6conf
 END
 
 }
@@ -372,22 +372,15 @@ sub nameservers {
 		return unless defined wantarray;
 	}
 
-	my @returnval;
-	if ( $self->force_v4() ) {
-		@returnval = @{$self->{nameserver4}};
-	} elsif ( $self->prefer_v6() ) {
-		@returnval = ( @{$self->{nameserver6}}, @{$self->{nameserver4}} );
-	} else {
-		@returnval = ( @{$self->{nameserver4}}, @{$self->{nameserver6}} );
-	}
+	my @ns4 = @{$self->{nameserver4}} unless $self->force_v6;
+	my @ns6 = @{$self->{nameserver6}} if $has_inet6 && !$self->force_v4;
+	my @returnval = $self->prefer_v6 ? ( @ns6, @ns4 ) : ( @ns4, @ns6 );
 
 	return @returnval if scalar @returnval;
 
 	$self->errorstring('no nameservers');
-	if ( scalar( @{$self->{nameserver6}} ) ) {
-		$self->errorstring('IPv6 transport not available') unless $has_inet6;
-		$self->errorstring('unable to use IPv6 transport') if $self->force_v4();
-	}
+	$self->errorstring('IPv4 transport not available') if scalar(@ns4) < scalar @{$self->{nameserver4}};
+	$self->errorstring('IPv6 transport not available') if scalar(@ns6) < scalar @{$self->{nameserver6}};
 	return @returnval;
 }
 
@@ -426,12 +419,24 @@ sub cname_addr {
 # then we use EDNS and $self->{udppacketsize}
 # should be taken as the maximum packet_data length
 sub _packetsz {
-	my $udpsize = shift->{udppacketsize} || PACKETSZ;
+	my $udpsize = shift->{udppacketsize} || 0;
 	return $udpsize > PACKETSZ ? $udpsize : PACKETSZ;
 }
 
+sub answerfrom {
+	my $self = shift;
+	$self->{answerfrom} = shift if scalar @_;
+	return $self->{answerfrom};
+}
+
+sub errorstring {
+	my $self = shift;
+	$self->{errorstring} = shift if scalar @_;
+	return $self->{errorstring};
+}
+
 sub _reset_errorstring {
-	my ($self) = @_;
+	my $self = shift;
 
 	$self->errorstring( $self->defaults->{'errorstring'} );
 }
@@ -1085,21 +1090,24 @@ sub make_query_packet {
 
 	$header->rd( $self->{recurse} ) if $header->opcode eq 'QUERY';
 
-	if ( $self->dnssec ) {					# RFC 3225
-		print ";; Set EDNS DO flag and UDP packetsize $self->{udppacketsize}\n" if $self->{debug};
-		$packet->edns->size( $self->{udppacketsize} );	# advertise UDP payload size for local IP stack
-		$header->do(1);
-		$header->ad( $self->{adflag} );
-		$header->cd( $self->{cdflag} );
+	unless ( $self->dnssec ) {
+		$header->ad(0);
+		$header->do(0);
 
-	} elsif ( $self->{udppacketsize} > PACKETSZ ) {
-		print ";; Clear EDNS DO flag and set UDP packetsize $self->{udppacketsize}\n" if $self->{debug};
-		$packet->edns->size( $self->{udppacketsize} );	# advertise UDP payload size for local IP stack
+	} elsif ( $self->{adflag} ) {
+		print ";; Set AD flag\n" if $self->{debug};
+		$header->ad(1);
+		$header->cd(0);
 		$header->do(0);
 
 	} else {
-		$header->do(0);
+		print ";; Set EDNS DO flag\n" if $self->{debug};
+		$header->ad(0);
+		$header->cd( $self->{cdflag} );
+		$header->do(1);
 	}
+
+	$packet->edns->size( $self->{udppacketsize} );		# advertise payload size for local stack
 
 	if ( $self->{tsig_rr} && !grep $_->type eq 'TSIG', $packet->additional ) {
 		$packet->sign_tsig( $self->{tsig_rr} );
@@ -1484,6 +1492,44 @@ sub _ip_is_ipv6 {
 }
 
 
+sub force_v4 {
+	my $self = shift;
+	return $self->{force_v4} unless scalar @_;
+	my $value = shift;
+	$self->force_v6(0) if $value;
+	$self->{force_v4} = $value ? 1 : 0;
+}
+
+sub force_v6 {
+	my $self = shift;
+	return $self->{force_v6} unless scalar @_;
+	my $value = shift;
+	$self->force_v4(0) if $value;
+	$self->{force_v6} = $value ? 1 : 0;
+}
+
+sub prefer_v4 {
+	my $self = shift;
+	return $self->{prefer_v6} ? 0 : 1 unless scalar @_;
+	my $value = shift;
+	$self->{prefer_v6} = $value ? 0 : 1;
+	return $value;
+}
+
+sub prefer_v6 {
+	my $self = shift;
+	return $self->{prefer_v6} unless scalar @_;
+	$self->{prefer_v6} = shift() ? 1 : 0;
+}
+
+
+sub udppacketsize {
+	my $self = shift;
+	$self->{udppacketsize} = shift if scalar @_;
+	return $self->_packetsz;
+}
+
+
 sub DESTROY { }				## Avoid tickling AUTOLOAD (in cleanup)
 
 use vars qw($AUTOLOAD);
@@ -1494,7 +1540,7 @@ sub AUTOLOAD {				## Default method
 
 	my $name = $AUTOLOAD;
 	$name =~ s/.*://;
-	croak "$name: no such method" unless exists $self->{$name};
+	croak "$name: no such method" unless exists $public_attr{$name};
 
 	no strict q/refs/;
 	*{$AUTOLOAD} = sub {

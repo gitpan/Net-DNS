@@ -1,10 +1,10 @@
 package Net::DNS::Resolver::Recurse;
 
 #
-# $Id: Recurse.pm 1252 2014-08-19 13:14:41Z willem $
+# $Id: Recurse.pm 1259 2014-09-08 10:33:49Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1252 $)[1];
+$VERSION = (qw$LastChangedRevision: 1259 $)[1];
 
 
 =head1 NAME
@@ -168,8 +168,8 @@ sub send {
 		print ";; find missing glue for $domain. ($ns)\n" if $res->{debug};
 		$res->empty_nameservers();
 		my @ip = $res->nameservers($ns);
-		next unless @ip;
 		$ns = [@ip];					# substitute IP list in situ
+		next unless @ip;
 		my $reply = $res->send($query) || next;
 		$res->{callback}->($reply) if $res->{callback};
 		return $reply;
