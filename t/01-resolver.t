@@ -1,4 +1,4 @@
-# $Id: 01-resolver.t 1203 2014-05-20 12:25:01Z willem $	-*-perl-*-
+# $Id: 01-resolver.t 1263 2014-09-15 12:56:22Z willem $	-*-perl-*-
 
 use strict;
 use Test::More tests => 48;
@@ -9,7 +9,7 @@ use Net::DNS;
 my $res = Net::DNS::Resolver->new();
 
 for (@Net::DNS::Resolver::ISA) {
-	diag "$_\t($^O)" unless /[:]UNIX$/;
+	diag $_ unless /[:]UNIX$/;
 }
 
 isa_ok( $res, 'Net::DNS::Resolver', 'new() created object' );
