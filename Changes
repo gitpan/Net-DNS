@@ -1,7 +1,7 @@
-$Id: Changes 1263 2014-09-15 12:56:22Z willem $                       -*-text-*-
+$Id: Changes 1267 2014-09-22 08:03:42Z willem $                       -*-text-*-
 
 
-**** 0.80 [unreleased]
+**** 0.80 Sep 22, 2014
 
 Removal of Win32::IPHelper support with cygwin
 
