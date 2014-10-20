@@ -1,10 +1,10 @@
 package Net::DNS::RR::LOC;
 
 #
-# $Id: LOC.pm 1188 2014-04-03 18:54:34Z willem $
+# $Id: LOC.pm 1276 2014-10-19 06:02:40Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1188 $)[1];
+$VERSION = (qw$LastChangedRevision: 1276 $)[1];
 
 
 use strict;
@@ -44,7 +44,7 @@ sub format_rdata {			## format rdata portion of RR string.
 	my $self = shift;
 
 	return '' unless defined $self->{longitude};
-	my @angular = ( $self->latitude, $self->longitude );
+	my @angular = ( $self->latitude, ' ', $self->longitude, ' ' );
 	my @linear = ( $self->altitude, $self->size, $self->hp, $self->vp );
 	join ' ', @angular, join 'm ', @linear, '';
 }
@@ -172,8 +172,7 @@ sub _decode_lat {
 sub _encode_lat {
 	my @ang = scalar @_ > 1 ? (@_) : ( split /[\s\260'"]+/, shift || '0' );
 	my $ang = ( 0 + shift @ang ) * 3600000;
-	my $neg = pop(@ang) =~ /[SWsw]/ if scalar @ang;
-	undef $neg if $ang < 0;
+	my $neg = ( @ang ? pop @ang : '' ) =~ /[SWsw]/ && $ang > 0;
 	$ang += ( @ang ? shift @ang : 0 ) * 60000;
 	$ang += ( @ang ? shift @ang : 0 ) * 1000;
 	return int( 0.5 + ( $neg ? $datum_loc - $ang : $datum_loc + $ang ) );

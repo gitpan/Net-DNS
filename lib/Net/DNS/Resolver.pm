@@ -1,10 +1,10 @@
 package Net::DNS::Resolver;
 
 #
-# $Id: Resolver.pm 1266 2014-09-22 08:00:05Z willem $
+# $Id: Resolver.pm 1276 2014-10-19 06:02:40Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1266 $)[1];
+$VERSION = (qw$LastChangedRevision: 1276 $)[1];
 
 =head1 NAME
 
@@ -770,9 +770,6 @@ For example, if we wanted to cache lookups:
 
 
 =head1 BUGS
-
-The current implementation supports TSIG only on outgoing packets.
-No validation of server replies is performed.
 
 bgsend() does not honour the usevc flag and only uses UDP for transport.
 

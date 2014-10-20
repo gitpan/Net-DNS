@@ -1,10 +1,10 @@
 package Net::DNS::RR::OPT;
 
 #
-# $Id: OPT.pm 1229 2014-07-09 07:07:42Z willem $
+# $Id: OPT.pm 1276 2014-10-19 06:02:40Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1229 $)[1];
+$VERSION = (qw$LastChangedRevision: 1276 $)[1];
 
 
 use strict;
@@ -121,9 +121,8 @@ sub class {				## overide RR method
 
 sub ttl {				## overide RR method
 	my $self = shift;
-	my $mods = shift || return if scalar @_;
 	carp qq[Usage: OPT has no "ttl" attribute, please use "flags()" and "rcode()"] unless $warned++;
-	@{$self}{qw(rcode version flags)} = unpack 'C2 n', pack 'N', $mods if $mods;
+	@{$self}{qw(rcode version flags)} = unpack 'C2 n', pack 'N', shift || 0 if scalar @_;
 	return pack 'C2 n', @{$self}{qw(rcode version flags)} if defined wantarray;
 }
 

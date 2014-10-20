@@ -1,10 +1,10 @@
 package Net::DNS::Nameserver;
 
 #
-# $Id: Nameserver.pm 1222 2014-06-24 12:30:08Z willem $
+# $Id: Nameserver.pm 1276 2014-10-19 06:02:40Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1222 $)[1];
+$VERSION = (qw$LastChangedRevision: 1276 $)[1];
 
 
 =head1 NAME
@@ -412,7 +412,7 @@ sub udp_connection {
 		};
 	my $reply = $self->make_reply( $query, $peerhost, $conn ) || return;
 
-	my $max_len = $query->edns->size if $query && $self->{Truncate};
+	my $max_len = ( $query && $self->{Truncate} ) ? $query->edns->size : undef;
 	if ( $self->{Verbose} ) {
 		local $| = 1;
 		print "Maximum UDP size advertised by $peerhost:$peerport: $max_len\n" if $max_len;

@@ -1,10 +1,10 @@
 package Net::DNS::RR::TKEY;
 
 #
-# $Id: TKEY.pm 1188 2014-04-03 18:54:34Z willem $
+# $Id: TKEY.pm 1276 2014-10-19 06:02:40Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1188 $)[1];
+$VERSION = (qw$LastChangedRevision: 1276 $)[1];
 
 
 use strict;
@@ -156,7 +156,7 @@ __END__
 
 =head1 DESCRIPTION
 
-Class for DNS Transaction Signature (TKEY) resource records.
+Class for DNS TSIG Key (TKEY) resource records.
 
 =head1 METHODS
 
@@ -222,8 +222,8 @@ The meaning of this data depends on the mode.
     $other = $rr->other;
     $rr->other( $other );
 
-Not defined in [RFC2930] specification but may be used in future
-extensions.
+Content not defined in the [RFC2930] specification but may be used
+in future extensions.
 
 
 =head1 COPYRIGHT

@@ -1,10 +1,10 @@
 package Net::DNS::RR::APL;
 
 #
-# $Id: APL.pm 1188 2014-04-03 18:54:34Z willem $
+# $Id: APL.pm 1272 2014-10-10 22:21:43Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1188 $)[1];
+$VERSION = (qw$LastChangedRevision: 1272 $)[1];
 
 
 use strict;
@@ -137,11 +137,10 @@ sub prefix {
 	sub _address_1 {
 		my $self = shift;
 
-		my $dummy = {address => pack( 'a* @4', $self->{address} || '' )};
-		return Net::DNS::RR::A::address($dummy) unless scalar @_;
+		return bless( {%$self}, 'Net::DNS::RR::A' )->address unless scalar @_;
 
 		my $alength = ( $self->prefix + 7 ) >> 3;	# mask non-prefix bits, suppress nulls
-		my @address = unpack "C$alength", Net::DNS::RR::A::address( $dummy, shift );
+		my @address = unpack "C$alength", Net::DNS::RR::A->address(shift);
 		my $bitmask = 0xFF << ( 8 - $self->prefix & 7 );
 		push @address, ( $bitmask & pop(@address) ) if $alength;
 		for ( reverse @address ) { last if $_; pop @address }
@@ -152,11 +151,10 @@ sub prefix {
 	sub _address_2 {
 		my $self = shift;
 
-		my $dummy = {address => pack( 'a* @16', $self->{address} || '' )};
-		return Net::DNS::RR::AAAA::address_long($dummy) unless scalar @_;
+		return bless( {%$self}, 'Net::DNS::RR::AAAA' )->address_long unless scalar @_;
 
 		my $alength = ( $self->prefix + 7 ) >> 3;	# mask non-prefix bits, suppress nulls
-		my @address = unpack "C$alength", Net::DNS::RR::AAAA::address( $dummy, shift );
+		my @address = unpack "C$alength", Net::DNS::RR::AAAA->address(shift);
 		my $bitmask = 0xFF << ( 8 - $self->prefix & 7 );
 		push @address, ( $bitmask & pop(@address) ) if $alength;
 		for ( reverse @address ) { last if $_; pop @address }

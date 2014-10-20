@@ -1,10 +1,10 @@
 package Net::DNS::Packet;
 
 #
-# $Id: Packet.pm 1246 2014-08-14 19:39:22Z willem $
+# $Id: Packet.pm 1276 2014-10-19 06:02:40Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1246 $)[1];
+$VERSION = (qw$LastChangedRevision: 1276 $)[1];
 
 
 =head1 NAME
@@ -39,7 +39,8 @@ BEGIN {
 	require Net::DNS::RR;
 }
 
-my @dummy_header = ( header => {} ) if Net::DNS::RR->COMPATIBLE;
+use constant OLDDNSSEC => Net::DNS::RR->COMPATIBLE;
+my @dummy_header = OLDDNSSEC ? ( header => {} ) : ();
 
 
 =head1 METHODS
@@ -227,7 +228,7 @@ represents the header section of the packet.
 
 sub header {
 	my $self = shift;
-	return bless \$self, q(Net::DNS::Header);
+	bless \$self, q(Net::DNS::Header);
 }
 
 
@@ -237,7 +238,7 @@ sub header {
     $version = $edns->version;
     $size    = $edns->size;
 
-Auxilliary function edns() provides access to EDNS extensions.
+Auxiliary function edns() provides access to EDNS extensions.
 
 =cut
 
@@ -245,7 +246,7 @@ sub edns {
 	my $self = shift;
 	my $link = \$self->{xedns};
 	($$link) = grep $_->isa(qw(Net::DNS::RR::OPT)), @{$self->{additional}} unless $$link;
-	return $$link ||= new Net::DNS::RR( type => 'OPT' );
+	$$link ||= new Net::DNS::RR( type => 'OPT' );
 }
 
 
@@ -828,7 +829,7 @@ The minimum maximum length that is honoured is 512 octets.
 #   The TC bit should be set in responses only when an RRSet is required
 #   as a part of the response, but could not be included in its entirety.
 #   The TC bit should not be set merely because some extra information
-#   could have been included, but there was insufficient room.  This
+#   could have been included, for which there was insufficient room. This
 #   includes the results of additional section processing.  In such cases
 #   the entire RRSet that will not fit in the response should be omitted,
 #   and the reply sent as is, with the TC bit clear.  If the recipient of

@@ -1,15 +1,15 @@
 package Net::DNS::Domain;
 
 #
-# $Id: Domain.pm 1222 2014-06-24 12:30:08Z willem $
+# $Id: Domain.pm 1276 2014-10-19 06:02:40Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1222 $)[1];
+$VERSION = (qw$LastChangedRevision: 1276 $)[1];
 
 
 =head1 NAME
 
-Net::DNS::Domain - Domain Name System domains
+Net::DNS::Domain - DNS domains
 
 =head1 SYNOPSIS
 
@@ -59,9 +59,9 @@ use constant LIBIDN => eval {
 } || 0;
 
 
-# perlcc: eddress of encoding objects must be determined at runtime
-my $ascii = Encode::find_encoding('ascii') if ASCII;		# Osborn's Law:
-my $utf8  = Encode::find_encoding('utf8')  if UTF8;		# Variables won't; constants aren't.
+# perlcc: address of encoding objects must be determined at runtime
+my $ascii = ASCII ? Encode::find_encoding('ascii') : undef;	# Osborn's Law:
+my $utf8  = UTF8  ? Encode::find_encoding('utf8')  : undef;	# Variables won't; constants aren't.
 
 
 =head1 METHODS
@@ -151,7 +151,8 @@ sub name {
 	my $head = _decode_ascii( join chr(46), map _escape($_), @$lref );
 	my $tail = $self->{origin} || return $self->{name} = $head || $dot;
 	return $self->{name} = $tail->name unless length $head;
-	return $self->{name} = join $dot, $head, $tail->name;
+	my $suffix = $tail->name;
+	return $self->{name} = $suffix eq $dot ? $head : join $dot, $head, $suffix;
 }
 
 
@@ -243,10 +244,10 @@ where relative names become descendents of the specified $ORIGIN.
 my $placebo = sub { my $constructor = shift; &$constructor; };
 
 sub origin {
-	my $class = shift;
-	my $name = shift || return $placebo;
+	my ( $class, $name ) = @_;
 
-	my $domain = new Net::DNS::Domain($name);
+	my $domain = defined $name ? new Net::DNS::Domain($name) : return $placebo;
+	$domain = undef unless scalar @{$domain->{label}};
 	return sub {						# closure w.r.t. $domain
 		my $constructor = shift;
 		local $ORIGIN = $domain;			# dynamically scoped $ORIGIN

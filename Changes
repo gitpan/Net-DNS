@@ -1,4 +1,32 @@
-$Id: Changes 1267 2014-09-22 08:03:42Z willem $                       -*-text-*-
+$Id: Changes 1277 2014-10-20 07:46:37Z willem $                       -*-text-*-
+
+
+**** 0.81 [unreleased]
+
+Fix rt.cpan.org #99571
+
+	AXFR BADSIG failures
+
+Fix rt.cpan.org #99531
+
+	Resolver doc error - when is a 'bug' a 'bug'? [TSIG verification]
+
+Fix rt.cpan.org #99528
+
+	TSIG::create fails with some filenames
+	
+Fix rt.cpan.org #99527
+
+	Random errors... [declaration with statement modifier]
+
+Fix rt.cpan.org #99429
+
+	Infinite recursion in Net::DNS::Resolver::Recurse::send when
+	following certain delegations with empty-non terminals.
+
+Fix rt.cpan.org #99320
+
+	Net::DNS::ZoneFile bug in "$ORIGIN ."
 
 
 **** 0.80 Sep 22, 2014

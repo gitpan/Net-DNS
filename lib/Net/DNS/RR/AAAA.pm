@@ -1,10 +1,10 @@
 package Net::DNS::RR::AAAA;
 
 #
-# $Id: AAAA.pm 1235 2014-07-29 07:58:19Z willem $
+# $Id: AAAA.pm 1272 2014-10-10 22:21:43Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1235 $)[1];
+$VERSION = (qw$LastChangedRevision: 1272 $)[1];
 
 
 use strict;
@@ -51,13 +51,15 @@ sub parse_rdata {			## populate RR from rdata in argument list
 }
 
 
+my $pad = pack 'x16';
+
 sub address_long {
-	return sprintf '%x:%x:%x:%x:%x:%x:%x:%x', unpack 'n8', shift->{address};
+	sprintf '%x:%x:%x:%x:%x:%x:%x:%x', unpack 'n8', shift->{address} . $pad;
 }
 
 
 sub address_short {
-	for ( sprintf ':%x:%x:%x:%x:%x:%x:%x:%x:', unpack 'n8', shift->{address} ) {
+	for ( sprintf ':%x:%x:%x:%x:%x:%x:%x:%x:', unpack 'n8', shift->{address} . $pad ) {
 		s/(:0[:0]+:)(?!.+:0\1)/::/;			# squash longest zero sequence
 		s/^:// unless /^::/;				# prune LH :
 		s/:$// unless /::$/;				# prune RH :
@@ -73,6 +75,7 @@ sub address {
 
 	my $argument = shift || '';
 	my @parse = split /:/, "0$argument";
+	$self = {} unless ref($self);
 
 	if ( (@parse)[$#parse] =~ /\./ ) {			# embedded IPv4
 		my @ip4 = split /\./, pop(@parse);

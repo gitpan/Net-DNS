@@ -1,10 +1,10 @@
 package Net::DNS::ZoneFile;
 
 #
-# $Id: ZoneFile.pm 1235 2014-07-29 07:58:19Z willem $
+# $Id: ZoneFile.pm 1277 2014-10-20 07:46:37Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1235 $)[1];
+$VERSION = (qw$LastChangedRevision: 1277 $)[1];
 
 
 =head1 NAME
@@ -548,7 +548,7 @@ sub _include {				## open $INCLUDE file
 	my $file = _filename(shift);
 	my $root = shift;
 
-	my @discipline = ( join ':', '<', PerlIO::get_layers $self->{handle} ) if PERLIO;
+	my @discipline = PERLIO ? ( join ':', '<', PerlIO::get_layers $self->{handle} ) : ();
 	my $handle = new FileHandle( $file, @discipline ) or croak qq(open: "$file" $!);
 
 	delete $self->{latest};					# forbid empty owner field

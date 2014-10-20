@@ -1,10 +1,10 @@
 package Net::DNS::Resolver::Base;
 
 #
-# $Id: Base.pm 1260 2014-09-09 09:12:28Z willem $
+# $Id: Base.pm 1277 2014-10-20 07:46:37Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1260 $)[1];
+$VERSION = (qw$LastChangedRevision: 1277 $)[1];
 
 
 use strict;
@@ -18,7 +18,7 @@ use IO::Select;
 use Net::DNS::RR;
 use Net::DNS::Packet;
 
-use constant DNSSEC => eval { require Net::DNS::RR::DS; } || 0;
+use constant DNSSEC => eval { require Net::DNS::RR::DNSKEY; } || 0;
 use constant INT16SZ  => 2;
 use constant PACKETSZ => 512;
 
@@ -154,7 +154,7 @@ my $initial;
 
 sub new {
 	my $class = shift;
-	my %args = @_ unless scalar(@_) % 2;
+	my %args = ( scalar(@_) % 2 ) ? () : @_;
 
 	my $self;
 	my $base = $class->defaults;
@@ -351,7 +351,7 @@ sub nameservers {
 
 		my $packet = $defres->search( $ns, 'A' );
 		$self->errorstring( $defres->errorstring );
-		my @address = cname_addr( [@names], $packet ) if defined $packet;
+		my @address = $packet ? cname_addr( [@names], $packet ) : ();
 
 		if ($has_inet6) {
 			$packet = $defres->search( $ns, 'AAAA' );
@@ -372,8 +372,8 @@ sub nameservers {
 		return unless defined wantarray;
 	}
 
-	my @ns4 = @{$self->{nameserver4}} unless $self->force_v6;
-	my @ns6 = @{$self->{nameserver6}} if $has_inet6 && !$self->force_v4;
+	my @ns4 = $self->force_v6 ? () : @{$self->{nameserver4}};
+	my @ns6 = $has_inet6 && !$self->force_v4 ? @{$self->{nameserver6}} : ();
 	my @returnval = $self->prefer_v6 ? ( @ns6, @ns4 ) : ( @ns4, @ns6 );
 
 	return @returnval if scalar @returnval;
@@ -446,8 +446,8 @@ sub search {
 	my $self = shift;
 	my $name = shift || '.';
 
-	my $defdomain  = $self->{domain}	  if $self->{defnames};
-	my @searchlist = @{$self->{'searchlist'}} if $self->{dnsrch};
+	my $defdomain  = $self->{defnames} ? $self->{domain}	      : undef;
+	my @searchlist = $self->{dnsrch}   ? @{$self->{'searchlist'}} : ();
 
 	# resolve name by trying as absolute name, then applying searchlist
 	my @list = ( undef, @searchlist );
@@ -483,7 +483,7 @@ sub query {
 	my $name = shift || '.';
 
 	# resolve name containing no dots or colons by appending domain
-	my @suffix = ( $self->{domain} || () ) if $name !~ m/[:.]/ and $self->{defnames};
+	my @suffix = ( $name !~ m/[:.]/ && $self->{defnames} ) ? ( $self->{domain} || () ) : ();
 
 	my $fqname = join '.', $name, @suffix;
 
@@ -655,7 +655,7 @@ sub send_udp {
 
 	my $lastanswer;
 
-	my $stop_time = time + $self->{'udp_timeout'} if $self->{'udp_timeout'};
+	my $stop_time = $self->{'udp_timeout'} ? time + $self->{'udp_timeout'} : undef;
 
 	$self->_reset_errorstring;
 
@@ -1094,7 +1094,7 @@ sub make_query_packet {
 		$header->ad(0);
 		$header->do(0);
 
-	} elsif ( $self->{adflag} ) {
+	} elsif ( $self->{adflag} ) {				# RFC6840, 5.7
 		print ";; Set AD flag\n" if $self->{debug};
 		$header->ad(1);
 		$header->cd(0);
@@ -1124,9 +1124,11 @@ sub axfr {				## zone transfer
 	my @null;
 	my $query = $self->_axfr_start(@_) || return $whole ? @null : sub {undef};
 	my $reply = $self->_axfr_next()	   || return $whole ? @null : sub {undef};
-	my $verfy = $reply->verify($query) || croak $reply->verifyerr if $query->sigrr;
 	my @rr	  = $reply->answer;
 	my $soa	  = $rr[0];
+	my $verfy = $query->sigrr();
+	$verfy = $reply->verify($query) || croak $reply->verifyerr if $verfy;
+	print ';; ', $verfy ? '' : 'not ', "verified\n" if $self->{debug};
 
 	if ($whole) {
 		my @zone = shift @rr;
@@ -1135,7 +1137,8 @@ sub axfr {				## zone transfer
 			push @zone, @rr;			# unpack non-terminal packet
 			@rr    = @null;
 			$reply = $self->_axfr_next() || last;
-			$verfy = $reply->verify($verfy) || croak $reply->verifyerr if $query->sigrr;
+			$verfy = $reply->verify($verfy) || croak $reply->verifyerr if $verfy;
+			print ';; ', $verfy ? '' : 'not ', "verified\n" if $self->{debug};
 			@rr    = $reply->answer;
 		}
 
@@ -1160,7 +1163,8 @@ sub axfr {				## zone transfer
 		}
 
 		$reply = $self->_axfr_next() || return undef;	# end of packet
-		$verfy = $reply->verify($verfy) || croak $reply->verifyerr if $query->sigrr;
+		$verfy = $reply->verify($verfy) || croak $reply->verifyerr if $verfy;
+		print ';; ', $verfy ? '' : 'not ', "verified\n" if $self->{debug};
 		@rr = $reply->answer;
 		return $rr;
 	};
@@ -1560,7 +1564,7 @@ __END__
 
 =head1 NAME
 
-Net::DNS::Resolver::Base - Common Resolver Class
+Net::DNS::Resolver::Base - DNS resolver base class
 
 =head1 SYNOPSIS
 

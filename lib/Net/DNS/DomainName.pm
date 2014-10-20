@@ -1,15 +1,15 @@
 package Net::DNS::DomainName;
 
 #
-# $Id: DomainName.pm 1222 2014-06-24 12:30:08Z willem $
+# $Id: DomainName.pm 1272 2014-10-10 22:21:43Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1222 $)[1];
+$VERSION = (qw$LastChangedRevision: 1272 $)[1];
 
 
 =head1 NAME
 
-Net::DNS::DomainName - DNS domain name wire representation
+Net::DNS::DomainName - DNS name representation
 
 =head1 SYNOPSIS
 

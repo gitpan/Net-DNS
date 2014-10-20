@@ -1,15 +1,15 @@
 package Net::DNS::RR;
 
 #
-# $Id: RR.pm 1260 2014-09-09 09:12:28Z willem $
+# $Id: RR.pm 1276 2014-10-19 06:02:40Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1260 $)[1];
+$VERSION = (qw$LastChangedRevision: 1276 $)[1];
 
 
 =head1 NAME
 
-Net::DNS::RR - DNS Resource Record base class
+Net::DNS::RR - DNS resource record base class
 
 =head1 SYNOPSIS
 
@@ -203,11 +203,7 @@ sub _new_hash {
 	$self->ttl($ttl)     if defined $ttl;			# specify TTL
 
 	while ( my ( $attribute, $value ) = each %attribute ) {
-		if ( UNIVERSAL::isa( $value, 'ARRAY' ) ) {
-			$self->$attribute(@$value);		# attribute => [ ... ]
-		} else {
-			$self->$attribute($value);		# attribute => value
-		}
+		$self->$attribute( ref($value) eq 'ARRAY' ? @$value : $value );
 	}
 
 	if ( COMPATIBLE && $self->{OLD} ) {
@@ -378,11 +374,10 @@ the trailing dot.
 sub string {
 	my $self = shift;
 
-	my $name = $self->name if COMPATIBLE;
+	my $name = COMPATIBLE ? $self->name : '';
 	my @core = ( $self->{owner}->string, $self->ttl, $self->class, $self->type );
 
 	my $rdata = $self->rdstring;
-
 	return join "\t", @core, '; no data' unless length $rdata;
 
 	chomp $rdata;
@@ -425,7 +420,6 @@ Returns the record type.
 
 sub type {
 	my $self = shift;
-
 	croak 'not possible to change RR->type' if scalar @_;
 
 	return $self->{type} || 'A' if COMPATIBLE;
@@ -631,11 +625,11 @@ sub get_rrsort_func {
 }
 
 
-###################################################################################
+################################################################################
 ##
 ##	Default implementation for unknown RR type
 ##
-###################################################################################
+################################################################################
 
 sub decode_rdata {			## decode rdata from wire-format octet string
 	my ( $self, $data, $offset ) = @_;
@@ -675,6 +669,8 @@ sub dump {				## print internal data structure
 	print Data::Dumper::Dumper(@_);
 }
 
+
+################################################################################
 
 #
 #  Net::DNS::RR->_subclass($rrtype)
@@ -725,11 +721,11 @@ sub _subclass {
 }
 
 
-###################################################################################
+################################################################################
 ##	Compatibility interface to allow old and new RR architectures to coexist
 ##
 ##	"new" modules inherit these methods to wrap themselves in "old" clothing.
-###################################################################################
+################################################################################
 
 sub _new_from_rdata {			## decode rdata from wire-format byte string
 	my $class = shift;
@@ -779,7 +775,7 @@ sub _normalize_ownername { }
 sub _normalize_dnames { }
 
 
-###################################################################################
+################################################################################
 
 use vars qw($AUTOLOAD);
 
@@ -791,7 +787,7 @@ sub AUTOLOAD {				## Default method
 	confess 'undefined method ', $AUTOLOAD unless $oref;
 	confess 'unimplemented type ', $self->type if $oref eq __PACKAGE__;
 
-	my $method = $1 if $AUTOLOAD =~ m/^.*::(.*)$/;
+	my $method = $AUTOLOAD =~ m/^.*::(.*)$/ ? $1 : '<undef>';
 
 	if (COMPATIBLE) {
 		return $self->{$method} = shift if @_;
@@ -804,7 +800,7 @@ sub AUTOLOAD {				## Default method
 ***  FATAL PROGRAM ERROR!!	Unknown method '$method'
 ***  which the program has attempted to call for the object:
 ***
-***  $object
+    $object
 ***
 ***  This object does not have a method '$method'.  THIS IS A BUG
 ***  IN THE CALLING SOFTWARE, which incorrectly assumes that the
@@ -816,7 +812,7 @@ END
 }
 
 
-###################################################################################
+################################################################################
 
 ## Stub implementation of Net::DNS::RR::OPT to avoid a barrage of confusing failure
 ## reports if the subtype implementation module is absent or fails to load.
