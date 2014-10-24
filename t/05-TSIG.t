@@ -1,4 +1,4 @@
-# $Id: 05-TSIG.t 1136 2013-12-10 14:30:00Z willem $	-*-perl-*-
+# $Id: 05-TSIG.t 1279 2014-10-24 08:12:21Z willem $	-*-perl-*-
 
 use strict;
 
@@ -59,11 +59,12 @@ my $hash = {};
 
 	my $null   = new Net::DNS::RR("$name NULL")->encode;
 	my $empty  = new Net::DNS::RR("$name $type")->encode;
-	my $rxbin  = decode Net::DNS::RR( \$empty )->encode;
+	my $buffer = $empty;		## Note: TSIG RR gets destroyed by decoder
+	my $rxbin  = decode Net::DNS::RR( \$buffer )->encode;
 	my $packet = Net::DNS::Packet->new( $name, 'TKEY', 'IN' );
 	$packet->header->id(1234);				# fix packet id
-	my $encoded = $rr->encode( 0, {}, $packet );
-	my $decoded = decode Net::DNS::RR( \$encoded );
+	my $encoded = $buffer = $rr->encode( 0, {}, $packet );
+	my $decoded = decode Net::DNS::RR( \$buffer );
 	my $hex1    = unpack 'H*', $encoded;
 	my $hex2    = unpack 'H*', $decoded->encode;
 	my $hex3    = unpack 'H*', substr( $encoded, length $null );
