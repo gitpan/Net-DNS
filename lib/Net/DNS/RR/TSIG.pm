@@ -1,10 +1,10 @@
 package Net::DNS::RR::TSIG;
 
 #
-# $Id: TSIG.pm 1279 2014-10-24 08:12:21Z willem $
+# $Id: TSIG.pm 1282 2014-10-27 09:45:19Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1279 $)[1];
+$VERSION = (qw$LastChangedRevision: 1282 $)[1];
 
 
 use strict;
@@ -75,7 +75,6 @@ sub decode_rdata {			## decode rdata from wire-format octet string
 	my $self = shift;
 	my ( $data, $offset ) = @_;
 
-	my $eom = $offset - Net::DNS::RR->RRFIXEDSZ - length $self->{owner}->encode();
 	( $self->{algorithm}, $offset ) = decode Net::DNS::DomainName(@_);
 
 	# Design decision: Use 32 bits, which will work until the end of time()!
@@ -94,7 +93,7 @@ sub decode_rdata {			## decode rdata from wire-format octet string
 	$offset += $other_size + 2;
 
 	croak('misplaced or corrupt TSIG') unless $offset == length $$data;
-	substr( $$data, $eom ) = '';
+	substr( $$data, $self->{offset} || $offset ) = '';
 	$self->{rawref} = $data;
 }
 

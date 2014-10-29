@@ -1,14 +1,14 @@
 package Net::DNS::Resolver::os2;
 
 #
-# $Id: os2.pm 1235 2014-07-29 07:58:19Z willem $
+# $Id: os2.pm 1282 2014-10-27 09:45:19Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1235 $)[1];
+$VERSION = (qw$LastChangedRevision: 1282 $)[1];
 
 =head1 NAME
 
-Net::DNS::Resolver::os2 - OS2 Resolver Class
+Net::DNS::Resolver::os2 - OS2 resolver class
 
 =cut
 

@@ -1,14 +1,14 @@
 package Net::DNS::Resolver::cygwin;
 
 #
-# $Id: cygwin.pm 1258 2014-09-04 12:23:18Z willem $
+# $Id: cygwin.pm 1282 2014-10-27 09:45:19Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1258 $)[1];
+$VERSION = (qw$LastChangedRevision: 1282 $)[1];
 
 =head1 NAME
 
-Net::DNS::Resolver::cygwin - Cygwin Resolver Class
+Net::DNS::Resolver::cygwin - Cygwin resolver class
 
 =cut
 

@@ -1,10 +1,10 @@
 package Net::DNS::Resolver::Recurse;
 
 #
-# $Id: Recurse.pm 1274 2014-10-14 20:35:58Z willem $
+# $Id: Recurse.pm 1282 2014-10-27 09:45:19Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1274 $)[1];
+$VERSION = (qw$LastChangedRevision: 1282 $)[1];
 
 
 =head1 NAME
@@ -176,7 +176,7 @@ sub send {
 		$ns = [];					# substitute IP list in situ
 		$res->empty_nameservers();
 		@$ns = $res->nameservers($name);
-		next unless @$ns;
+		next unless scalar @$ns;
 		my $reply = $res->send($query) || next;
 		$res->{callback}->($reply) if $res->{callback};
 		return $reply;

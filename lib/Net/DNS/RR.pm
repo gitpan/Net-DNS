@@ -1,10 +1,10 @@
 package Net::DNS::RR;
 
 #
-# $Id: RR.pm 1276 2014-10-19 06:02:40Z willem $
+# $Id: RR.pm 1282 2014-10-27 09:45:19Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1276 $)[1];
+$VERSION = (qw$LastChangedRevision: 1282 $)[1];
 
 
 =head1 NAME
@@ -243,6 +243,7 @@ use constant RRFIXEDSZ => length pack 'n2 N n', (0) x 4;
 sub decode {
 	my $base = shift;
 	my ( $data, $offset, @opaque ) = @_;
+	my $start = $offset;
 
 	my ( $owner, $fixed ) = decode Net::DNS::DomainName1035(@_);
 
@@ -257,12 +258,15 @@ sub decode {
 	my $next = $index + $self->{rdlength};
 	die 'corrupt wire-format data' if length $$data < $next;
 
+	$self->{offset} = $start;
 	if (COMPATIBLE) {
 		ref($self)->new( $self, $data, $index, @opaque );
+		delete $self->{offset};
 		return wantarray ? ( $self, $next ) : $self;
 	}
 
 	$self->decode_rdata( $data, $index, @opaque ) if $next > $index or $self->type eq 'OPT';
+	delete $self->{offset};
 
 	return wantarray ? ( $self, $next ) : $self;
 }

@@ -1,15 +1,15 @@
 package Net::DNS::Resolver::android;
 
 #
-# $Id: android.pm 1255 2014-08-20 09:05:00Z willem $
+# $Id: android.pm 1282 2014-10-27 09:45:19Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1255 $)[1];
+$VERSION = (qw$LastChangedRevision: 1282 $)[1];
 
 
 =head1 NAME
 
-Net::DNS::Resolver::android - Android Resolver Class
+Net::DNS::Resolver::android - Android resolver class
 
 =cut
 
