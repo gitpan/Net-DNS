@@ -1,10 +1,10 @@
 package Net::DNS::ZoneFile;
 
 #
-# $Id: ZoneFile.pm 1277 2014-10-20 07:46:37Z willem $
+# $Id: ZoneFile.pm 1288 2015-01-05 09:59:33Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1277 $)[1];
+$VERSION = (qw$LastChangedRevision: 1288 $)[1];
 
 
 =head1 NAME
@@ -484,13 +484,7 @@ sub _getline {				## get line from current source
 
 		return $_ unless /^\$/;				# RR string
 
-		if (/^\$ORIGIN/) {				# directive
-			my ( $keyword, $origin, @etc ) = split;
-			die '$ORIGIN incomplete' unless $origin;
-			my $context = $self->{context};
-			&$context( sub { $self->_origin($origin); } );
-
-		} elsif (/^\$INCLUDE/) {			# directive
+		if (/^\$INCLUDE/) {				# directive
 			my ( $keyword, @argument ) = split;
 			$fh = $self->_include(@argument);
 
@@ -498,6 +492,12 @@ sub _getline {				## get line from current source
 			my ( $keyword, $range, @template ) = split;
 			die '$GENERATE incomplete' unless $range;
 			$fh = $self->_generate( $range, "@template\n" );
+
+		} elsif (/^\$ORIGIN/) {				# directive
+			my ( $keyword, $origin, @etc ) = split;
+			die '$ORIGIN incomplete' unless $origin;
+			my $context = $self->{context};
+			&$context( sub { $self->_origin($origin); } );
 
 		} elsif (/^\$TTL/) {				# directive
 			my ( $keyword, $ttl, @etc ) = split;

@@ -25,4 +25,4 @@ requires:
   MIME::Base64: 2.11
   Test::More: 0.52
   perl: 5.00404
-version: 0.81
+version: 0.81_01

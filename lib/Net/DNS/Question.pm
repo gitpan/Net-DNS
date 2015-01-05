@@ -1,10 +1,10 @@
 package Net::DNS::Question;
 
 #
-# $Id: Question.pm 1222 2014-06-24 12:30:08Z willem $
+# $Id: Question.pm 1286 2014-11-19 10:19:48Z willem $
 #
 use vars qw($VERSION);
-$VERSION = (qw$LastChangedRevision: 1222 $)[1];
+$VERSION = (qw$LastChangedRevision: 1286 $)[1];
 
 
 =head1 NAME
@@ -278,6 +278,7 @@ sub _dns_addr {			## Map IP address into reverse lookup namespace
 	local $_ = shift;
 
 	# IP address must contain address characters only
+	s/[%].+$//;						# discard RFC4007 scopeid
 	return undef unless m#^[a-fA-F0-9:./]+$#;
 
 	my ( $address, $length ) = split m#/#, $_ . '/0';

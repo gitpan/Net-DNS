@@ -1,4 +1,11 @@
-$Id: Changes 1285 2014-10-29 13:31:41Z willem $                       -*-text-*-
+$Id: Changes 1286 2014-11-19 10:19:48Z willem $                       -*-text-*-
+
+
+**** 0.82 [unreleased]
+
+Fix rt.cpan.org #100385
+
+	Support for IPv6 link-local addresses with scope_id
 
 
 **** 0.81 Oct 29, 2014
@@ -22,7 +29,7 @@ Fix rt.cpan.org #99527
 Fix rt.cpan.org #99429
 
 	Infinite recursion in Net::DNS::Resolver::Recurse::send when
-	following certain delegations with empty-non terminals.
+	following certain delegations with empty non-terminals.
 
 Fix rt.cpan.org #99320
 

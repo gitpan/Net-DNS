@@ -1,10 +1,10 @@
 package Net::DNS::Update;
 
 #
-# $Id: Update.pm 1272 2014-10-10 22:21:43Z willem $
+# $Id: Update.pm 1288 2015-01-05 09:59:33Z willem $
 #
 use vars qw($VERSION @ISA);
-$VERSION = (qw$LastChangedRevision: 1272 $)[1];
+$VERSION = (qw$LastChangedRevision: 1288 $)[1];
 
 
 =head1 NAME
@@ -57,7 +57,8 @@ If the class is omitted, it defaults to IN.
 =cut
 
 sub new {
-	my ( $package, $zone, $class ) = @_;
+	my $package = shift;
+	my ( $zone, $class ) = @_;
 
 	unless ($zone) {
 		require Net::DNS::Resolver;
@@ -66,6 +67,8 @@ sub new {
 		($zone) = $resolver->searchlist;
 		return unless $zone;
 	}
+
+	return $package->SUPER::decode(@_) if ref($zone);
 
 	my $self = $package->SUPER::new( $zone, 'SOA', $class ) || return;
 
